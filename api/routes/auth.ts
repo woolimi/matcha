@@ -4,7 +4,7 @@ import authToken from "../middleware/authToken";
 
 const authRouter = express.Router();
 
-// access_token -> client memory
+// access_token -> client session cookie
 // refresh_token -> Secure/HttpOnly/SameSite cookie
 
 authRouter.post("/login", (req, res) => {
@@ -20,7 +20,6 @@ authRouter.post("/login", (req, res) => {
 
 authRouter.post("/refresh", (req, res) => {
 	// check refresh token
-	console.log("REFRESH TOKEN");
 	const refresh_token = req.cookies["auth._refresh_token.local"];
 	if (!refresh_token) return res.sendStatus(401);
 	jwt.verify(
