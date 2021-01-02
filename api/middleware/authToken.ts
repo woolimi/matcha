@@ -1,4 +1,4 @@
-import { NextFunction, Router } from "express";
+import { NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 const authToken = (req: any, res: any, next: NextFunction): any => {
