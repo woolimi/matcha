@@ -60,7 +60,7 @@ export default {
     },
     async userLogin() {
       try {
-        await this.$auth.loginWith('local', { data: this.form });
+        await this.$auth.loginWith('local', { data: this.login });
         TokenManager.silentRefresh(this);
         return this.$router.go(-1);
       } catch (error) {

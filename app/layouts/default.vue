@@ -1,21 +1,24 @@
 <template>
   <v-app dark>
-    <v-app-bar app>
+    <v-app-bar flat app>
       <NuxtLink to="/" style="text-decoration: none">
         <v-toolbar-title> Matcha </v-toolbar-title>
       </NuxtLink>
 
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <template v-if="$auth.loggedIn">
-        <NuxtLink to="/private" style="text-decoration: none">
-          {{ $auth.user.username }}'s page
-        </NuxtLink>
-        <v-btn @click="logout"> logout </v-btn>
+        <v-tabs right>
+          <v-tab to="/private"> {{ $auth.user.username }}'s page </v-tab>
+          <v-tab @click="logout"> Logout </v-tab>
+        </v-tabs>
       </template>
 
       <template v-else>
-        <NuxtLink to="/login" style="text-decoration: none"> Login </NuxtLink>
+        <v-tabs right>
+          <v-tab to="/login"> Login </v-tab>
+          <v-tab to="/register"> Register </v-tab>
+        </v-tabs>
       </template>
     </v-app-bar>
     <v-main>
