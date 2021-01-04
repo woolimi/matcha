@@ -17,7 +17,11 @@ export default {
   css: [],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-  plugins: ['~/plugins/axios', '~/plugins/TokenManager.client'],
+  plugins: [
+    '~/plugins/axios',
+    '~/plugins/vuelidate.client.js',
+    '~/plugins/TokenManager.client',
+  ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: true,
