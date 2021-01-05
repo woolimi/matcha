@@ -1,6 +1,6 @@
-import Model from "./Model";
-import bcrypt from "bcrypt";
-import { ResultSetHeader } from "mysql2";
+import Model from './Model';
+import bcrypt from 'bcrypt';
+import { ResultSetHeader } from 'mysql2';
 
 interface RegisterForm {
 	email: string;
@@ -12,7 +12,7 @@ interface RegisterForm {
 }
 
 class User extends Model {
-	static tname = "users";
+	static tname = 'users';
 	static table =
 		"CREATE TABLE `users` ( \
 			`id` int NOT NULL AUTO_INCREMENT, \
@@ -27,7 +27,7 @@ class User extends Model {
 			UNIQUE KEY `username_UNIQUE` (`username`) \
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin";
 	static init(): Promise<any> {
-		return Model.init("users", User);
+		return Model.init('users', User);
 	}
 	static async register(formData: RegisterForm): Promise<ResultSetHeader> {
 		// TODO: Validation form
@@ -35,14 +35,8 @@ class User extends Model {
 			const data = { ...formData };
 			data.password = await bcrypt.hash(formData.password, 10);
 			return await User.query(
-				"INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`) VALUES (?, ?, ?, ?, ?)",
-				[
-					data.email,
-					data.username,
-					data.password,
-					data.firstName,
-					data.lastName,
-				],
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`) VALUES (?, ?, ?, ?, ?)',
+				[data.email, data.username, data.password, data.firstName, data.lastName]
 			);
 		} catch (error) {
 			throw error;
