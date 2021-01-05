@@ -1,16 +1,9 @@
 <template>
-	<div>
-		<v-btn type="button" @click="apiCall">api</v-btn>
-	</div>
+	<h1>Home</h1>
 </template>
 
 <script>
 	export default {
 		auth: false,
-		methods: {
-			async apiCall() {
-				const res = await this.$axios.get('http://localhost:5000/test');
-			},
-		},
 	};
 </script>
