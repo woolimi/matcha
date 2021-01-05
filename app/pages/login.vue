@@ -23,11 +23,10 @@
 						</v-card-text>
 						<v-card-text>
 							You don't have an account ? Please click here to
-							<NuxtLink to="/signup" style="text-decoration: none"> register </NuxtLink>
+							<NuxtLink to="/register" style="text-decoration: none"> register </NuxtLink>
 						</v-card-text>
 						<v-card-actions>
 							<v-btn type="submit"> login </v-btn>
-							<v-btn type="button" @click="apiCall">api</v-btn>
 						</v-card-actions>
 					</v-form>
 				</v-card>
@@ -53,9 +52,6 @@
 			};
 		},
 		methods: {
-			async apiCall() {
-				const res = await this.$axios.get('http://localhost:5000/test');
-			},
 			async userLogin() {
 				try {
 					await this.$auth.loginWith('local', { data: this.login });
