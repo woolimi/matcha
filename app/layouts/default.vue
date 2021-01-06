@@ -1,38 +1,30 @@
 <template>
-	<v-app dark>
-		<v-app-bar flat app>
-			<NuxtLink to="/" style="text-decoration: none">
-				<v-toolbar-title> Matcha </v-toolbar-title>
-			</NuxtLink>
-
-			<v-spacer />
-
-			<template v-if="$auth.loggedIn">
-				<v-tabs right>
+	<v-app>
+		<v-app-bar app color="primary" dark>
+			<v-toolbar-title style="overflow: visible"> Matcha </v-toolbar-title>
+			<v-tabs right>
+				<v-tab to="/"> Home </v-tab>
+				<template v-if="$auth.loggedIn">
 					<v-tab to="/private"> {{ $auth.user.username }}'s page </v-tab>
 					<v-tab @click="logout"> Logout </v-tab>
-				</v-tabs>
-			</template>
+				</template>
 
-			<template v-else>
-				<v-tabs right>
+				<template v-else>
 					<v-tab to="/login"> Login </v-tab>
 					<v-tab to="/register"> Register </v-tab>
-				</v-tabs>
-			</template>
+				</template>
+			</v-tabs>
 		</v-app-bar>
 		<v-main>
 			<v-container>
 				<nuxt />
 			</v-container>
 		</v-main>
-		<v-footer app>
-			<v-row>
-				<v-col class="d-flex align-center justify-center">
+		<v-footer color="primary lighten-1" padless>
+			<v-row justify="center" no-gutters>
+				<v-col class="primary lighten-2 py-4 text-center white--text">
 					<NuxtLink to="/" style="text-decoration: none">
-						<v-btn icon>
-							<v-icon>mdi-home</v-icon>
-						</v-btn>
+						<v-btn text rounded class="white--text"> <v-icon>mdi-home</v-icon> </v-btn>
 					</NuxtLink>
 				</v-col>
 			</v-row>
@@ -59,4 +51,8 @@
 	};
 </script>
 
-<style scoped></style>
+<style>
+	html {
+		overflow-y: auto;
+	}
+</style>

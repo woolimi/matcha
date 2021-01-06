@@ -7,26 +7,24 @@
 						<v-card-title> Login </v-card-title>
 						<v-card-text>
 							<v-text-field
-								placeholder="your@email.com"
-								label="Email"
+								label="E-mail"
 								v-model="login.email"
 								type="email"
 								required
+								prepend-inner-icon="mdi-email"
 							/>
 							<v-text-field
-								placeholder="password"
 								label="Password"
 								v-model="login.password"
 								type="password"
 								required
+								prepend-inner-icon="mdi-lock"
 							/>
 						</v-card-text>
-						<v-card-text>
-							You don't have an account ? Please click here to
-							<NuxtLink to="/register" style="text-decoration: none"> register </NuxtLink>
-						</v-card-text>
 						<v-card-actions>
-							<v-btn type="submit"> login </v-btn>
+							<NuxtLink to="/register"> <v-btn class="secondary"> Register </v-btn> </NuxtLink>
+							<v-spacer />
+							<v-btn type="submit" class="primary"> Login </v-btn>
 						</v-card-actions>
 					</v-form>
 				</v-card>
