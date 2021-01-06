@@ -7,50 +7,51 @@
 						<v-card-title> Register </v-card-title>
 						<v-card-text>
 							<v-text-field
-								placeholder="your@email.com"
-								label="Email"
+								label="E-mail"
 								type="email"
 								v-model="register.email"
 								required
+								prepend-inner-icon="mdi-email"
 							/>
 							<v-text-field
-								placeholder="Username"
 								label="Username"
 								type="text"
 								v-model="register.username"
 								required
+								prepend-inner-icon="mdi-account"
 							/>
 							<v-text-field
-								placeholder="First name"
 								label="First name"
 								type="text"
 								v-model="register.firstName"
 								required
+								prepend-inner-icon="mdi-card-account-details"
 							/>
 							<v-text-field
-								placeholder="Last name"
 								label="Last name"
 								type="text"
 								v-model="register.lastName"
 								required
+								prepend-inner-icon="mdi-card-account-details"
 							/>
 							<v-text-field
-								placeholder="password"
 								label="Password"
 								type="password"
 								v-model="register.password"
 								required
+								prepend-inner-icon="mdi-lock"
 							/>
 							<v-text-field
-								placeholder="Verify password"
 								label="Verify password"
 								type="password"
 								v-model="register.vpassword"
 								required
+								prepend-inner-icon="mdi-lock"
 							/>
 						</v-card-text>
 						<v-card-actions>
-							<v-btn type="submit"> submit </v-btn>
+							<v-spacer />
+							<v-btn type="submit" class="primary"> submit </v-btn>
 						</v-card-actions>
 					</v-form>
 				</v-card>
