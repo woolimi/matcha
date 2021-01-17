@@ -16,3 +16,11 @@ npm run server
 cd app
 npm run dev
 ```
+
+## Pages
+
+```
+/
+/app/onboarding
+/app/profile
+```
