@@ -5,6 +5,9 @@ interface ModelClass {
 	table: string;
 }
 
+export const CHARSET = 'utf8mb4';
+export const COLLATION = 'utf8mb4_unicode_ci';
+
 class Model {
 	static tname = 'null';
 	static query(sql: string, placeholder?: Array<any>): Promise<ResultSetHeader | any> {
