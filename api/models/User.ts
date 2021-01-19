@@ -1,4 +1,4 @@
-import Model from './Model';
+import Model, { CHARSET, COLLATION } from './Model';
 import bcrypt from 'bcrypt';
 import { ResultSetHeader } from 'mysql2';
 
@@ -13,19 +13,22 @@ interface RegisterForm {
 
 class User extends Model {
 	static tname = 'users';
-	static table =
-		"CREATE TABLE `users` ( \
-			`id` int NOT NULL AUTO_INCREMENT, \
-			`email` varchar(60) COLLATE utf8_bin NOT NULL, \
-			`username` varchar(20) COLLATE utf8_bin NOT NULL, \
-			`password` varchar(100) COLLATE utf8_bin NOT NULL, \
-			`lastName` varchar(45) COLLATE utf8_bin NOT NULL, \
-			`firstName` varchar(45) COLLATE utf8_bin NOT NULL, \
-			`verified` tinyint DEFAULT '0', \
-			PRIMARY KEY (`id`), \
-			UNIQUE KEY `email_UNIQUE` (`email`), \
-			UNIQUE KEY `username_UNIQUE` (`username`) \
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin";
+	static table = `CREATE TABLE users (
+			id int NOT NULL AUTO_INCREMENT,
+			email varchar(60) NOT NULL,
+			username varchar(20) NOT NULL,
+			password varchar(100) NOT NULL,
+			lastName varchar(45) NOT NULL,
+			firstName varchar(45) NOT NULL,
+			verified tinyint DEFAULT '0',
+			initialized tinyint DEFAULT '0',
+			gender enum('male','female') DEFAULT NULL,
+			preferences enum('male','female','all') DEFAULT NULL,
+			biography TEXT DEFAULT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY email_UNIQUE (email),
+			UNIQUE KEY username_UNIQUE (username)
+		) ENGINE=InnoDB DEFAULT CHARSET=${CHARSET} COLLATE=${COLLATION}`;
 	static init(): Promise<any> {
 		return Model.init('users', User);
 	}

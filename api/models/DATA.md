@@ -11,6 +11,7 @@
 - `firstName`
 - `password`
 - `verified`: Has clicked the link in the registration email
+- `initialized`: Filled his profile after registration
 - `gender`
 - `preferences`
 - `biography`
