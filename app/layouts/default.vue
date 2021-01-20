@@ -29,13 +29,16 @@
 				</v-col>
 			</v-row>
 		</v-footer>
+		<Snackbar />
 	</v-app>
 </template>
 
 <script>
+	import SnackbarVue from '~/components/Snackbar.vue';
 	import TokenManager from '~/plugins/TokenManager.client';
 
 	export default {
+		components: { SnackbarVue },
 		mounted() {
 			if (this.$auth.loggedIn) {
 				TokenManager.silentRefresh(this);

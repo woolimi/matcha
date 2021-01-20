@@ -73,7 +73,7 @@
 					firstName: 'firstName',
 					lastName: 'lastName',
 					password: 'password',
-					vpassword: 'vpassword',
+					vpassword: 'password',
 				},
 			};
 		},
@@ -104,8 +104,17 @@
 				try {
 					const res = await this.$axios.post('/auth/register', this.register);
 					if (res.status === 201) {
-						alert('Successfully registered. Please check your email.');
+						this.$store.dispatch('snackbar/show', {
+							text: `Successfully registered, you can now login.\nPlease check your emails.`,
+							color: 'success',
+						});
+						// TODO: Get token instead of refreshing the page
+						// this.$router.push({ path: '/' });
 						return window.location.replace('/');
+					} else if (res.status >= 400 && res.status < 500) {
+						console.error(res);
+					} else {
+						console.error(res);
 					}
 				} catch (error) {
 					console.log(error);
