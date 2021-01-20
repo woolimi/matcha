@@ -7,6 +7,7 @@ export const mutations = {
 		state.refreshId = id;
 	},
 };
+
 export const actions = {
 	async nuxtServerInit({ commit }, { app }) {
 		// when page is refreshed

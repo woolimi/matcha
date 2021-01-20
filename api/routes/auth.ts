@@ -77,11 +77,12 @@ authRouter.post('/register', async (req, res) => {
 		const result: ResultSetHeader = await User.register(formData);
 		// send email with jwt (15 mins limit)
 		const token = generateToken({ id: result.insertId }, 'access');
-		const mail = await Mailing.send_email_to_verify(
+		// TODO: Mailgun API
+		/*const mail = await Mailing.send_email_to_verify(
 			formData.email,
 			`http://localhost:5000/auth/email-verification/${token}`
 		);
-		console.log(mail);
+		console.log(mail);*/
 		// set refresh token
 		setRefreshToken(res, { id: result.insertId });
 		res.sendStatus(201);
