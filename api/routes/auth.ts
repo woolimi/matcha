@@ -94,7 +94,7 @@ authRouter.post('/register', async (req, res) => {
 
 authRouter.get('/email-verification/:jwt', async (req, res) => {
 	try {
-		const user: any = await jwt.verify(req.params.jwt, process.env.ACESS_TOKEN_SECRET);
+		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
 		if (!queryResult.affectedRows) throw `User id ${user.id} doesn't exist.`;
 		res.redirect('http://localhost:3000');
@@ -140,7 +140,7 @@ function deleteRefreshToken(res: any) {
 function generateToken(obj: object, option: string = 'access') {
 	// expires after half and hour (1800 seconds = 30 minutes)
 	if (option == 'access') {
-		const access = jwt.sign(obj, process.env.ACESS_TOKEN_SECRET, {
+		const access = jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET, {
 			expiresIn: `${60 * 15}s`, // 15 mins
 		});
 		console.log('access token generated');
