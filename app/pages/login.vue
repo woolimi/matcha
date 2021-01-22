@@ -8,14 +8,14 @@
 						<v-card-text>
 							<v-text-field
 								label="E-mail"
-								v-model="login.email"
+								v-model="user.email"
 								type="email"
 								required
 								prepend-inner-icon="mdi-email"
 							/>
 							<v-text-field
 								label="Password"
-								v-model="login.password"
+								v-model="user.password"
 								type="password"
 								required
 								prepend-inner-icon="mdi-lock"
@@ -43,7 +43,7 @@
 		},
 		data() {
 			return {
-				login: {
+				user: {
 					email: '',
 					password: '',
 				},
@@ -52,7 +52,7 @@
 		methods: {
 			async userLogin() {
 				try {
-					await this.$auth.loginWith('local', { data: this.login });
+					await this.$auth.loginWith('local', { data: this.user });
 					TokenManager.silentRefresh(this);
 					return this.$router.go(-1);
 				} catch (error) {

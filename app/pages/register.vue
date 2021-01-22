@@ -79,11 +79,9 @@
 </template>
 
 <script>
-	import { validationMixin } from 'vuelidate';
 	import { required, sameAs, minLength, maxLength, email } from 'vuelidate/lib/validators';
 
 	export default {
-		mixins: [validationMixin],
 		auth: false,
 		data() {
 			return {
