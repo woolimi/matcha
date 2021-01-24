@@ -118,7 +118,7 @@
 						if (value === '' || !this.$v.user.username.minLength || !this.$v.user.username.maxLength) {
 							return true;
 						}
-						const res = await this.$axios.get(`/check/username`, { username: value });
+						const res = await this.$axios.post(`/check/username`, { username: value });
 						return res.status == 200 && res.data.unique;
 					},
 				},
