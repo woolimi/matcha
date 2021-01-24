@@ -1,5 +1,6 @@
 <template>
 	<v-app>
+		<HomeNav />
 		<div
 			class="align-center justify-center d-flex flex-column"
 			style="
@@ -11,16 +12,28 @@
 			"
 		>
 			<h1 class="white--text" style="font-size: 4em">Find your love</h1>
-			<v-btn color="primary">create your account</v-btn>
+			<v-dialog v-model="registerModal" max-width="400px">
+				<template v-slot:activator="{ on, attrs }">
+					<v-btn v-bind="attrs" v-on="on" color="primary">create your account</v-btn>
+				</template>
+				<Register />
+			</v-dialog>
 		</div>
-		<HomeNav />
-		<HomeReviews />
-		<HomeFooter />
+		<v-main class="pt-0">
+			<nuxt />
+		</v-main>
+		<Footer />
 	</v-app>
 </template>
 
 <script>
-	export default {};
+	export default {
+		data() {
+			return {
+				registerModal: false,
+			};
+		},
+	};
 </script>
 
 <style></style>
