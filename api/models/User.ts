@@ -21,7 +21,7 @@ class User extends Model {
 			`password` varchar(100) COLLATE utf8_bin NOT NULL, \
 			`lastName` varchar(45) COLLATE utf8_bin NOT NULL, \
 			`firstName` varchar(45) COLLATE utf8_bin NOT NULL, \
-			`verified` tinyint DEFAULT '0', \
+			`step` tinyint DEFAULT '0', \
 			PRIMARY KEY (`id`), \
 			UNIQUE KEY `email_UNIQUE` (`email`), \
 			UNIQUE KEY `username_UNIQUE` (`username`) \
