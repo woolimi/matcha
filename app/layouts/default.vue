@@ -23,11 +23,15 @@
 			<nuxt />
 		</v-main>
 		<Footer />
+		<Snackbar />
 	</v-app>
 </template>
 
 <script>
+	import SnackbarVue from '~/components/Snackbar.vue';
+
 	export default {
+		components: { SnackbarVue },
 		data() {
 			return {
 				registerModal: false,
