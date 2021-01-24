@@ -10,6 +10,7 @@
 -   `lastName`
 -   `firstName`
 -   `password`
+-   `verified`: Has clicked the link in the registration email
 -   `gender`
 -   `preferences`
 -   `biography`
@@ -17,7 +18,6 @@
 -   `location`: GPS coordinates
 -   `online`: ??
 -   `lastLogin`
--   `step` : {0: email verification need, 1: fill profile need, 2: App}
 
 -   Has many:
     -   UserPicture
