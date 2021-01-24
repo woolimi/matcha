@@ -18,7 +18,7 @@ class Model {
 	}
 	static async init(modelName: string, modelClass: ModelClass): Promise<any> {
 		try {
-			const hasTable: any = await this.query("SHOW TABLES FROM `matcha` LIKE 'users'");
+			const hasTable: any = await this.query(`SHOW TABLES FROM matcha LIKE '${modelName}'`);
 			if (hasTable.length > 0) return console.log(`⚡️[server]: Table '${modelName}' already exist`);
 			await Model.query(modelClass.table);
 			console.log(`⚡️[server]: Table '${modelName}' created`);
