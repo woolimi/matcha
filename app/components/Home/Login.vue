@@ -59,4 +59,8 @@
 	};
 </script>
 
-<style scoped></style>
+<style scoped>
+	form {
+		overflow: hidden;
+	}
+</style>
