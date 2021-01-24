@@ -69,9 +69,9 @@ export default {
 		},
 		localStorage: false,
 		redirect: {
-			login: '/login',
+			login: '/',
 			logout: '/',
-			callback: '/login',
+			callback: '/',
 			home: '/',
 		},
 	},
@@ -97,6 +97,9 @@ export default {
 					warning: colors.amber.base,
 					error: colors.deepOrange.accent4,
 					success: colors.green.accent3,
+				},
+				light: {
+					primary: '#9e0000',
 				},
 			},
 		},
