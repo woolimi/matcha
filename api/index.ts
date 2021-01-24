@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import MySQL from './init/MySQL';
 import cookieParser from 'cookie-parser';
 import authToken from './middleware/authToken';
+import registerCheckRouter from './routes/api/registerCheck';
 
 dotenv.config();
 const app = express();
@@ -22,14 +23,15 @@ app.use(
 );
 app.use(cookieParser());
 
-// api
+// API
+app.use('/check', registerCheckRouter);
 app.use('/api/users', usersRouter);
 app.use('/auth', authRouter);
-
 app.get('/test', authToken, (req: Request, res: Response) => {
 	res.json({ hi: 'hi' });
 });
 
+// Start !
 app.listen(PORT, () => {
 	console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
 });

@@ -3,6 +3,7 @@
 		"host": "localhost",
 		"user": "root",
 		"password": "root",
-		"database": "matcha"
+		"database": "matcha",
+		"charset": "utf8mb4_unicode_ci"
 	}
 }
