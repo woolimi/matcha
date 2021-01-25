@@ -1,33 +1,30 @@
 <template>
-	<v-snackbar v-model="show" :multi-line="multiline" :timeout="timeout" :color="color">
-		{{ text }}
-
+	<v-snackbar v-model="show" :color="color">
+		{{ message }}
 		<template v-slot:action="{ attrs }">
-			<v-btn dark text v-bind="attrs" @click="snackbar = false"> Close </v-btn>
+			<v-btn dark text v-bind="attrs" @click="show = false"> Close </v-btn>
 		</template>
 	</v-snackbar>
 </template>
 
 <script>
 	export default {
-		created() {
-			this.$store.subscribe((mutation, state) => {
-				if (mutation.type === 'snackbar/show') {
-					this.text = state.snackbar.text;
-					this.color = state.snackbar.color;
-					this.timeout = state.snackbar.timeout;
-					this.show = true;
-				}
-			});
-		},
 		data() {
 			return {
 				show: false,
-				color: 'success',
-				multiline: true,
-				text: '',
-				timeout: 4000,
+				message: '',
+				color: '',
 			};
+		},
+
+		created() {
+			this.$store.subscribe((mutation, state) => {
+				if (mutation.type === 'snackbar/showMessage') {
+					this.message = state.snackbar.message;
+					this.color = state.snackbar.color;
+					this.show = true;
+				}
+			});
 		},
 	};
 </script>
