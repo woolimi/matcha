@@ -12,8 +12,6 @@
 								v-model="user.email"
 								:error-messages="emailErrors"
 								required
-								@input="$v.user.email.$touch()"
-								@blur="$v.user.email.$touch()"
 								prepend-inner-icon="mdi-email"
 							/>
 							<v-text-field
@@ -22,8 +20,6 @@
 								v-model="user.username"
 								:error-messages="usernameErrors"
 								required
-								@input="$v.user.username.$touch()"
-								@blur="$v.user.username.$touch()"
 								prepend-inner-icon="mdi-account"
 							/>
 							<v-text-field
@@ -32,8 +28,6 @@
 								v-model="user.firstName"
 								:error-messages="firstNameErrors"
 								required
-								@input="$v.user.firstName.$touch()"
-								@blur="$v.user.firstName.$touch()"
 								prepend-inner-icon="mdi-card-account-details"
 							/>
 							<v-text-field
@@ -42,8 +36,6 @@
 								v-model="user.lastName"
 								:error-messages="lastNameErrors"
 								required
-								@input="$v.user.lastName.$touch()"
-								@blur="$v.user.lastName.$touch()"
 								prepend-inner-icon="mdi-card-account-details"
 							/>
 							<v-text-field
@@ -52,8 +44,6 @@
 								v-model="user.password"
 								:error-messages="passwordErrors"
 								required
-								@input="$v.user.password.$touch()"
-								@blur="$v.user.password.$touch()"
 								prepend-inner-icon="mdi-lock"
 							/>
 							<v-text-field
@@ -62,8 +52,6 @@
 								v-model="user.vpassword"
 								:error-messages="vpasswordErrors"
 								required
-								@input="$v.user.vpassword.$touch()"
-								@blur="$v.user.vpassword.$touch()"
 								prepend-inner-icon="mdi-lock"
 							/>
 						</v-card-text>
@@ -80,16 +68,15 @@
 
 <script>
 	import { required, sameAs, minLength, maxLength, email } from 'vuelidate/lib/validators';
-
 	export default {
 		auth: false,
 		data() {
 			return {
 				user: {
 					email: 'woolimi91@naver.com',
-					username: 'username',
-					firstName: 'firstName',
-					lastName: 'lastName',
+					username: 'wpark',
+					firstName: 'woolim',
+					lastName: 'park',
 					password: 'password',
 					vpassword: 'password',
 				},
@@ -191,30 +178,25 @@
 		methods: {
 			async userRegister() {
 				try {
-					this.$v.$touch();
-					if (!this.$v.user.$invalid) {
-						const res = await this.$axios.post('/auth/register', this.user);
-						if (res.status === 201) {
-							this.$store.dispatch('snackbar/show', {
-								text: `Successfully registered, you can now login.\nPlease check your emails.`,
-								color: 'success',
-							});
-							// TODO: Get token instead of refreshing the page
-							// this.$router.push({ path: '/' });
-							return window.location.replace('/');
-						}
-					} else {
-						this.$store.dispatch('snackbar/show', {
-							text: `Invalid form.`,
-							color: 'error',
-						});
-					}
-				} catch (error) {
-					this.$store.dispatch('snackbar/show', {
-						text: `Request error.`,
-						color: 'error',
+					// this.$v.$touch();
+					// if (!this.$v.user.$invalid) {
+					// 	const res = await this.$axios.post('/auth/register', this.user);
+					// 	if (res.status === 201) {
+					this.$notifier.showMessage({
+						message: 'Successfully registered, you can now login.\nPlease check your emails.',
+						color: 'success',
 					});
-					console.log(error);
+					return this.$router.push('/app/profile');
+					// 	}
+					// } else {
+					// 	this.$store.dispatch('snackbar/show', {
+					// 		text: `Invalid form.`,
+					// 		color: 'error',
+					// 	});
+					// }
+				} catch (error) {
+					this.$notifier.showMessage({ message: 'Request error', color: 'error' });
+					console.error(error);
 				}
 			},
 		},

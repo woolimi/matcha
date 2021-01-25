@@ -1,18 +1,11 @@
 export const state = () => ({
-	text: '',
+	message: '',
 	color: '',
-	timeout: '',
 });
 
 export const mutations = {
-	show(state, payload) {
-		state.text = payload.text;
+	showMessage(state, payload) {
+		state.message = payload.message;
 		state.color = payload.color;
-		state.timeout = payload.timeout;
-	},
-};
-export const actions = {
-	show({ commit }, payload) {
-		commit('show', payload);
 	},
 };
