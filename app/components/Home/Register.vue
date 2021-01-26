@@ -10,7 +10,7 @@
 								label="E-mail"
 								type="email"
 								v-model="user.email"
-								:error-messages="emailErrors"
+								:error-messages="error.email"
 								required
 								prepend-inner-icon="mdi-email"
 							/>
@@ -18,7 +18,7 @@
 								label="Username"
 								type="text"
 								v-model="user.username"
-								:error-messages="usernameErrors"
+								:error-messages="error.username"
 								required
 								prepend-inner-icon="mdi-account"
 							/>
@@ -26,7 +26,7 @@
 								label="First name"
 								type="text"
 								v-model="user.firstName"
-								:error-messages="firstNameErrors"
+								:error-messages="error.firstName"
 								required
 								prepend-inner-icon="mdi-card-account-details"
 							/>
@@ -34,7 +34,7 @@
 								label="Last name"
 								type="text"
 								v-model="user.lastName"
-								:error-messages="lastNameErrors"
+								:error-messages="error.lastName"
 								required
 								prepend-inner-icon="mdi-card-account-details"
 							/>
@@ -42,7 +42,7 @@
 								label="Password"
 								type="password"
 								v-model="user.password"
-								:error-messages="passwordErrors"
+								:error-messages="error.password"
 								required
 								prepend-inner-icon="mdi-lock"
 							/>
@@ -50,7 +50,7 @@
 								label="Verify password"
 								type="password"
 								v-model="user.vpassword"
-								:error-messages="vpasswordErrors"
+								:error-messages="error.vpassword"
 								required
 								prepend-inner-icon="mdi-lock"
 							/>
@@ -68,6 +68,8 @@
 
 <script>
 	import { required, sameAs, minLength, maxLength, email } from 'vuelidate/lib/validators';
+	import _ from 'lodash';
+
 	export default {
 		auth: false,
 		data() {
@@ -80,21 +82,18 @@
 					password: 'password',
 					vpassword: 'password',
 				},
+				error: {
+					email: '',
+					username: '',
+					firstName: '',
+					lastName: '',
+					password: '',
+					vpassword: '',
+				},
 			};
 		},
 		validations: {
 			user: {
-				email: {
-					required,
-					email,
-					// TODO: Debounce
-					async isUnique(value) {
-						// Avoid sending requests for invalid emails
-						if (value === '' || !this.$v.user.email.email) return true;
-						const res = await this.$axios.post(`/check/email`, { email: value });
-						return res.status == 200 && res.data.unique;
-					},
-				},
 				username: {
 					required,
 					minLength: minLength(4),
@@ -129,37 +128,6 @@
 			},
 		},
 		computed: {
-			emailErrors() {
-				const errors = [];
-				if (!this.$v.user.email.$dirty) return errors;
-				!this.$v.user.email.email && errors.push('Must be valid email');
-				!this.$v.user.email.isUnique && errors.push('Email already taken');
-				!this.$v.user.email.required && errors.push('Email is required');
-				return errors;
-			},
-			usernameErrors() {
-				const errors = [];
-				if (!this.$v.user.username.$dirty) return errors;
-				!this.$v.user.username.minLength && errors.push('Username must be at least 4 characters long');
-				!this.$v.user.username.maxLength && errors.push('Username must be at most 20 characters long');
-				!this.$v.user.username.isUnique && errors.push('Username already taken');
-				!this.$v.user.username.required && errors.push('Name is required.');
-				return errors;
-			},
-			firstNameErrors() {
-				const errors = [];
-				if (!this.$v.user.firstName.$dirty) return errors;
-				!this.$v.user.firstName.maxLength && errors.push('Name must be at most 45 characters long');
-				!this.$v.user.firstName.required && errors.push('Name is required.');
-				return errors;
-			},
-			lastNameErrors() {
-				const errors = [];
-				if (!this.$v.user.lastName.$dirty) return errors;
-				!this.$v.user.lastName.maxLength && errors.push('Name must be at most 45 characters long');
-				!this.$v.user.lastName.required && errors.push('Name is required.');
-				return errors;
-			},
 			passwordErrors() {
 				const errors = [];
 				if (!this.$v.user.password.$dirty) return errors;
@@ -178,25 +146,27 @@
 		methods: {
 			async userRegister() {
 				try {
-					// this.$v.$touch();
-					// if (!this.$v.user.$invalid) {
+					const validated = this.$validator.userRegister(this.user);
+					if (!_.isEmpty(validated.error)) throw { error: validated.error };
+
 					// 	const res = await this.$axios.post('/auth/register', this.user);
 					// 	if (res.status === 201) {
 					this.$notifier.showMessage({
-						message: 'Successfully registered, you can now login.\nPlease check your emails.',
+						message: 'Successfully registered, you can now login. Please check your emails.',
 						color: 'success',
 					});
+					this.$store.commit('register/CLOSE');
 					return this.$router.push('/app/profile');
-					// 	}
-					// } else {
-					// 	this.$store.dispatch('snackbar/show', {
-					// 		text: `Invalid form.`,
-					// 		color: 'error',
-					// 	});
-					// }
-				} catch (error) {
-					this.$notifier.showMessage({ message: 'Request error', color: 'error' });
-					console.error(error);
+				} catch (e) {
+					if (_.isEmpty(e.error)) {
+						this.$notifier.showMessage({ message: 'Request error', color: 'error' });
+					} else {
+						this.error = e.error;
+						this.$notifier.showMessage({
+							message: 'Invalid form',
+							color: 'error',
+						});
+					}
 				}
 			},
 		},

@@ -19,9 +19,10 @@ export default {
 	// Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
 	plugins: [
 		'~/plugins/axios',
-		'~/plugins/notifier.js',
+		'~/plugins/notifier.client',
 		'~/plugins/vuelidate.client',
 		'~/plugins/TokenManager.client',
+		'~/plugins/validator.client.ts',
 	],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
