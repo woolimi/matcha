@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<!-- app bar -->
-		<v-app-bar app flat color="primary" clipped-left v-bind:style="{ 'z-index': 10 }">
+		<v-app-bar v-bind:app="app" flat color="primary" clipped-left v-bind:style="{ 'z-index': 10 }">
 			<v-row>
 				<v-col cols="2">
 					<v-app-bar-nav-icon
@@ -47,6 +47,7 @@
 		mounted() {
 			this.selected = this.navList.find((list) => list.path === this.$nuxt.$route.path).id;
 		},
+		props: ['app'],
 		data: () => ({
 			selected: null,
 			drawer: false,

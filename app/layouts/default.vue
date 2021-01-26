@@ -1,7 +1,7 @@
 <template>
 	<v-app>
 		<template v-if="this.$route.path === '/'">
-			<HomeNav />
+			<HomeNav app />
 			<div
 				class="align-center justify-center d-flex flex-column"
 				style="
@@ -22,7 +22,7 @@
 			</div>
 		</template>
 		<template v-else>
-			<AppNav />
+			<AppNav app />
 		</template>
 		<v-main class="pt-0">
 			<nuxt />

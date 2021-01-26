@@ -6,3 +6,8 @@ export interface RegisterForm {
 	password: string;
 	vpassword: string;
 }
+
+export interface LoginForm {
+	username: string;
+	password: string;
+}
