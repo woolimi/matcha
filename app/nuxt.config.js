@@ -20,7 +20,6 @@ export default {
 	plugins: [
 		'~/plugins/axios',
 		'~/plugins/notifier.client',
-		'~/plugins/vuelidate.client',
 		'~/plugins/TokenManager.client',
 		'~/plugins/validator.client.ts',
 	],
