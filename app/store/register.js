@@ -3,10 +3,7 @@ export const state = () => ({
 });
 
 export const mutations = {
-	show(state) {},
-};
-export const actions = {
-	show({ commit }, payload) {
-		commit('show', payload);
+	CLOSE(state) {
+		state.modal = false;
 	},
 };

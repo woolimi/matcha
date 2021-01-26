@@ -13,7 +13,7 @@
 				"
 			>
 				<h1 class="white--text" style="font-size: 4em">Find your love</h1>
-				<v-dialog v-model="registerModal" max-width="400px">
+				<v-dialog v-bind:value="this.$store.state.register.modal" max-width="400px">
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn v-bind="attrs" v-on="on" color="primary">create your account</v-btn>
 					</template>
@@ -33,11 +33,5 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				registerModal: false,
-			};
-		},
-	};
+	export default {};
 </script>
