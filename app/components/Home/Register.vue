@@ -67,7 +67,6 @@
 </template>
 
 <script>
-	import { required, sameAs, minLength, maxLength, email } from 'vuelidate/lib/validators';
 	import _ from 'lodash';
 
 	export default {
@@ -91,57 +90,6 @@
 					vpassword: '',
 				},
 			};
-		},
-		validations: {
-			user: {
-				username: {
-					required,
-					minLength: minLength(4),
-					maxLength: maxLength(20),
-					// TODO: Debounce
-					async isUnique(value) {
-						// Avoid sending requests for invalid usernames
-						if (value === '' || !this.$v.user.username.minLength || !this.$v.user.username.maxLength) {
-							return true;
-						}
-						const res = await this.$axios.post(`/check/username`, { username: value });
-						return res.status == 200 && res.data.unique;
-					},
-				},
-				firstName: {
-					required,
-					maxLength: maxLength(45),
-				},
-				lastName: {
-					required,
-					maxLength: maxLength(45),
-				},
-				password: {
-					required,
-					minLength: minLength(4),
-					maxLength: maxLength(100),
-				},
-				vpassword: {
-					required,
-					sameAsPassword: sameAs('password'),
-				},
-			},
-		},
-		computed: {
-			passwordErrors() {
-				const errors = [];
-				if (!this.$v.user.password.$dirty) return errors;
-				!this.$v.user.password.minLength && errors.push('Password must be at least 4 characters long');
-				!this.$v.user.password.maxLength && errors.push('Password must be at most 100 characters long');
-				!this.$v.user.password.required && errors.push('Password is required.');
-				return errors;
-			},
-			vpasswordErrors() {
-				const errors = [];
-				if (!this.$v.user.vpassword.$dirty) return errors;
-				!this.$v.user.vpassword.sameAsPassword && errors.push('Passwords does not match');
-				return errors;
-			},
 		},
 		methods: {
 			async userRegister() {
@@ -172,5 +120,3 @@
 		},
 	};
 </script>
-
-<style scoped></style>
