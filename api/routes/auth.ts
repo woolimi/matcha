@@ -6,6 +6,7 @@ import { ResultSetHeader } from 'mysql2';
 import Mailing from '../init/Mailing';
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
+import validator from '../middleware/validator';
 
 const authRouter = express.Router();
 
@@ -71,23 +72,24 @@ authRouter.delete('/logout', (req, res) => {
 	return res.sendStatus(200);
 });
 
-authRouter.post('/register', async (req, res) => {
+authRouter.post('/register', validator.userRegister, async (req, res) => {
 	const formData = req.body;
 	try {
 		const result: ResultSetHeader = await User.register(formData);
 		// send email with jwt (15 mins limit)
 		const token = generateToken({ id: result.insertId }, 'access');
 		// TODO: Mailgun API
-		/*const mail = await Mailing.send_email_to_verify(
+		const mail = await Mailing.send_email_to_verify(
 			formData.email,
 			`http://localhost:5000/auth/email-verification/${token}`
 		);
-		console.log(mail);*/
+		console.log('Email : ', mail);
+		console.log('Email verification token : ', token);
 		// set refresh token
 		setRefreshToken(res, { id: result.insertId });
 		res.sendStatus(201);
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		res.sendStatus(403);
 	}
 });
@@ -96,8 +98,8 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 	try {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
-		if (!queryResult.affectedRows) throw `User id ${user.id} doesn't exist.`;
-		res.redirect('http://localhost:3000');
+		if (!queryResult.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
+		res.redirect('http://localhost:3000/app/profile');
 	} catch (error) {
 		console.log('/email-verification : ', error);
 		if (error instanceof jwt.TokenExpiredError) {

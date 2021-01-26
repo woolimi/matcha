@@ -1,15 +1,7 @@
 import Model, { CHARSET, COLLATION } from './Model';
 import bcrypt from 'bcrypt';
 import { ResultSetHeader } from 'mysql2';
-
-interface RegisterForm {
-	email: string;
-	username: string;
-	firstName: string;
-	lastName: string;
-	password: string;
-	vpassword: string;
-}
+import { RegisterForm } from '../init/Interfaces';
 
 class User extends Model {
 	static tname = 'users';
@@ -34,49 +26,10 @@ class User extends Model {
 	}
 	static async register(formData: RegisterForm): Promise<ResultSetHeader> {
 		try {
-			// Check if all fields exist
-			const fields = ['email', 'username', 'firstName', 'lastName', 'password', 'vpassword'];
-			const foundFields = [];
-			for (const field of Object.keys(formData)) {
-				if (fields.indexOf(field) < 0) {
-					throw new Error(`Invalid field ${field}.`);
-				} else foundFields.push(field);
-			}
-			if (fields.length != foundFields.length) {
-				throw new Error(`Missing parameters.`);
-			}
-			// Check if all fields are valid
-			fields.forEach((field) => {
-				if (formData[field as keyof RegisterForm]!.length < 0) {
-					throw new Error(`Empty field ${field} !`);
-				}
-			});
-			// Check valid email -- @see https://regexr.com/2rhq7
-			if (
-				!/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(
-					formData.email!
-				)
-			) {
-				throw new Error('Invalid email !');
-			}
-			// Check duplicate email or usernames
-			const check = await User.query('SELECT id FROM users WHERE email = ? OR username = ?', [
-				formData.email,
-				formData.username,
-			]);
-			// [ { id: number }, ... ]
-			if (check && check.length > 0) {
-				throw new Error(`Email or username already taken.`);
-			}
-			// Check passwords
-			if (formData.password != formData.vpassword) {
-				throw new Error('The password validation does not match the password.');
-			}
-			// Save
 			const data = { ...formData };
 			data.password = await bcrypt.hash(formData.password, 10);
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`) VALUES (?, ?, ?, ?, ?)',
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`) VALUES (?, ?, ?, ?, ?, false)',
 				[data.email, data.username, data.password, data.firstName, data.lastName]
 			);
 		} catch (error) {
