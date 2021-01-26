@@ -1,9 +1,12 @@
 export const state = () => ({
-	modal: false,
+	show: false,
 });
 
 export const mutations = {
 	CLOSE(state) {
-		state.modal = false;
+		state.show = false;
+	},
+	SET(state, val) {
+		state.show = val;
 	},
 };

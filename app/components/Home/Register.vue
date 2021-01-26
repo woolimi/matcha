@@ -78,8 +78,8 @@
 					username: 'wpark',
 					firstName: 'woolim',
 					lastName: 'park',
-					password: 'password',
-					vpassword: 'password',
+					password: 'asdf',
+					vpassword: 'asdf',
 				},
 				error: {
 					email: '',
@@ -94,19 +94,21 @@
 		methods: {
 			async userRegister() {
 				try {
-					const validated = this.$validator.userRegister(this.user);
+					const validated = await this.$validator.userRegister(this.user);
 					if (!_.isEmpty(validated.error)) throw { error: validated.error };
 
-					// 	const res = await this.$axios.post('/auth/register', this.user);
-					// 	if (res.status === 201) {
-					this.$notifier.showMessage({
-						message: 'Successfully registered, you can now login. Please check your emails.',
-						color: 'success',
-					});
+					const { data, status } = await this.$axios.post('/auth/register', this.user);
+					if (data.error) throw { error: data.error };
+					if (status === 201) {
+						this.$notifier.showMessage({
+							message: 'Successfully registered, you can now login. Please check your emails.',
+							color: 'success',
+						});
+					}
 					this.$store.commit('register/CLOSE');
-					return this.$router.push('/app/profile');
 				} catch (e) {
 					if (_.isEmpty(e.error)) {
+						console.error(e);
 						this.$notifier.showMessage({ message: 'Request error', color: 'error' });
 					} else {
 						this.error = e.error;
