@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<v-toolbar></v-toolbar>
 		<h1>profile page</h1>
 	</div>
 </template>

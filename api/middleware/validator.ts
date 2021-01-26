@@ -1,6 +1,6 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
-import { RegisterForm } from '../init/Interfaces';
+import { RegisterForm, LoginForm } from '../init/Interfaces';
 
 function validate_email(email: string): string {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -38,7 +38,7 @@ function validate_vpassword(password: string, vpassword: string): string {
 	return '';
 }
 
-function fieldsChecker(formData: RegisterForm, expectedFields: Array<string>): boolean {
+function fieldsChecker(formData: RegisterForm | LoginForm, expectedFields: Array<string>): boolean {
 	const foundFields = [];
 
 	for (const field of Object.keys(formData)) {
@@ -78,6 +78,12 @@ export default {
 		if (!_.isEmpty(error)) {
 			return res.status(200).json({ error });
 		}
+		next();
+	},
+	userLogin(req: any, res: any, next: NextFunction): any {
+		const user: LoginForm = req.body;
+		console.log(user);
+		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(403);
 		next();
 	},
 };
