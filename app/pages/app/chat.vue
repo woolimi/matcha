@@ -1,13 +1,13 @@
 <template>
 	<div>
+		<v-toolbar></v-toolbar>
 		<h1>chat</h1>
 	</div>
 </template>
 
 <script>
 	export default {
-		auth: false,
-		layout: 'app',
+		auth: true,
 	};
 </script>
 

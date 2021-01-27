@@ -1,33 +1,31 @@
 <template>
-	<v-snackbar v-model="show" :multi-line="multiline" :timeout="timeout" :color="color">
-		{{ text }}
-
+	<v-snackbar v-model="show" :color="snackbar.color" timeout="4000">
+		{{ snackbar.message }}
 		<template v-slot:action="{ attrs }">
-			<v-btn dark text v-bind="attrs" @click="snackbar = false"> Close </v-btn>
+			<v-btn dark text v-bind="attrs" @click="close"> Close </v-btn>
 		</template>
 	</v-snackbar>
 </template>
 
 <script>
+	import { mapState } from 'vuex';
+
 	export default {
-		created() {
-			this.$store.subscribe((mutation, state) => {
-				if (mutation.type === 'snackbar/show') {
-					this.text = state.snackbar.text;
-					this.color = state.snackbar.color;
-					this.timeout = state.snackbar.timeout;
-					this.show = true;
-				}
-			});
+		methods: {
+			close() {
+				this.$store.commit('snackbar/CLOSE');
+			},
 		},
-		data() {
-			return {
-				show: false,
-				color: 'success',
-				multiline: true,
-				text: '',
-				timeout: 4000,
-			};
+		computed: {
+			show: {
+				get() {
+					return this.$store.state.snackbar.show;
+				},
+				set(val) {
+					this.$store.commit('snackbar/SET', val);
+				},
+			},
+			...mapState(['snackbar']),
 		},
 	};
 </script>
