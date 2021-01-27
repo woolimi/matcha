@@ -54,7 +54,7 @@
 
 <script>
 	export default {
-		mounted() {
+		created() {
 			this.selected = this.navList.find((list) => list.path === this.$nuxt.$route.path).id;
 		},
 		props: ['app'],
