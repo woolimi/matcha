@@ -1,3 +1,7 @@
+html {
+	overflow: auto !important;
+}
+
 a {
 	all: inherit;
 }
