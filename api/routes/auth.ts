@@ -97,7 +97,7 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
 		if (!queryResult.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
-		res.redirect('/email-verification?result=success');
+		res.redirect('/auth/email-verification?result=success');
 	} catch (error) {
 		console.log('EMAIL VERIFICATION ERROR : ', error);
 		if (error instanceof jwt.TokenExpiredError) {
