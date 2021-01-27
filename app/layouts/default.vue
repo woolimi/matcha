@@ -34,6 +34,12 @@
 
 <script>
 	export default {
+		mounted() {
+			if (this.$auth.loggedIn) {
+				if (this.$store.state.refreshId) clearInterval(this.$store.state.refreshId);
+				this.$tokenManager.silentRefresh(this);
+			}
+		},
 		computed: {
 			show: {
 				get() {

@@ -7,6 +7,7 @@ import Mailing from '../init/Mailing';
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
+import path from 'path';
 
 const authRouter = express.Router();
 
@@ -78,15 +79,12 @@ authRouter.post('/register', validator.userRegister, async (req, res) => {
 		const result: ResultSetHeader = await User.register(formData);
 		// send email with jwt (15 mins limit)
 		const token = generateToken({ id: result.insertId }, 'access');
-		// TODO: Mailgun API
 		const mail = await Mailing.send_email_to_verify(
 			formData.email,
 			`http://localhost:5000/auth/email-verification/${token}`
 		);
 		console.log('Email : ', mail);
 		console.log('Email verification token : ', token);
-		// set refresh token
-		setRefreshToken(res, { id: result.insertId });
 		res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
@@ -99,12 +97,22 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
 		if (!queryResult.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
-		res.redirect('http://localhost:3000/app/profile');
+		res.redirect('/email-verification?result=success');
 	} catch (error) {
-		console.log('/email-verification : ', error);
+		console.log('EMAIL VERIFICATION ERROR : ', error);
 		if (error instanceof jwt.TokenExpiredError) {
-			res.status(401).send('Your token is expired.');
-		} else res.status(403);
+			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Your token is expired'));
+		} else {
+			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Invalid token'));
+		}
+	}
+});
+
+authRouter.get('/email-verification', (req, res) => {
+	if (req.query.result === 'success') {
+		res.status(200).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
+	} else {
+		res.status(401).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
 	}
 });
 
