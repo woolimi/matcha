@@ -18,7 +18,7 @@
 				</v-col>
 				<v-col cols="2" class="d-flex align-center">
 					<v-spacer></v-spacer>
-					<v-icon color="white" class="text-h5">mdi-logout</v-icon>
+					<v-icon color="white" class="text-h5" @click="userLogout">mdi-logout</v-icon>
 				</v-col>
 			</v-row>
 		</v-app-bar>
@@ -29,12 +29,22 @@
 			<v-list nav dense>
 				<v-list-item-group v-model="selected" active-class="primary--text text--accent-4">
 					<v-list-item v-for="list in navList" :key="list.title">
-						<NuxtLink :to="{ path: list.path }">
-							<v-list-item-icon>
-								<v-icon>{{ list.icon }}</v-icon>
-							</v-list-item-icon>
-							<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
-						</NuxtLink>
+						<template v-if="list.title === 'Logout'">
+							<a @click="userLogout">
+								<v-list-item-icon>
+									<v-icon>{{ list.icon }}</v-icon>
+								</v-list-item-icon>
+								<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
+							</a>
+						</template>
+						<template v-else>
+							<NuxtLink :to="{ path: list.path }">
+								<v-list-item-icon>
+									<v-icon>{{ list.icon }}</v-icon>
+								</v-list-item-icon>
+								<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
+							</NuxtLink>
+						</template>
 					</v-list-item>
 				</v-list-item-group>
 			</v-list>
@@ -83,5 +93,10 @@
 				},
 			],
 		}),
+		methods: {
+			userLogout() {
+				this.$tokenManager.logout();
+			},
+		},
 	};
 </script>

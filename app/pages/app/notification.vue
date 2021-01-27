@@ -6,7 +6,7 @@
 
 <script>
 	export default {
-		auth: false,
+		auth: true,
 	};
 </script>
 
