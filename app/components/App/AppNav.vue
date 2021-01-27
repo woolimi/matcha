@@ -55,7 +55,8 @@
 <script>
 	export default {
 		created() {
-			this.selected = this.navList.find((list) => list.path === this.$nuxt.$route.path).id;
+			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
+			this.selected = path ? path.id : 0;
 		},
 		props: ['app'],
 		data: () => ({
