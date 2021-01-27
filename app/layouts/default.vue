@@ -38,7 +38,7 @@
 		mounted() {
 			if (this.$auth.loggedIn) {
 				if (this.$store.state.refreshId) clearInterval(this.$store.state.refreshId);
-				this.$tokenManager.silentRefresh(this);
+				this.$tokenManager.silentRefresh();
 			}
 		},
 		computed: {
