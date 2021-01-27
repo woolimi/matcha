@@ -6,28 +6,30 @@ import { ResultSetHeader } from 'mysql2';
 import Mailing from '../init/Mailing';
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
+import validator from '../middleware/validator';
+import path from 'path';
 
 const authRouter = express.Router();
 
 // access_token -> client session cookie
 // refresh_token -> Secure/HttpOnly/SameSite cookie
 
-authRouter.post('/login', async (req, res) => {
-	// Check email and password
+authRouter.post('/login', validator.userLogin, async (req, res) => {
+	// Check username and password
 	try {
 		const loginForm = req.body;
-		// check email
-		const queryResult = await User.query('SELECT * FROM users WHERE email = ? LIMIT 1', loginForm.email);
+		// check username
+		const queryResult = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [loginForm.username]);
 		if (!queryResult.length) {
-			console.log(`email(${loginForm.email}) not matched`);
-			return res.status(401).send({ message: 'Wrong email or password' });
+			console.log(`email(${loginForm.username}) not matched`);
+			return res.status(200).send({ error: 'Wrong email or password' });
 		}
 		// check password
 		const user = queryResult[0];
 		const isValidPassword = await bcrypt.compare(loginForm.password, user.password);
 		if (!isValidPassword) {
-			console.log(`${loginForm.email}'s password not matched`);
-			return res.status(401).send({ message: 'Wrong email or password' });
+			console.log(`${loginForm.username}'s password not matched`);
+			return res.status(200).send({ error: 'Wrong email or password' });
 		}
 		// return tokens
 		const u = _.pick(user, ['id']);
@@ -71,23 +73,21 @@ authRouter.delete('/logout', (req, res) => {
 	return res.sendStatus(200);
 });
 
-authRouter.post('/register', async (req, res) => {
+authRouter.post('/register', validator.userRegister, async (req, res) => {
 	const formData = req.body;
 	try {
 		const result: ResultSetHeader = await User.register(formData);
 		// send email with jwt (15 mins limit)
 		const token = generateToken({ id: result.insertId }, 'access');
-		// TODO: Mailgun API
-		/*const mail = await Mailing.send_email_to_verify(
+		const mail = await Mailing.send_email_to_verify(
 			formData.email,
 			`http://localhost:5000/auth/email-verification/${token}`
 		);
-		console.log(mail);*/
-		// set refresh token
-		setRefreshToken(res, { id: result.insertId });
+		console.log('Email : ', mail);
+		console.log('Email verification token : ', token);
 		res.sendStatus(201);
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		res.sendStatus(403);
 	}
 });
@@ -96,13 +96,23 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 	try {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
-		if (!queryResult.affectedRows) throw `User id ${user.id} doesn't exist.`;
-		res.redirect('http://localhost:3000');
+		if (!queryResult.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
+		res.redirect('/auth/email-verification?result=success');
 	} catch (error) {
-		console.log('/email-verification : ', error);
+		console.log('EMAIL VERIFICATION ERROR : ', error);
 		if (error instanceof jwt.TokenExpiredError) {
-			res.status(401).send('Your token is expired.');
-		} else res.status(403);
+			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Your token is expired'));
+		} else {
+			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Invalid token'));
+		}
+	}
+});
+
+authRouter.get('/email-verification', (req, res) => {
+	if (req.query.result === 'success') {
+		res.status(200).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
+	} else {
+		res.status(401).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
 	}
 });
 

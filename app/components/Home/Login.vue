@@ -4,18 +4,20 @@
 			<v-card-title> Login </v-card-title>
 			<v-card-text>
 				<v-text-field
-					label="E-mail"
-					v-model="login.email"
-					type="email"
+					label="Username"
+					v-model="user.username"
+					type="text"
 					required
-					prepend-inner-icon="mdi-email"
+					prepend-inner-icon="mdi-account"
+					:error-messages="error.username"
 				/>
 				<v-text-field
 					label="Password"
-					v-model="login.password"
+					v-model="user.password"
 					type="password"
 					required
 					prepend-inner-icon="mdi-lock"
+					:error-messages="error.password"
 				/>
 			</v-card-text>
 			<v-card-actions>
@@ -30,17 +32,16 @@
 </template>
 
 <script>
-	import TokenManager from '~/plugins/TokenManager.client';
-
 	export default {
 		auth: false,
-		middleware({ store, redirect, app }) {
-			if (app.$auth.loggedIn) return redirect('/private');
-		},
 		data() {
 			return {
-				login: {
-					email: '',
+				user: {
+					username: '',
+					password: '',
+				},
+				error: {
+					username: '',
 					password: '',
 				},
 			};
@@ -48,11 +49,25 @@
 		methods: {
 			async userLogin() {
 				try {
-					await this.$auth.loginWith('local', { data: this.login });
-					TokenManager.silentRefresh(this);
-					return this.$router.go(-1);
-				} catch (error) {
-					console.log(error);
+					const validated = await this.$validator.userLogin(this.user);
+					if (!_.isEmpty(validated.error)) throw { error: validated.error };
+
+					const { data } = await this.$auth.loginWith('local', { data: this.user });
+					if (data.error) {
+						this.$notifier.showMessage({
+							message: data.error,
+							color: 'error',
+						});
+						return;
+					}
+					this.$tokenManager.silentRefresh(this);
+					return this.$router.replace('/app/search');
+				} catch (e) {
+					if (e.error) {
+						this.error = e.error;
+					} else {
+						console.error(e);
+					}
 				}
 			},
 		},
