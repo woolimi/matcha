@@ -24,7 +24,7 @@
 		<template v-else>
 			<AppNav app />
 		</template>
-		<v-main class="pt-0">
+		<v-main>
 			<nuxt />
 		</v-main>
 		<Footer />
