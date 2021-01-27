@@ -1,7 +1,7 @@
 <template>
-	<div>
+	<Fragment>
 		<!-- app bar -->
-		<v-app-bar v-bind:app="app" flat color="primary" clipped-left v-bind:style="{ 'z-index': 10 }">
+		<v-app-bar app flat color="primary" clipped-left v-bind:style="{ 'z-index': 10 }">
 			<v-row>
 				<v-col cols="2">
 					<v-app-bar-nav-icon
@@ -49,7 +49,7 @@
 				</v-list-item-group>
 			</v-list>
 		</v-navigation-drawer>
-	</div>
+	</Fragment>
 </template>
 
 <script>
