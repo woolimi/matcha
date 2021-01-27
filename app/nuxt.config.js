@@ -44,7 +44,7 @@ export default {
 	],
 
 	router: {
-		middleware: 'auth',
+		middleware: ['auth'],
 	},
 	auth: {
 		strategies: {
@@ -77,7 +77,7 @@ export default {
 			login: '/',
 			logout: '/',
 			callback: '/',
-			home: '/',
+			home: '/app/search',
 		},
 	},
 
