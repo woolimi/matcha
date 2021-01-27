@@ -82,7 +82,6 @@ export default {
 	},
 	userLogin(req: any, res: any, next: NextFunction): any {
 		const user: LoginForm = req.body;
-		console.log(user);
 		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(403);
 		next();
 	},

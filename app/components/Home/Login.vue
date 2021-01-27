@@ -32,8 +32,6 @@
 </template>
 
 <script>
-	import TokenManager from '~/plugins/TokenManager.client';
-
 	export default {
 		auth: false,
 		data() {
@@ -62,8 +60,8 @@
 						});
 						return;
 					}
-					// TokenManager.silentRefresh(this);
-					return this.$router.push('/app/profile');
+					this.$tokenManager.silentRefresh(this);
+					return this.$router.replace('/app/search');
 				} catch (e) {
 					if (e.error) {
 						this.error = e.error;
