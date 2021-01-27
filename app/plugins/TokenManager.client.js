@@ -13,7 +13,7 @@ export default ({ app, store }, inject) => {
 				clearInterval(store.state.refreshId);
 				store.commit('SET_REFRESH_ID', null);
 				console.log('STOP REFRESH');
-				const { status } = await app.$axios.delete('/auth/logout');
+				await app.$axios.delete('/auth/logout');
 				await app.$auth.logout();
 			} catch (e) {
 				console.error(e);
