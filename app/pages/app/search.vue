@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<v-toolbar></v-toolbar>
 		<h1>search page</h1>
 	</div>
 </template>
