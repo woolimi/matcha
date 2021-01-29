@@ -5,11 +5,9 @@ interface ModelClass {
 	table: string;
 }
 
-export const CHARSET = 'utf8mb4';
-export const COLLATION = 'utf8mb4_unicode_ci';
-
-class Model {
+abstract class Model {
 	static tname = 'null';
+
 	static query(sql: string, placeholder?: Array<any>): Promise<ResultSetHeader | any> {
 		return new Promise((resolve, reject) => {
 			if (!MySQL.con) reject('MySQL is not connected.');
@@ -19,6 +17,7 @@ class Model {
 			});
 		});
 	}
+
 	static async init(modelName: string, modelClass: ModelClass): Promise<any> {
 		try {
 			const hasTable: any = await this.query(`SHOW TABLES FROM matcha LIKE '${modelName}'`);
@@ -29,6 +28,7 @@ class Model {
 			console.log(error);
 		}
 	}
+
 	static async find(id: number) {
 		try {
 			console.log(this.tname);
