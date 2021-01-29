@@ -1,17 +1,11 @@
 import mysql from 'mysql2';
 import database from '../config/database.json';
-import User from '../models/User';
 
 class MySQL {
 	static con = mysql.createConnection(database.MYSQL_CONFIG);
-	static init() {
-		const con = MySQL.con;
-		con.connect((err) => {
-			if (err) throw err;
-			console.log('⚡️[server]: Connected to MYSQL Server');
-			User.init();
-		});
-	}
+
+	static CHARSET = 'utf8mb4';
+	static COLLATION = 'utf8mb4_unicode_ci';
 }
 
 export default MySQL;
