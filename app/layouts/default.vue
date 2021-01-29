@@ -12,10 +12,10 @@
 					background-attachment: fixed;
 				"
 			>
-				<h1 class="white--text" style="font-size: 4em">Find your love</h1>
+				<h1 class="white--text" style="font-size: 4em">Find your Love</h1>
 				<v-dialog v-model="show" max-width="400px">
 					<template v-slot:activator="{ on, attrs }">
-						<v-btn v-bind="attrs" v-on="on" color="primary">create your account</v-btn>
+						<v-btn v-bind="attrs" v-on="on" color="primary">Create an Account</v-btn>
 					</template>
 					<Register />
 				</v-dialog>
