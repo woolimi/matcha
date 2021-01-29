@@ -54,13 +54,13 @@
 
 -   `id`
 -   `user`: User
--   `like`: User, the other User who liked `user`
+-   `liked`: User, the other User who `user` like
 
 #### UserBlock
 
 -   `id`
 -   `user`: User
--   `blocked`: User, the other blocked User
+-   `blocked`: User, the other blocked User by `user`
 
 #### UserChat
 
