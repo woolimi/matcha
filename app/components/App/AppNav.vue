@@ -98,6 +98,7 @@
 			userLogout() {
 				console.log('userLogout');
 				this.$tokenManager.logout();
+				this.$auth.logout();
 			},
 		},
 	};

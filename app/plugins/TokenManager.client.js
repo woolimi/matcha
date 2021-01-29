@@ -8,12 +8,11 @@ export default ({ app, store }, inject) => {
 			}, 1000 * 60 * 14); // every 14 mins
 			store.commit('SET_REFRESH_ID', id);
 		},
-		async logout() {
+		logout() {
 			try {
 				clearInterval(store.state.refreshId);
 				store.commit('SET_REFRESH_ID', null);
 				console.log('STOP REFRESH');
-				await app.$auth.logout();
 			} catch (e) {
 				console.error(e);
 			}
