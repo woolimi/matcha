@@ -34,25 +34,27 @@
 -   `id`
 -   `user`
 -   `format`
+-   `added`
 
 #### UserTag
 
 -   `id`
 -   `user`
 -   `tag`: See [#Tags](#Tags)
+-   `added`
 
 #### UserVisit
 
 -   `id`
 -   `visited`: User, to get _self_ history, select \* where visited = self
 -   `visitor`: User
--   `date`: Maybe ?
+-   `at`: Date
 
 #### UserLike
 
 -   `id`
 -   `user`: User
--   `from`: User, the other User who liked `user`
+-   `like`: User, the other User who liked `user`
 
 #### UserBlock
 
@@ -65,15 +67,15 @@
 -   `id`
 -   `user1`: User
 -   `user2`: User
+-   `start`: Date ?
 
 ##### ChatMessage
 
 -   `id`
 -   `chat`: Chat
 -   `sender`: User
--   `date`
+-   `at`: Date
 -   `content`
--   `read`: Maybe ?
 
 ### UserNotification
 
@@ -81,6 +83,7 @@
 -   `user`: User
 -   `type`: `likeReceived`, `profileVisited`, `messageReceived`, `likedBack`, `likeRemoved`
 -   `content`
+-   `at`: Date
 -   `read`: boolean
 
 ### Tag
