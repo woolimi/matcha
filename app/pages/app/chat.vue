@@ -1,8 +1,8 @@
 <template>
 	<v-row no-gutters align="stretch">
-		<v-col cols="3" style="border-right: 1px solid rgba(0, 0, 0, 0.12)">
+		<v-col cols="12" md="3" :class="userListClass" style="border-right: 1px solid rgba(0, 0, 0, 0.12)">
 			<template v-if="users.length > 0">
-				<v-list>
+				<v-list width="100%">
 					<v-list-item-group>
 						<v-list-item v-for="user in users" :key="user.avatar" @click="currentUser = user">
 							<v-list-item-avatar>
@@ -41,9 +41,11 @@
 				</div>
 			</template>
 		</v-col>
-		<v-col cols="9" class="d-flex flex-column flex-nowrap" style="overflow: hidden">
+		<v-col cols="12" md="9" :class="messageListClass" style="overflow: hidden">
 			<template v-if="currentUser">
 				<v-toolbar class="flex-grow-0">
+					<v-icon class="hidden-md-and-up" @click="currentUser = undefined">mdi-chevron-left</v-icon>
+
 					<v-badge
 						:color="currentUser.online ? 'green' : 'pink'"
 						bordered
@@ -258,6 +260,14 @@
 					},
 				],
 			};
+		},
+		computed: {
+			userListClass() {
+				return this.currentUser === undefined ? 'd-flex' : 'hidden-sm-and-down';
+			},
+			messageListClass() {
+				return `${this.currentUser === undefined ? 'hidden-sm-and-down' : 'd-flex'} flex-column flex-nowrap`;
+			},
 		},
 	};
 </script>
