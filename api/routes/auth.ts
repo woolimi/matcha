@@ -1,5 +1,5 @@
-import express, { query } from 'express';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
+import express from 'express';
+import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
 import { ResultSetHeader } from 'mysql2';

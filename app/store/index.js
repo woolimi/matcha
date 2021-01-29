@@ -26,7 +26,7 @@ export const actions = {
 				});
 				// renew access token
 				app.$cookies.set('auth._token.local', `Bearer ${data.access_token}`);
-				redirect('/app/search');
+				// redirect('/app/search');
 			} catch (error) {
 				return redirect('/');
 			}
