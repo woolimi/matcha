@@ -11,8 +11,8 @@ import path from 'path';
 
 const authRouter = express.Router();
 
-// access_token -> client session cookie
-// refresh_token -> Secure/HttpOnly/SameSite cookie
+const REFRESH_TOKEN_EXP = 3600 * 24 * 7;
+const ACCESS_TOKEN_EXP = 60 * 15;
 
 authRouter.post('/login', validator.userLogin, async (req, res) => {
 	// Check username and password
@@ -130,10 +130,11 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 function setRefreshToken(res: any, user: any) {
 	const rtoken = generateToken(user, 'refresh');
 	res.cookie('auth._refresh_token.local', rtoken, {
-		expires: new Date(Date.now() + 3600 * 24 * 7),
+		expires: new Date(Date.now() + 1000 * REFRESH_TOKEN_EXP),
 		secure: false,
 		httpOnly: true,
 		sameSite: true,
+		path: '/',
 	});
 	return rtoken;
 }
@@ -144,6 +145,7 @@ function deleteRefreshToken(res: any) {
 		secure: false,
 		httpOnly: false,
 		sameSite: false,
+		path: '/',
 	});
 }
 
@@ -151,14 +153,14 @@ function generateToken(obj: object, option: string = 'access') {
 	// expires after half and hour (1800 seconds = 30 minutes)
 	if (option == 'access') {
 		const access = jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET, {
-			expiresIn: `${60 * 15}s`, // 15 mins
+			expiresIn: `${ACCESS_TOKEN_EXP}s`, // 15 mins
 		});
 		console.log('access token generated');
 		return access;
 	}
 	if (option == 'refresh') {
 		const refresh = jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, {
-			expiresIn: `${3600 * 24 * 7}s`, // 1 week
+			expiresIn: `${REFRESH_TOKEN_EXP}s`, // 1 week
 		});
 		console.log('refresh token generated');
 		return refresh;
