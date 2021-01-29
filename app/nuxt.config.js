@@ -59,6 +59,7 @@ export default {
 						secure: false,
 						httpOnly: true,
 						sameSite: true,
+						path: '/',
 					},
 				},
 				user: {

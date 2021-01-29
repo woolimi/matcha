@@ -9,7 +9,7 @@ export const mutations = {
 };
 
 export const actions = {
-	async nuxtServerInit({ commit }, { app }) {
+	async nuxtServerInit({ commit }, { app, redirect }) {
 		// when page is refreshed
 		const refresh_token = app.$cookies.get('auth._refresh_token.local');
 		if (refresh_token) {
@@ -20,13 +20,16 @@ export const actions = {
 				app.$cookies.set('auth._refresh_token.local', data.refresh_token, {
 					httpOnly: true,
 					sameSite: true,
-					expires: new Date(Date.now() + 3600 * 24 * 7),
+					expires: new Date(Date.now() + 1000 * 3600 * 24 * 7),
 					secure: false,
+					path: '/',
 				});
 				// renew access token
 				app.$cookies.set('auth._token.local', `Bearer ${data.access_token}`);
-				// app.$auth.strategy.token.set(data.access_token);
-			} catch (error) {}
+				redirect('/app/search');
+			} catch (error) {
+				return redirect('/');
+			}
 		}
 	},
 	setRefreshId({ commit }, id) {
