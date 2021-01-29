@@ -5,9 +5,9 @@ import { ResultSetHeader } from 'mysql2';
 class Tag extends Model {
 	static tname = 'tags';
 	static table = `CREATE TABLE tags (
-			id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+			id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			name VARCHAR(100) NOT NULL,
-			UNIQUE KEY name_UNIQUE (name),
+			UNIQUE KEY name_UNIQUE (name)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
 
 	static init(): Promise<any> {

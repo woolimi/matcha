@@ -10,7 +10,7 @@ class UserPicture extends Model {
 			user INT UNSIGNED NOT NULL,
 			extension VARCHAR(10) NOT NULL,
 			added DATETIME DEFAULT NOW(),
-			FOREIGN KEY (user) REFERENCES ${User.tname} (id) ON DELETE CASCADE,
+			FOREIGN KEY (user) REFERENCES ${User.tname} (id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
 
 	static init(): Promise<any> {

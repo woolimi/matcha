@@ -11,9 +11,9 @@ class ChatMessage extends Model {
 			chat INT UNSIGNED NOT NULL,
 			sender INT UNSIGNED NOT NULL,
 			at DATETIME DEFAULT NOW(),
-			content TEXT DEFAULT NOT NULL,
+			content TEXT NOT NULL,
 			FOREIGN KEY (chat) REFERENCES ${Chat.tname} (id) ON DELETE CASCADE,
-			FOREIGN KEY (sender) REFERENCES ${User.tname} (id) ON DELETE CASCADE,
+			FOREIGN KEY (sender) REFERENCES ${User.tname} (id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
 
 	static init(): Promise<any> {

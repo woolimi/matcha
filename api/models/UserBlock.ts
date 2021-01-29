@@ -10,7 +10,7 @@ export class UserBlock extends Model {
 			user INT UNSIGNED NOT NULL,
 			blocked INT UNSIGNED NOT NULL,
 			at DATETIME DEFAULT NOW(),
-			UNIQUE user_blocked_UNIQUE (user, blocked),
+			UNIQUE KEY user_blocked_UNIQUE (user, blocked),
 			FOREIGN KEY (user) REFERENCES ${User.tname} (id) ON DELETE CASCADE,
 			FOREIGN KEY (blocked) REFERENCES ${User.tname} (id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
