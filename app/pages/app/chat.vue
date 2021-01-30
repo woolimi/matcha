@@ -1,6 +1,6 @@
 <template>
-	<v-row no-gutters align="stretch">
-		<v-col cols="12" md="3" :class="userListClass" style="border-right: 1px solid rgba(0, 0, 0, 0.12)">
+	<v-row no-gutters style="height: 100%">
+		<v-col cols="12" md="3" :class="userListClass">
 			<template v-if="users.length > 0">
 				<v-list width="100%">
 					<v-list-item-group>
@@ -35,15 +35,15 @@
 			</template>
 			<template v-else>
 				<div class="pa-2">
-					<v-alert border="left" elevation="2" outlined text type="info"
-						>Start matching to chat with other peoples !</v-alert
-					>
+					<v-alert border="left" elevation="2" outlined text type="info">
+						Start matching to chat with other peoples !
+					</v-alert>
 				</div>
 			</template>
 		</v-col>
-		<v-col cols="12" md="9" :class="messageListClass" style="overflow: hidden">
+		<v-col cols="12" md="9" :class="messageListClass">
 			<template v-if="currentUser">
-				<v-toolbar class="flex-grow-0">
+				<v-toolbar class="flex-grow-0" style="z-index: 1">
 					<v-icon class="hidden-md-and-up" @click="currentUser = undefined">mdi-chevron-left</v-icon>
 
 					<v-badge
@@ -64,11 +64,12 @@
 
 					<v-spacer></v-spacer>
 
-					<v-btn text outline color="pink"> <v-icon>mdi-heart</v-icon> Unlike </v-btn>
-					<v-btn text outline color="error"> <v-icon>mdi-cancel</v-icon> Block </v-btn>
+					<v-btn text color="pink"> <v-icon>mdi-heart</v-icon> Unlike </v-btn>
+					<v-btn text color="error"> <v-icon>mdi-cancel</v-icon> Block </v-btn>
 				</v-toolbar>
 				<v-container
-					class="messages grey d-flex flex-grow-1 flex-shrink-0 flex-column flex-fill lighten-5 mb-0"
+					fluid
+					class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
 				>
 					<v-subheader> Tuesday, 28 January 2021 </v-subheader>
 					<div class="d-flex message received">
@@ -120,7 +121,10 @@
 						</v-card>
 					</div>
 				</v-container>
-				<v-container fluid class="d-flex justify-center flex-grow-0 align-center flex-nowrap elevation-4">
+				<v-container
+					fluid
+					class="d-flex justify-center flex-grow-0 align-center flex-nowrap elevation-4 message-input"
+				>
 					<!--<v-avatar size="40"> <v-img :src="self.avatar"></v-img> </v-avatar>-->
 					<v-text-field
 						v-model="message"
@@ -136,9 +140,9 @@
 			</template>
 			<template v-else>
 				<div class="pa-2" style="display: flex; justify-content: center; align-items: center">
-					<v-alert border="left" elevation="2" outlined text type="info" icon="mdi-chevron-left"
-						>Select an User you want to talk to on the left.</v-alert
-					>
+					<v-alert border="left" elevation="2" outlined text type="info" icon="mdi-chevron-left">
+						Select an User you want to talk to on the left.
+					</v-alert>
 				</div>
 			</template>
 		</v-col>
@@ -263,18 +267,31 @@
 		},
 		computed: {
 			userListClass() {
-				return this.currentUser === undefined ? 'd-flex' : 'hidden-sm-and-down';
+				return `${this.currentUser === undefined ? 'd-flex' : 'hidden-sm-and-down'} user-list`;
 			},
 			messageListClass() {
-				return `${this.currentUser === undefined ? 'hidden-sm-and-down' : 'd-flex'} flex-column flex-nowrap`;
+				return `${this.currentUser === undefined ? 'hidden-sm-and-down' : 'd-flex'} user-chat`;
 			},
 		},
 	};
 </script>
 
 <style scoped>
+	.user-list {
+		height: 100%;
+		overflow: auto;
+		border-right: 1px solid rgba(0, 0, 0, 0.12);
+	}
+
 	.v-list-item .v-avatar {
 		overflow: visible;
+	}
+
+	.user-chat {
+		display: flex;
+		flex-flow: column nowrap;
+		height: 100%;
+		overflow: auto;
 	}
 
 	.v-subheader {
@@ -282,6 +299,7 @@
 	}
 
 	.messages {
+		flex-grow: 0;
 		overflow: auto;
 	}
 	.message {
