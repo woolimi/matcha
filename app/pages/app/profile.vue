@@ -2,8 +2,11 @@
 	<v-container>
 		<!-- Profile card -->
 		<v-row>
-			<v-col cols="12">
-				<ProfileCard />
+			<v-col cols="12" sm="6">
+				<ProfileImages />
+			</v-col>
+			<v-col cols="12" sm="6">
+				<PrivateInfo />
 			</v-col>
 			<v-col cols="12">
 				<PublicInfo />
