@@ -17,12 +17,7 @@ export default {
 	css: ['~/assets/css/matcha.css'],
 
 	// Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-	plugins: [
-		'~/plugins/axios',
-		'~/plugins/notifier.client',
-		'~/plugins/TokenManager.client',
-		'~/plugins/validator.client.ts',
-	],
+	plugins: ['~/plugins/notifier.client', '~/plugins/validator.client.ts'],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
 	components: true,
@@ -48,19 +43,17 @@ export default {
 	},
 	auth: {
 		strategies: {
-			local: {
+			cookie: {
+				scheme: 'refresh',
 				token: {
 					property: 'access_token',
 					type: 'Bearer',
+					maxAge: 60 * 15,
 				},
-				cookie: {
-					name: 'auth._refresh_token.local',
-					options: {
-						secure: false,
-						httpOnly: true,
-						sameSite: true,
-						path: '/',
-					},
+				refreshToken: {
+					property: 'refresh_token',
+					data: 'refresh_token',
+					maxAge: 3600 * 24 * 7,
 				},
 				user: {
 					property: 'user',
@@ -70,6 +63,7 @@ export default {
 					login: { url: '/auth/login', method: 'post' },
 					logout: { url: '/auth/logout', method: 'delete' },
 					user: { url: '/auth/me', method: 'get' },
+					refresh: { url: '/auth/refresh', method: 'post' },
 				},
 			},
 		},

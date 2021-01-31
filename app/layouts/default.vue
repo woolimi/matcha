@@ -37,7 +37,7 @@
 		middleware: 'appRoute',
 		mounted() {
 			if (this.$auth.loggedIn) {
-				this.$tokenManager.silentRefresh();
+				this.$auth.refreshTokens();
 			}
 		},
 		computed: {
