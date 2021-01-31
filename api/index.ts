@@ -3,13 +3,13 @@ import cors from 'cors';
 import usersRouter from './routes/api/users';
 import authRouter from './routes/auth';
 import dotenv from 'dotenv';
-import MySQL from './init/MySQL';
 import cookieParser from 'cookie-parser';
 import authToken from './middleware/authToken';
 import checkRouter from './routes/api/check';
 import morgan from 'morgan';
 import fs from 'fs';
 import path from 'path';
+import Database from './init/Database';
 
 const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
 
@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-MySQL.init();
+Database.init();
 app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
 app.use(
