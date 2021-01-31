@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h1>search page</h1>
+		<h1>search</h1>
 	</div>
 </template>
 
@@ -11,4 +11,3 @@
 </script>
 
 <style scoped></style>
-x`
