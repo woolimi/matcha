@@ -74,12 +74,12 @@
 		data() {
 			return {
 				user: {
-					email: 'woolimi91@naver.com',
-					username: 'wpark',
-					firstName: 'woolim',
-					lastName: 'park',
-					password: 'asdf',
-					vpassword: 'asdf',
+					email: '',
+					username: '',
+					firstName: '',
+					lastName: '',
+					password: '',
+					vpassword: '',
 				},
 				error: {
 					email: '',

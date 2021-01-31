@@ -54,8 +54,9 @@
 
 <script>
 	export default {
-		mounted() {
-			this.selected = this.navList.find((list) => list.path === this.$nuxt.$route.path).id;
+		created() {
+			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
+			this.selected = path ? path.id : 0;
 		},
 		props: ['app'],
 		data: () => ({
@@ -95,7 +96,7 @@
 		}),
 		methods: {
 			userLogout() {
-				this.$tokenManager.logout();
+				this.$auth.logout();
 			},
 		},
 	};
