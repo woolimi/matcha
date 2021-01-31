@@ -58,16 +58,13 @@
 					const validated = await this.$validator.userLogin(this.user);
 					if (!_.isEmpty(validated.error)) throw { error: validated.error };
 
-					const { data } = await this.$auth.loginWith('local', { data: this.user });
+					const { data } = await this.$auth.loginWith('cookie', { data: this.user });
 					if (data.error) {
 						this.$notifier.showMessage({
 							message: data.error,
 							color: 'error',
 						});
-						return;
 					}
-					this.$tokenManager.silentRefresh(this);
-					return this.$router.replace('/app/search');
 				} catch (e) {
 					if (e.error) {
 						this.error = e.error;

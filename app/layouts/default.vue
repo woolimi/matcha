@@ -30,10 +30,10 @@
 				isLandingPage: true,
 			};
 		},
+		middleware: 'appRoute',
 		mounted() {
 			if (this.$auth.loggedIn) {
-				if (this.$store.state.refreshId) clearInterval(this.$store.state.refreshId);
-				this.$tokenManager.silentRefresh(this);
+				this.$auth.refreshTokens();
 			}
 			this.isLandingPage = this.$route.path == '/';
 		},
