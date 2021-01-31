@@ -12,6 +12,7 @@ import path from 'path';
 const authRouter = express.Router();
 
 const REFRESH_TOKEN_EXP = 3600 * 24 * 7;
+const REFRESH_COOKIE_NAME = 'auth._refresh_token.cookie';
 const ACCESS_TOKEN_EXP = 60 * 15;
 
 authRouter.post('/login', validator.userLogin, async (req, res) => {
@@ -46,8 +47,11 @@ authRouter.post('/login', validator.userLogin, async (req, res) => {
 
 authRouter.post('/refresh', async (req, res) => {
 	// check refresh token
-	let refresh_token = req.cookies['auth._refresh_token.local'];
-	if (!refresh_token) return res.sendStatus(401);
+	let refresh_token = req.cookies['auth._refresh_token.cookie'];
+	if (!refresh_token)
+		return res.json({
+			error: 'refresh_token not exist',
+		});
 	try {
 		const user: any = await jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET);
 		delete user.exp;
@@ -61,13 +65,15 @@ authRouter.post('/refresh', async (req, res) => {
 		});
 	} catch (error) {
 		console.log('REFRESH TOKEN ERROR: ', error);
-		res.sendStatus(403);
+		res.json({
+			error: 'invlid refresh_token',
+		});
 	}
 });
 
 authRouter.delete('/logout', (req, res) => {
 	// delete cookies
-	const refresh_token = req.cookies['auth._refresh_token.local'];
+	const refresh_token = req.cookies[REFRESH_COOKIE_NAME];
 	if (!refresh_token) return res.sendStatus(200);
 	deleteRefreshToken(res);
 	return res.sendStatus(200);
@@ -129,7 +135,7 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 
 function setRefreshToken(res: any, user: any) {
 	const rtoken = generateToken(user, 'refresh');
-	res.cookie('auth._refresh_token.local', rtoken, {
+	res.cookie(REFRESH_COOKIE_NAME, rtoken, {
 		expires: new Date(Date.now() + 1000 * REFRESH_TOKEN_EXP),
 		secure: false,
 		httpOnly: true,
@@ -140,7 +146,7 @@ function setRefreshToken(res: any, user: any) {
 }
 
 function deleteRefreshToken(res: any) {
-	return res.cookie('auth._refresh_token.local', 'false', {
+	return res.cookie(REFRESH_COOKIE_NAME, 'false', {
 		expires: new Date(Date.now()),
 		secure: false,
 		httpOnly: false,
