@@ -1,28 +1,5 @@
 <template>
 	<div>
-		<!-- app bar -->
-		<v-app-bar app flat color="primary" clipped-left v-bind:style="{ 'z-index': 10 }">
-			<v-row>
-				<v-col cols="2">
-					<v-app-bar-nav-icon
-						class="white--text"
-						@click="drawer = true"
-						v-show="$nuxt.$vuetify.breakpoint.mdAndDown"
-					></v-app-bar-nav-icon>
-				</v-col>
-				<v-col class="d-flex justify-space-around align-center">
-					<div class="white--text text-h5">
-						<v-icon color="white">mdi-fire</v-icon>
-						Matcha
-					</div>
-				</v-col>
-				<v-col cols="2" class="d-flex align-center">
-					<v-spacer></v-spacer>
-					<v-icon color="white" class="text-h5" @click="userLogout">mdi-logout</v-icon>
-				</v-col>
-			</v-row>
-		</v-app-bar>
-
 		<!-- drawer -->
 		<v-navigation-drawer v-model="drawer" app v-bind:permanent="$nuxt.$vuetify.breakpoint.lgAndUp">
 			<v-toolbar></v-toolbar>
@@ -49,6 +26,29 @@
 				</v-list-item-group>
 			</v-list>
 		</v-navigation-drawer>
+
+		<!-- app bar -->
+		<v-app-bar flat color="primary" clipped-left :style="{ 'z-index': 10 }">
+			<v-row>
+				<v-col cols="2">
+					<v-app-bar-nav-icon
+						class="white--text"
+						@click="drawer = true"
+						v-show="$nuxt.$vuetify.breakpoint.mdAndDown"
+					></v-app-bar-nav-icon>
+				</v-col>
+				<v-col class="d-flex justify-space-around align-center">
+					<div class="white--text text-h5">
+						<v-icon color="white">mdi-fire</v-icon>
+						Matcha
+					</div>
+				</v-col>
+				<v-col cols="2" class="d-flex align-center">
+					<v-spacer></v-spacer>
+					<v-icon color="white" class="text-h5" @click="userLogout">mdi-logout</v-icon>
+				</v-col>
+			</v-row>
+		</v-app-bar>
 	</div>
 </template>
 

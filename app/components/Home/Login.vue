@@ -1,34 +1,40 @@
 <template>
-	<v-card>
-		<v-form @submit.prevent="userLogin">
-			<v-card-title> Login </v-card-title>
-			<v-card-text>
-				<v-text-field
-					label="Username"
-					v-model="user.username"
-					type="text"
-					required
-					prepend-inner-icon="mdi-account"
-					:error-messages="error.username"
-				/>
-				<v-text-field
-					label="Password"
-					v-model="user.password"
-					type="password"
-					required
-					prepend-inner-icon="mdi-lock"
-					:error-messages="error.password"
-				/>
-			</v-card-text>
-			<v-card-actions>
-				<v-row>
-					<v-col class="text-center">
-						<v-btn type="submit" class="primary"> Login </v-btn>
-					</v-col>
-				</v-row>
-			</v-card-actions>
-		</v-form>
-	</v-card>
+	<v-container fill-height fluid>
+		<v-row>
+			<v-col class="d-flex align-center justify-center">
+				<v-card elevation="2" width="600px" class="pa-6">
+					<v-form @submit.prevent="userLogin">
+						<v-card-title> Login </v-card-title>
+						<v-card-text>
+							<v-text-field
+								label="Username"
+								v-model="user.username"
+								type="text"
+								required
+								prepend-inner-icon="mdi-account"
+								:error-messages="error.username"
+							/>
+							<v-text-field
+								label="Password"
+								v-model="user.password"
+								type="password"
+								required
+								prepend-inner-icon="mdi-lock"
+								:error-messages="error.password"
+							/>
+						</v-card-text>
+						<v-card-actions>
+							<v-row>
+								<v-col class="text-center">
+									<v-btn type="submit" class="primary"> Login </v-btn>
+								</v-col>
+							</v-row>
+						</v-card-actions>
+					</v-form>
+				</v-card>
+			</v-col>
+		</v-row>
+	</v-container>
 </template>
 
 <script>
