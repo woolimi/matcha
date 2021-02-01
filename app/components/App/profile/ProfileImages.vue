@@ -1,5 +1,5 @@
 <template>
-	<v-card elevation="4" height="400" class="pa-2">
+	<v-card elevation="4" height="450" class="pa-2">
 		<v-row>
 			<v-col class="text-center">
 				<v-window v-model="window">
@@ -8,7 +8,7 @@
 							<div slot="activator">
 								<v-avatar
 									tile
-									height="300"
+									height="350"
 									width="100%"
 									max-width="250"
 									v-if="!user.images[i].url"
