@@ -16,6 +16,11 @@ interface LoginForm {
 	password: string;
 }
 
+interface EmailVerification {
+	email: string;
+	prev_email: string;
+}
+
 async function validate_email(email: string, $axios: NuxtAxiosInstance): Promise<string> {
 	try {
 		const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -89,6 +94,13 @@ export default ({ $axios }: Context, inject: Inject) => {
 			const error: any = {};
 			if (user.username.length === 0) error.username = 'username is required';
 			if (user.password.length === 0) error.password = 'password is required';
+			return { error };
+		},
+		async emailVerification(user: EmailVerification) {
+			const error: any = {};
+			let e_msg = '';
+			e_msg = await validate_email(user.email, $axios);
+			if (e_msg) error.email = e_msg;
 			return { error };
 		},
 	});

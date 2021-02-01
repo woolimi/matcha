@@ -16,23 +16,29 @@
 				:error-messages="error.email"
 			>
 				<template v-slot:append>
-					<template v-if="user.verified">
-						<v-btn rounded text small color="success">
-							<v-icon color="success">mdi-check-circle </v-icon>
-						</v-btn>
-					</template>
-					<template v-else-if="!user.verified || $auth.user.email != user.email">
+					<template v-if="!user.verified || $auth.user.email !== user.email">
 						<v-btn rounded text small color="error">
 							<v-icon color="error">mdi-alert-circle</v-icon>
+						</v-btn>
+					</template>
+					<template v-else>
+						<v-btn rounded text small color="success">
+							<v-icon color="success">mdi-check-circle </v-icon>
 						</v-btn>
 					</template>
 				</template>
 			</v-text-field>
 			<div class="text-right">
-				<v-btn v-if="!user.verified || $auth.user.email != user.email" outlined small color="error"
+				<v-btn
+					:loading="loading.email"
+					v-if="!user.verified || $auth.user.email !== user.email"
+					outlined
+					small
+					color="error"
+					@click="emailVerification"
 					>send verification</v-btn
 				>
-				<v-btn v-else small text outlined color="success">verified</v-btn>
+				<v-btn v-else small text outlined :ripple="false" class="no-cursor" color="success">verified</v-btn>
 			</div>
 
 			<v-text-field
@@ -67,9 +73,53 @@
 			return {
 				user: {
 					email: this.$auth.user.email,
+					verified: this.$auth.user.verified,
 				},
-				error: {},
+				loading: {
+					email: false,
+				},
+				error: {
+					email: '',
+				},
 			};
+		},
+		methods: {
+			async emailVerification() {
+				try {
+					this.loading.email = true;
+					const email_verification_form = {
+						email: this.user.email,
+						prev_email: this.$auth.user.email,
+					};
+					const validated = await this.$validator.emailVerification(email_verification_form);
+					if (!_.isEmpty(validated.error)) throw { error: validated.error };
+
+					const { data } = await this.$axios.post(
+						'/api/profile/send-email-verification',
+						email_verification_form
+					);
+					if (!_.isEmpty(data.error)) throw { error: data.error };
+
+					this.$notifier.showMessage({
+						message: data.message,
+						color: 'success',
+					});
+					this.$auth.setUser({ ...this.$auth.user, email: this.user.email });
+					this.loading.email = false;
+				} catch (e) {
+					if (_.isEmpty(e.error)) {
+						console.error(e);
+						this.$notifier.showMessage({ message: 'Error', color: 'error' });
+					} else {
+						this.error = e.error;
+						this.$notifier.showMessage({
+							message: 'Invalid email',
+							color: 'error',
+						});
+					}
+					this.loading.email = false;
+				}
+			},
 		},
 	};
 </script>
@@ -79,5 +129,8 @@
 		position: relative;
 		left: -5px;
 		top: 3px;
+	}
+	.no-cursor {
+		cursor: not-allowed;
 	}
 </style>

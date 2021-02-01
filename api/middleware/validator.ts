@@ -1,6 +1,7 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
 import { RegisterForm, LoginForm } from '../init/Interfaces';
+import User from '../models/User';
 
 function validate_email(email: string): string {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -76,13 +77,27 @@ export default {
 		if (e_msg) error.vpassword = e_msg;
 
 		if (!_.isEmpty(error)) {
-			return res.status(200).json({ error });
+			return res.json({ error });
 		}
 		next();
 	},
 	userLogin(req: any, res: any, next: NextFunction): any {
 		const user: LoginForm = req.body;
 		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(403);
+		next();
+	},
+	userEmailVerification(req: any, res: any, next: NextFunction): any {
+		const data = req.body;
+		if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(403);
+
+		const error: any = {};
+		let e_msg = '';
+		e_msg = validate_email(data.email);
+		if (e_msg) error.email = e_msg;
+
+		if (!_.isEmpty(error)) {
+			return res.json({ error });
+		}
 		next();
 	},
 };

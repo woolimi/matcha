@@ -109,7 +109,7 @@
 				} catch (e) {
 					if (_.isEmpty(e.error)) {
 						console.error(e);
-						this.$notifier.showMessage({ message: 'Request error', color: 'error' });
+						this.$notifier.showMessage({ message: 'Error', color: 'error' });
 					} else {
 						this.error = e.error;
 						this.$notifier.showMessage({

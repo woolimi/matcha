@@ -3,17 +3,14 @@ import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
 import { ResultSetHeader } from 'mysql2';
-import Mailing from '../init/Mailing';
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
 import path from 'path';
+import { setRefreshToken, deleteRefreshToken, generateToken } from '../services/Token';
+import { send_verification_email } from '../services/Mailing';
 
 const authRouter = express.Router();
-
-const REFRESH_TOKEN_EXP = 3600 * 24 * 7;
-const REFRESH_COOKIE_NAME = 'auth._refresh_token.cookie';
-const ACCESS_TOKEN_EXP = 60 * 15;
 
 authRouter.post('/login', validator.userLogin, async (req, res) => {
 	// Check username and password
@@ -73,7 +70,7 @@ authRouter.post('/refresh', async (req, res) => {
 
 authRouter.delete('/logout', (req, res) => {
 	// delete cookies
-	const refresh_token = req.cookies[REFRESH_COOKIE_NAME];
+	const refresh_token = req.cookies[process.env.REFRESH_COOKIE_NAME];
 	if (!refresh_token) return res.sendStatus(200);
 	deleteRefreshToken(res);
 	return res.sendStatus(200);
@@ -83,14 +80,7 @@ authRouter.post('/register', validator.userRegister, async (req, res) => {
 	const formData = req.body;
 	try {
 		const result: ResultSetHeader = await User.register(formData);
-		// send email with jwt (15 mins limit)
-		const token = generateToken({ id: result.insertId }, 'access');
-		const mail = await Mailing.send_email_to_verify(
-			formData.email,
-			`http://localhost:5000/auth/email-verification/${token}`
-		);
-		console.log('Email : ', mail);
-		console.log('Email verification token : ', token);
+		await send_verification_email(formData.email, result.insertId);
 		res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
@@ -132,45 +122,5 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 		console.log(error);
 	}
 });
-
-function setRefreshToken(res: any, user: any) {
-	const rtoken = generateToken(user, 'refresh');
-	res.cookie(REFRESH_COOKIE_NAME, rtoken, {
-		expires: new Date(Date.now() + 1000 * REFRESH_TOKEN_EXP),
-		secure: false,
-		httpOnly: true,
-		sameSite: true,
-		path: '/',
-	});
-	return rtoken;
-}
-
-function deleteRefreshToken(res: any) {
-	return res.cookie(REFRESH_COOKIE_NAME, 'false', {
-		expires: new Date(Date.now()),
-		secure: false,
-		httpOnly: false,
-		sameSite: false,
-		path: '/',
-	});
-}
-
-function generateToken(obj: object, option: string = 'access') {
-	// expires after half and hour (1800 seconds = 30 minutes)
-	if (option == 'access') {
-		const access = jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET, {
-			expiresIn: `${ACCESS_TOKEN_EXP}s`, // 15 mins
-		});
-		console.log('access token generated');
-		return access;
-	}
-	if (option == 'refresh') {
-		const refresh = jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, {
-			expiresIn: `${REFRESH_TOKEN_EXP}s`, // 1 week
-		});
-		console.log('refresh token generated');
-		return refresh;
-	}
-}
 
 export default authRouter;
