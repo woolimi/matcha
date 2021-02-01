@@ -1,10 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import usersRouter from './routes/api/users';
+import profileRouter from './routes/api/profile';
 import authRouter from './routes/auth';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import authToken from './middleware/authToken';
 import checkRouter from './routes/api/check';
 import morgan from 'morgan';
 import fs from 'fs';
@@ -30,7 +29,7 @@ app.use(cookieParser());
 
 // API
 app.use('/check', checkRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/profile', profileRouter);
 app.use('/auth', authRouter);
 
 // Start !
