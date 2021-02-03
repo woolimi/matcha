@@ -17,7 +17,7 @@ export default {
 	css: ['~/assets/css/matcha.css'],
 
 	// Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-	plugins: ['~/plugins/notifier.client', '~/plugins/validator.client.ts'],
+	plugins: ['~/plugins/io.client.ts', '~/plugins/notifier.client', '~/plugins/validator.client.ts'],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
 	components: true,
@@ -112,5 +112,9 @@ export default {
 				fs: 'empty',
 			};
 		},
+	},
+
+	env: {
+		WS_URL: process.env.WS_URL || 'http://localhost:5000',
 	},
 };
