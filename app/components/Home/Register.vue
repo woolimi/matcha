@@ -80,6 +80,7 @@
 					lastName: '',
 					password: '',
 					vpassword: '',
+					location: [],
 				},
 				error: {
 					email: '',
@@ -90,6 +91,11 @@
 					vpassword: '',
 				},
 			};
+		},
+		mounted() {
+			navigator.geolocation.getCurrentPosition(({ coords }) => {
+				this.user.location = [coords.latitude, coords.longitude];
+			});
 		},
 		methods: {
 			async userRegister() {

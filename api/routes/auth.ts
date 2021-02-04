@@ -9,6 +9,7 @@ import validator from '../middleware/validator';
 import path from 'path';
 import { setRefreshToken, deleteRefreshToken, generateToken } from '../services/Token';
 import { send_verification_email } from '../services/Mailing';
+import geoip from 'geoip-lite';
 
 const authRouter = express.Router();
 
@@ -77,10 +78,13 @@ authRouter.delete('/logout', (req, res) => {
 });
 
 authRouter.post('/register', validator.userRegister, async (req, res) => {
+	const ip = req.clientIp;
+	const location = geoip.lookup(ip).ll;
 	const formData = req.body;
+	if (_.isEmpty(formData.location)) formData.location = location;
 	try {
 		const result: ResultSetHeader = await User.register(formData);
-		await send_verification_email(formData.email, result.insertId);
+		// 	await send_verification_email(formData.email, result.insertId);
 		res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
@@ -116,7 +120,7 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 	const id = req.user.id;
 	try {
 		const user = await User.find(id);
-		const trimedUser = _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified']);
+		const trimedUser = _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location']);
 		res.send({ user: trimedUser });
 	} catch (error) {
 		console.log(error);

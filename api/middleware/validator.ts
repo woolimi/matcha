@@ -83,12 +83,12 @@ export default {
 	},
 	userLogin(req: any, res: any, next: NextFunction): any {
 		const user: LoginForm = req.body;
-		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(403);
+		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(400);
 		next();
 	},
 	userEmailVerification(req: any, res: any, next: NextFunction): any {
 		const data = req.body;
-		if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(403);
+		if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(400);
 
 		const error: any = {};
 		let e_msg = '';
@@ -99,5 +99,10 @@ export default {
 			return res.json({ error });
 		}
 		next();
+	},
+	userLocation(req: any, res: any, next: NextFunction) {
+		const location = req.body;
+		if (Array.isArray(location) && location.length === 2) next();
+		else return res.setStatus(400);
 	},
 };
