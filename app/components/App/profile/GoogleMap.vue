@@ -37,6 +37,7 @@
 		methods: {
 			setPlace(place) {
 				this.place = place;
+				if (!this.place.geometry) return;
 				const loc = this.place.geometry.location;
 				this.center = {
 					lat: loc.lat(),
@@ -44,7 +45,7 @@
 				};
 			},
 			setLocationBySearch() {
-				console.log(this.place);
+				if (!this.place.geometry) return;
 				this.setLocation({ latLng: this.place.geometry.location });
 			},
 			async setLocation({ latLng }) {
