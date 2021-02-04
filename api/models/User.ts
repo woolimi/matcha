@@ -18,6 +18,7 @@ class User extends Model {
 			gender ENUM('male','female') DEFAULT NULL,
 			preferences ENUM('male','female','all') DEFAULT NULL,
 			biography TEXT DEFAULT NULL,
+			location POINT NOT NULL SRID 4326,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
@@ -31,8 +32,16 @@ class User extends Model {
 			const data = { ...formData };
 			data.password = await bcrypt.hash(formData.password, 10);
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`) VALUES (?, ?, ?, ?, ?, false)',
-				[data.email, data.username, data.password, data.firstName, data.lastName]
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
+				[
+					data.email,
+					data.username,
+					data.password,
+					data.firstName,
+					data.lastName,
+					data.location[0],
+					data.location[1],
+				]
 			);
 		} catch (error) {
 			throw error;

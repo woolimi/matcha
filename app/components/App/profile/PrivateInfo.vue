@@ -59,9 +59,23 @@
 				<v-btn small text outlined color="warning">change password</v-btn>
 			</div>
 
-			<v-text-field label="Location" type="text" v-model="user.location" prepend-icon="mdi-map-marker" />
 			<div class="text-right">
-				<v-btn small text outlined color="info">change location</v-btn>
+				<v-dialog v-model="map" width="80vw" height="60vh">
+					<template v-slot:activator="{ on, attrs }">
+						<v-text-field
+							v-bind="attrs"
+							v-on="on"
+							readonly
+							label="Location"
+							type="text"
+							v-model="location"
+							prepend-icon="mdi-map-marker"
+						/>
+					</template>
+					<v-card>
+						<GoogleMap />
+					</v-card>
+				</v-dialog>
 			</div>
 		</v-card-text>
 	</v-card>
@@ -81,7 +95,18 @@
 				error: {
 					email: '',
 				},
+				map: false,
 			};
+		},
+		computed: {
+			location: {
+				get() {
+					return JSON.stringify(Object.values(this.$auth.user.location));
+				},
+				set(val) {
+					return this.$auth.user.location;
+				},
+			},
 		},
 		methods: {
 			async emailVerification() {
