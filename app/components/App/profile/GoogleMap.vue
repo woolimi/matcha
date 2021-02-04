@@ -2,8 +2,8 @@
 	<v-container>
 		<v-container>
 			<label>
-				<gmap-autocomplete @place_changed="place" class="text-field"> </gmap-autocomplete>
-				<v-btn type="submit" @click="setLocationBySearch" class="primary">Set Location</v-btn>
+				<gmap-autocomplete @place_changed="setPlace" class="text-field"> </gmap-autocomplete>
+				<v-btn @click="setLocationBySearch" class="primary">Set Location</v-btn>
 			</label>
 		</v-container>
 		<gmap-map :center="center" @click="setLocation" :zoom="12" style="width: 100%; height: 50vh">
@@ -21,7 +21,7 @@
 					lat: this.$auth.user.location.x,
 					lng: this.$auth.user.location.y,
 				},
-				place: '',
+				place: null,
 			};
 		},
 
@@ -35,6 +35,14 @@
 		},
 
 		methods: {
+			setPlace(place) {
+				this.place = place;
+				const loc = this.place.geometry.location;
+				this.center = {
+					lat: loc.lat(),
+					lng: loc.lng(),
+				};
+			},
 			setLocationBySearch() {
 				console.log(this.place);
 				this.setLocation({ latLng: this.place.geometry.location });
@@ -62,8 +70,6 @@
 			},
 		},
 	};
-	// 	lat: this.currentPlace.geometry.location.lat(),
-	// lng: this.currentPlace.geometry.location.lng(),
 </script>
 
 <style scoped>
