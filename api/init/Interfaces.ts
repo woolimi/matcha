@@ -5,6 +5,7 @@ export interface RegisterForm {
 	lastName: string;
 	password: string;
 	vpassword: string;
+	location: [number, number];
 }
 
 export interface LoginForm {

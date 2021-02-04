@@ -9,24 +9,24 @@ import morgan from 'morgan';
 import fs from 'fs';
 import path from 'path';
 import Database from './init/Database';
-
-const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
+import requestIp from 'request-ip';
 
 dotenv.config();
+const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
+const corsConfig = {
+	origin: ['http://localhost:3000', 'http://176.169.89.89'],
+	credentials: true,
+};
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 Database.init();
 app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
-app.use(
-	cors({
-		origin: 'http://localhost:3000',
-		credentials: true,
-	})
-);
+app.use(cors(corsConfig));
 app.use(cookieParser());
-
+app.use(requestIp.mw());
 // API
 app.use('/check', checkRouter);
 app.use('/api/profile', profileRouter);
@@ -34,5 +34,5 @@ app.use('/auth', authRouter);
 
 // Start !
 app.listen(PORT, () => {
-	console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+	console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
 });

@@ -1,21 +1,16 @@
-version: "3.8"
+version: '3.8'
 services:
-  mysql:
-    image: "mysql:8.0.22"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: matcha
-    volumes:
-      - db_mysql:/var/lib/mysql
-    ports:
-      - 3306:3306
-  # neo4j:
-  #   image: "neo4j:4.2.0"
-  #   volumes:
-  #     - db_neo4j:/data
+    mysql:
+        image: 'mysql:8.0.22'
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: matcha
+        volumes:
+            - db_mysql:/var/lib/mysql
+        ports:
+            - 3306:3306
 volumes:
-  db_mysql:
-  # db_neo4j:
+    db_mysql:
 networks:
-  default:
-    driver: bridge
+    default:
+        driver: bridge

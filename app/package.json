@@ -22,7 +22,8 @@
     "hasha": "^5.2.2",
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.20",
-    "nuxt": "^2.14.12"
+    "nuxt": "^2.14.12",
+    "vue2-google-maps": "^0.10.7"
   },
   "devDependencies": {
     "@nuxt/types": "^2.14.12",
