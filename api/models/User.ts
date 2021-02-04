@@ -39,8 +39,8 @@ class User extends Model {
 					data.password,
 					data.firstName,
 					data.lastName,
-					data.location[0],
 					data.location[1],
+					data.location[0],
 				]
 			);
 		} catch (error) {

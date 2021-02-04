@@ -28,7 +28,7 @@ profileRouter.post('/send-email-verification', authToken, validator.userEmailVer
 profileRouter.post('/location', authToken, validator.userLocation, async (req, res) => {
 	try {
 		const location = req.body;
-		await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326)', [location[0], location[1]]);
+		await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326)', [location[1], location[0]]);
 		res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
