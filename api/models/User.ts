@@ -3,6 +3,9 @@ import Model from './Model';
 import bcrypt from 'bcrypt';
 import { ResultSetHeader } from 'mysql2';
 import { RegisterForm } from '../init/Interfaces';
+import _ from 'lodash';
+import { ll2xy, xy2ll } from '../services/Location';
+import { LocationLL } from '../init/Interfaces';
 
 class User extends Model {
 	static tname = 'users';
@@ -31,18 +34,28 @@ class User extends Model {
 		try {
 			const data = { ...formData };
 			data.password = await bcrypt.hash(formData.password, 10);
+			const xy = ll2xy(data.location);
 			return await User.query(
 				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
-				[
-					data.email,
-					data.username,
-					data.password,
-					data.firstName,
-					data.lastName,
-					data.location[1],
-					data.location[0],
-				]
+				[data.email, data.username, data.password, data.firstName, data.lastName, xy.x, xy.y]
 			);
+		} catch (error) {
+			throw error;
+		}
+	}
+	static async me(id: number) {
+		try {
+			const user = await User.find(id);
+			user.location = xy2ll(user.location);
+			return _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location']);
+		} catch (error) {
+			throw error;
+		}
+	}
+	static async updateLocation(ll: LocationLL) {
+		try {
+			const xy = ll2xy(ll);
+			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326)', [xy.x, xy.y]);
 		} catch (error) {
 			throw error;
 		}
