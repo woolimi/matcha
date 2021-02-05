@@ -18,18 +18,21 @@
 
 <script>
 	export default {
-		data: () => ({
-			uploadFieldName: 'file',
-		}),
 		props: {
-			// Use "value" to enable using v-model
-			value: Object,
+			value: Object, // Use "value" to enable using v-model
+			imageId: Number,
+		},
+		computed: {
+			uploadFieldName() {
+				return `image`;
+			},
 		},
 		methods: {
 			launchFilePicker() {
 				this.$refs.file.click();
 			},
-			onFileChange(fieldName, file) {
+			async onFileChange(fieldName, file) {
+				console.log(file);
 				const maxSize = 3;
 				const imageFile = file[0];
 				if (file.length > 0) {
@@ -52,7 +55,20 @@
 						const url = URL.createObjectURL(imageFile);
 						formData.append(fieldName, imageFile);
 						// Emit the FormData and image URL to the parent component
-						this.$emit('input', { formData, url });
+						// this.$emit('input', { formData, url });
+						try {
+							await this.$axios.put(
+								`/api/profile/images/${this.$auth.user.id}/${this.imageId}`,
+								formData,
+								{
+									headers: {
+										'content-type': 'multipart/form-data',
+									},
+								}
+							);
+						} catch (error) {
+							console.log(error);
+						}
 					}
 				}
 			},
