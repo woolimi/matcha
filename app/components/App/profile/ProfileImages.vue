@@ -5,7 +5,7 @@
 				<v-window v-model="window">
 					<v-window-item v-for="(image, i) in user.images" :key="i">
 						<div class="d-flex justify-center">
-							<ImageUploader v-model="user.images[i]">
+							<ImageUploader v-model="user.images[i]" :imageId="i">
 								<div slot="activator">
 									<v-avatar
 										tile
