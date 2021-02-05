@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
 import profileRouter from './routes/api/profile';
 import authRouter from './routes/auth';
@@ -27,6 +27,8 @@ app.use(express.json());
 app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(requestIp.mw());
+app.use(express.static(__dirname + '/uploads'));
+
 // API
 app.use('/check', checkRouter);
 app.use('/api/profile', profileRouter);
