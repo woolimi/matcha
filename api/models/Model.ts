@@ -31,7 +31,6 @@ abstract class Model {
 
 	static async find(id: number) {
 		try {
-			console.log(this.tname);
 			const rows = await Model.query(`SELECT * FROM ${this.tname} WHERE id = ?`, [id]);
 			return rows[0];
 		} catch (error) {
