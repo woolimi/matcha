@@ -4,23 +4,25 @@
 			<v-col class="text-center">
 				<v-window v-model="window">
 					<v-window-item v-for="(image, i) in user.images" :key="i">
-						<ImageUploader v-model="user.images[i]">
-							<div slot="activator">
-								<v-avatar
-									tile
-									height="350"
-									width="100%"
-									max-width="250"
-									class="mb-1 elevation-3 grey lighten-3 pointer"
-								>
-									<v-overlay :absolute="true" v-if="saving">
-										<v-progress-circular indeterminate color="primary"> </v-progress-circular>
-									</v-overlay>
-									<v-icon size="35px" v-if="!user.images[i].url">mdi-plus-circle-outline</v-icon>
-									<img v-else :src="user.images[i].url" alt="profile photo" />
-								</v-avatar>
-							</div>
-						</ImageUploader>
+						<div class="d-flex justify-center">
+							<ImageUploader v-model="user.images[i]">
+								<div slot="activator">
+									<v-avatar
+										tile
+										height="350"
+										width="100%"
+										max-width="250"
+										class="mb-1 elevation-3 grey lighten-3 pointer"
+									>
+										<v-overlay :absolute="true" v-if="saving">
+											<v-progress-circular indeterminate color="primary"> </v-progress-circular>
+										</v-overlay>
+										<v-icon size="35px" v-if="!user.images[i].url">mdi-plus-circle-outline</v-icon>
+										<img v-else :src="user.images[i].url" alt="profile photo" />
+									</v-avatar>
+								</div>
+							</ImageUploader>
+						</div>
 					</v-window-item>
 				</v-window>
 			</v-col>
