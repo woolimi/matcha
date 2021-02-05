@@ -17,7 +17,7 @@ export default {
 	css: ['~/assets/css/matcha.css'],
 
 	// Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-	plugins: ['~/plugins/io.client.ts', '~/plugins/notifier.client', '~/plugins/validator.client.ts'],
+	plugins: ['~/plugins/notifier.client', '~/plugins/validator.client.ts'],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
 	components: true,
@@ -36,6 +36,7 @@ export default {
 		'@nuxtjs/axios',
 		'@nuxtjs/auth-next',
 		['cookie-universal-nuxt', { parseJSON: false }],
+		'nuxt-socket-io',
 	],
 
 	router: {
@@ -114,7 +115,21 @@ export default {
 		},
 	},
 
-	env: {
-		WS_URL: process.env.WS_URL || 'http://localhost:5000',
+	io: {
+		sockets: [
+			{
+				url: 'http://localhost:5000',
+				default: true,
+				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
+				vuex: {
+					// { message: mutationName }
+					mutations: [],
+					// { message: actionName }
+					actions: [],
+					// { stateChange: eventName }
+					emitBacks: [],
+				},
+			},
+		],
 	},
 };
