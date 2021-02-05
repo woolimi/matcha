@@ -11,17 +11,13 @@
 									height="350"
 									width="100%"
 									max-width="250"
-									v-if="!user.images[i].url"
-									class="mb-2 elevation-3 grey lighten-3 pointer"
+									class="mb-1 elevation-3 grey lighten-3 pointer"
 								>
-									<!-- <v-overlay :absolute="true" z-index="10"> -->
-									<!-- <v-progress-circular indeterminate color="primary" v-if="saving"> -->
-									<!-- </v-progress-circular> -->
-									<v-icon size="35px">mdi-plus-circle-outline</v-icon>
-									<!-- </v-overlay> -->
-								</v-avatar>
-								<v-avatar tile height="300" width="100%" max-width="250" v-else class="pointer">
-									<img :src="user.images[i].url" alt="profile photo" />
+									<v-overlay :absolute="true" v-if="saving">
+										<v-progress-circular indeterminate color="primary"> </v-progress-circular>
+									</v-overlay>
+									<v-icon size="35px" v-if="!user.images[i].url">mdi-plus-circle-outline</v-icon>
+									<img v-else :src="user.images[i].url" alt="profile photo" />
 								</v-avatar>
 							</div>
 						</ImageUploader>
