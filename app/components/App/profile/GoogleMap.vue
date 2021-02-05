@@ -17,20 +17,17 @@
 		name: 'GoogleMap',
 		data() {
 			return {
-				center: {
-					lat: this.$auth.user.location.x,
-					lng: this.$auth.user.location.y,
-				},
+				center: this.$auth.user.location,
 				place: null,
 			};
 		},
 
 		computed: {
-			location() {
-				return {
-					lat: this.$auth.user.location.x,
-					lng: this.$auth.user.location.y,
-				};
+			location: {
+				get() {
+					return this.$auth.user.location;
+				},
+				set() {},
 			},
 		},
 
@@ -45,18 +42,16 @@
 				};
 			},
 			setLocationBySearch() {
-				if (!this.place.geometry) return;
+				if (!this.place || !this.place.geometry) return;
 				this.setLocation({ latLng: this.place.geometry.location });
 			},
 			async setLocation({ latLng }) {
 				try {
-					await this.$axios.post('/api/profile/location', [latLng.lat(), latLng.lng()]);
+					const location = { lat: latLng.lat(), lng: latLng.lng() };
+					await this.$axios.post('/api/profile/location', location);
 					this.$auth.setUser({
 						...this.$auth.user,
-						location: {
-							x: latLng.lat(),
-							y: latLng.lng(),
-						},
+						location,
 					});
 					this.$notifier.showMessage({
 						message: 'Location changed',

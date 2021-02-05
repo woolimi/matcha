@@ -78,13 +78,15 @@ authRouter.delete('/logout', (req, res) => {
 });
 
 authRouter.post('/register', validator.userRegister, async (req, res) => {
-	const ip = req.clientIp;
-	const location = geoip.lookup(ip).ll;
+	const ip: any = req.clientIp;
+	const location = geoip.lookup(ip)?.ll;
+	if (!location) res.sendStatus(400);
+
 	const formData = req.body;
 	if (_.isEmpty(formData.location)) formData.location = location;
 	try {
 		const result: ResultSetHeader = await User.register(formData);
-		// 	await send_verification_email(formData.email, result.insertId);
+		await send_verification_email(formData.email, result.insertId);
 		res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
@@ -119,9 +121,8 @@ authRouter.get('/email-verification', (req, res) => {
 authRouter.get('/me', authToken, async (req: any, res) => {
 	const id = req.user.id;
 	try {
-		const user = await User.find(id);
-		const trimedUser = _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location']);
-		res.send({ user: trimedUser });
+		const user = await User.me(id);
+		res.send({ user });
 	} catch (error) {
 		console.log(error);
 	}

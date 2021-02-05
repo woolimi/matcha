@@ -1,7 +1,6 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
 import { RegisterForm, LoginForm } from '../init/Interfaces';
-import User from '../models/User';
 
 function validate_email(email: string): string {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -102,7 +101,7 @@ export default {
 	},
 	userLocation(req: any, res: any, next: NextFunction) {
 		const location = req.body;
-		if (Array.isArray(location) && location.length === 2) next();
+		if (_.isObject(location) && location.hasOwnProperty('lat') && location.hasOwnProperty('lng')) next();
 		else return res.setStatus(400);
 	},
 };
