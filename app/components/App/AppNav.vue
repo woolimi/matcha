@@ -58,6 +58,20 @@
 			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
 			this.selected = path ? path.id : 0;
 		},
+		mounted() {
+			this.socket = this.$nuxtSocket({});
+			this.socket.once('login response', (response) => {
+				if (response.success) {
+					this.$store.commit('io/LOGIN');
+				} else {
+					this.$store.commit('snack/SHOW', {
+						message: 'Could not link user to WebSocket.',
+						color: 'error',
+					});
+				}
+			});
+			this.socket.emit('login', { token: this.$auth.strategy.token.get() });
+		},
 		props: ['app'],
 		data: () => ({
 			selected: null,
@@ -94,9 +108,15 @@
 				},
 			],
 		}),
+		unmounted() {
+			this.$store.commit('io/LOGOUT');
+			this.socket.disconnect();
+		},
 		methods: {
 			userLogout() {
 				this.$auth.logout();
+				this.$store.commit('io/LOGOUT');
+				this.socket.disconnect();
 			},
 		},
 	};
