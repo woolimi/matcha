@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div style="height: 350px; width: 100%; max-width: 250px">
 		<!-- slot for parent component to activate the file changer -->
 		<div @click="launchFilePicker()">
 			<slot name="activator"> </slot>
