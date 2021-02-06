@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import Database from './init/Database';
 import requestIp from 'request-ip';
+import tagRouter from './routes/api/tags';
 
 dotenv.config();
 const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
@@ -31,8 +32,9 @@ app.use(requestIp.mw());
 
 // API
 app.use('/check', checkRouter);
-app.use('/api/profile', profileRouter);
 app.use('/auth', authRouter);
+app.use('/api/profile', profileRouter);
+app.use('/api/tags', tagRouter);
 
 // Start !
 app.listen(PORT, () => {

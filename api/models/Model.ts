@@ -1,5 +1,5 @@
 import MySQL from '../init/MySQL';
-import { ResultSetHeader } from 'mysql2';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 interface ModelClass {
 	table: string;
@@ -8,14 +8,13 @@ interface ModelClass {
 abstract class Model {
 	static tname = 'null';
 
-	static query(sql: string, placeholder?: Array<any>): Promise<ResultSetHeader | any> {
-		return new Promise((resolve, reject) => {
-			if (!MySQL.con) reject('MySQL is not connected.');
-			MySQL.con.query(sql, placeholder, (error, result: ResultSetHeader) => {
-				if (error) reject(error);
-				else resolve(result);
-			});
-		});
+	static async query(sql: string, placeholder?: Array<any>): Promise<any | ResultSetHeader> {
+		if (sql.match(/(^update)|(^delete)|(^insert)/i)) {
+			const result = await MySQL.pool.query(sql, placeholder);
+			return result[0];
+		}
+		const [rows, fields] = await MySQL.pool.query(sql, placeholder);
+		return rows;
 	}
 
 	static async init(modelName: string, modelClass: ModelClass): Promise<any> {
@@ -31,10 +30,9 @@ abstract class Model {
 
 	static async find(id: number) {
 		try {
-			const rows = await Model.query(`SELECT * FROM ${this.tname} WHERE id = ?`, [id]);
+			const rows = await Model.query(`SELECT * FROM ${this.tname} WHERE id = ? LIMIT 1`, [id]);
 			return rows[0];
 		} catch (error) {
-			console.log(`Model find() ${this.tname} : ${error}`);
 			throw error;
 		}
 	}
