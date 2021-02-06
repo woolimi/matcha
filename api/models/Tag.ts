@@ -29,6 +29,14 @@ class Tag extends Model {
 			throw error;
 		}
 	}
+
+	static async get_tags() {
+		try {
+			return await Tag.query('SELECT name FROM tags');
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 export default Tag;

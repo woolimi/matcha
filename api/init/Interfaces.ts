@@ -13,10 +13,21 @@ export interface LoginForm {
 	password: string;
 }
 
+export interface PublicInfoForm {
+	firstName: string;
+	lastName: string;
+	languages: Array<string>;
+	gender: string;
+	preferences: string;
+	tags: Array<string>;
+	biography: string;
+}
+
 export interface LocationLL {
 	lat: number;
 	lng: number;
 }
+
 export interface LocationXY {
 	x: number;
 	y: number;

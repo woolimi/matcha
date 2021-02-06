@@ -11,22 +11,18 @@ import UserTag from '../models/UserTag';
 import UserVisit from '../models/UserVisit';
 
 class Database {
-	static init() {
-		const con = MySQL.con;
-		con.connect(async (err) => {
-			if (err) throw err;
-			console.log('⚡️[server]: Connected to MYSQL Server');
-			await Tag.init();
-			await User.init();
-			await UserTag.init();
-			await UserPicture.init();
-			await UserVisit.init();
-			await UserLike.init();
-			await UserBlock.init();
-			await UserNotification.init();
-			await Chat.init();
-			await ChatMessage.init();
-		});
+	static async init() {
+		console.log('⚡️[server]: Connected to MYSQL Server');
+		await Tag.init();
+		await User.init();
+		await UserTag.init();
+		await UserPicture.init();
+		await UserVisit.init();
+		await UserLike.init();
+		await UserBlock.init();
+		await UserNotification.init();
+		await Chat.init();
+		await ChatMessage.init();
 	}
 }
 

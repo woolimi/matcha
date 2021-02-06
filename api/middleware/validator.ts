@@ -1,6 +1,7 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
-import { RegisterForm, LoginForm } from '../init/Interfaces';
+import { RegisterForm, LoginForm, PublicInfoForm } from '../init/Interfaces';
+import LanguageSet from '../init/languages';
 
 function validate_email(email: string): string {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -38,7 +39,37 @@ function validate_vpassword(password: string, vpassword: string): string {
 	return '';
 }
 
-function fieldsChecker(formData: RegisterForm | LoginForm, expectedFields: Array<string>): boolean {
+function validate_languages(languages: Array<string>) {
+	if (!languages.length) return 'languages are required';
+	for (const lang of languages) {
+		if (!LanguageSet.has(lang)) return `Invalid language '${lang}'`;
+	}
+	return '';
+}
+
+function validate_gender(gender: string) {
+	if (!gender) return 'gender is required';
+	if (gender !== 'male' && gender !== 'female') return 'Invalid gender';
+	return '';
+}
+function validate_preferences(preferences: string) {
+	if (!preferences) return 'preference is required';
+	if (preferences !== 'heterosexual' && preferences !== 'bisexual') return 'Invalid preference';
+	return '';
+}
+
+function validate_tags(tags: Array<string>) {
+	if (!tags.length) return 'interest tags are required';
+	return '';
+}
+
+function validate_biography(biography: string) {
+	if (!biography.length) return 'biography is required';
+	if (biography.length > 150) return 'Too long';
+	return '';
+}
+
+function fieldsChecker(formData: RegisterForm | LoginForm | PublicInfoForm, expectedFields: Array<string>): boolean {
 	const foundFields = [];
 
 	for (const field of Object.keys(formData)) {
@@ -57,7 +88,7 @@ function fieldsChecker(formData: RegisterForm | LoginForm, expectedFields: Array
 export default {
 	userRegister(req: any, res: any, next: NextFunction): any {
 		const user: RegisterForm = req.body;
-		if (!fieldsChecker(user, ['email', 'username', 'firstName', 'lastName', 'password', 'vpassword']))
+		if (!fieldsChecker(user, ['email', 'username', 'firstName', 'lastName', 'password', 'vpassword', 'location']))
 			return res.sendStatus(403);
 
 		const error: any = {};
@@ -94,9 +125,8 @@ export default {
 		e_msg = validate_email(data.email);
 		if (e_msg) error.email = e_msg;
 
-		if (!_.isEmpty(error)) {
-			return res.json({ error });
-		}
+		if (!_.isEmpty(error)) return res.json({ error });
+
 		next();
 	},
 	userLocation(req: any, res: any, next: NextFunction) {
@@ -108,6 +138,29 @@ export default {
 		const { user_id, image_id } = req.params;
 		if (req.user.id !== Number(user_id)) return res.sendStatus(403);
 		if (Number(image_id) < 0 || Number(image_id) > 4) return res.sendStatus(403);
+		next();
+	},
+	userPublic(req: any, res: any, next: NextFunction) {
+		const user: PublicInfoForm = req.body;
+		if (!fieldsChecker(user, ['firstName', 'lastName', 'languages', 'gender', 'preferences', 'tags', 'biography']))
+			return res.sendStatus(403);
+		const error: any = {};
+		let e_msg = '';
+		e_msg = validate_firstName(user.firstName);
+		if (e_msg) error.firstName = e_msg;
+		e_msg = validate_lastName(user.lastName);
+		if (e_msg) error.lastName = e_msg;
+		e_msg = validate_languages(user.languages);
+		if (e_msg) error.languages = e_msg;
+		e_msg = validate_gender(user.gender);
+		if (e_msg) error.gender = e_msg;
+		e_msg = validate_preferences(user.preferences);
+		if (e_msg) error.preferences = e_msg;
+		e_msg = validate_tags(user.tags);
+		if (e_msg) error.tags = e_msg;
+		e_msg = validate_biography(user.biography);
+		if (e_msg) error.biography = e_msg;
+		if (!_.isEmpty(error)) return res.json({ error });
 		next();
 	},
 };

@@ -4,6 +4,7 @@
 		"user": "root",
 		"password": "root",
 		"database": "matcha",
-		"charset": "utf8mb4_unicode_ci"
+		"charset": "utf8mb4_unicode_ci",
+		"connectionLimit": 30
 	}
 }
