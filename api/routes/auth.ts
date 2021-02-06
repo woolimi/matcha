@@ -78,27 +78,32 @@ authRouter.delete('/logout', (req, res) => {
 });
 
 authRouter.post('/register', validator.userRegister, async (req, res) => {
-	const ip: any = req.clientIp;
-	const location = geoip.lookup(ip)?.ll;
-	if (!location) res.sendStatus(400);
-
 	const formData = req.body;
-	if (_.isEmpty(formData.location)) formData.location = location;
+	// Find location by IP if browser gps diabled
+	if (_.isEmpty(formData.location)) {
+		const ip: any = req.clientIp;
+		let location = geoip.lookup(ip)?.ll;
+		if (!location) {
+			location = [48.8566, 2.3522];
+		}
+		formData.location = location;
+	}
+
 	try {
-		const result: ResultSetHeader = await User.register(formData);
-		await send_verification_email(formData.email, result.insertId);
-		res.sendStatus(201);
+		const result = await User.register(formData);
+		// await send_verification_email(formData.email, result.insertId);
+		return res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
-		res.sendStatus(403);
+		return res.sendStatus(403);
 	}
 });
 
 authRouter.get('/email-verification/:jwt', async (req, res) => {
 	try {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
-		const queryResult = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
-		if (!queryResult.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
+		const result = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
+		if (!result.affectedRows) throw Error(`User id ${user.id} doesn't exist.`);
 		res.redirect('/auth/email-verification?result=success');
 	} catch (error) {
 		console.log('EMAIL VERIFICATION ERROR : ', error);

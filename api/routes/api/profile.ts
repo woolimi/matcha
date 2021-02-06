@@ -75,4 +75,14 @@ profileRouter.post('/location', authToken, validator.userLocation, async (req, r
 	}
 });
 
+profileRouter.post('/public-info', authToken, validator.userPublic, async (req: any, res) => {
+	try {
+		await User.updatePublic(req.user.id, req.body);
+		res.sendStatus(200);
+	} catch (error) {
+		console.error(error);
+		res.sendStatus(200);
+	}
+});
+
 export default profileRouter;
