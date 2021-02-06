@@ -1,31 +1,40 @@
-import express, { Request } from 'express';
+import fs from 'fs';
+import path from 'path';
+import mime from 'mime-types';
+import FileType from 'file-type';
+import express from 'express';
 import authToken from '../../middleware/authToken';
+import { upload } from '../../middleware/multer';
 import User from '../../models/User';
 import { send_verification_email } from '../../services/Mailing';
 import validator from '../../middleware/validator';
-import mime from 'mime-types';
-import FileType from 'file-type';
-import fs from 'fs';
-import path from 'path';
-import { upload } from '../../middleware/multer';
+import UserPicture from '../../models/UserPicture';
 
 const profileRouter = express.Router();
 
-profileRouter.put('/images/:user_id/:image_id', authToken, upload.single('image'), async (req, res) => {
-	try {
-		const fileType = await FileType.fromFile(req.file.path);
-		if (!fileType || fileType.ext !== mime.extension(req.file.mimetype)) {
-			await fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
-				if (err) console.log(err);
-			});
-			res.json({ error: 'Invalid image' });
+profileRouter.put(
+	'/images/:user_id/:image_id',
+	authToken,
+	validator.userPictures,
+	upload.single('image'),
+	async (req: any, res) => {
+		try {
+			const fileType = await FileType.fromFile(req.file.path);
+			if (!fileType || fileType.ext !== mime.extension(req.file.mimetype)) {
+				fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
+					if (err) console.log(err);
+				});
+				res.json({ error: 'Invalid image' });
+			}
+			await UserPicture.create_or_update(req.params.user_id, req.params.image_id, req.file.path);
+			const images = await UserPicture.get_images(req.params.user_id);
+			res.json({ images });
+		} catch (error) {
+			console.error(error);
 		}
-	} catch (error) {
-		console.error(error);
 	}
-});
+);
 
-// get user
 profileRouter.post('/send-email-verification', authToken, validator.userEmailVerification, async (req: any, res) => {
 	try {
 		const data = req.body;

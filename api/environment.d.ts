@@ -9,6 +9,7 @@ declare global {
 			REFRESH_COOKIE_NAME: string;
 			ACCESS_TOKEN_EXP: string;
 			MODE: string;
+			API: string;
 		}
 	}
 }

@@ -3,9 +3,9 @@
 		<v-row>
 			<v-col class="text-center">
 				<v-window v-model="window">
-					<v-window-item v-for="(image, i) in user.images" :key="i">
+					<v-window-item v-for="(image, i) in $auth.user.images" :key="i">
 						<div class="d-flex justify-center">
-							<ImageUploader v-model="user.images[i]" :imageId="i">
+							<ImageUploader v-model="$auth.user.images[i]" :imageId="i">
 								<div slot="activator">
 									<v-avatar
 										tile
@@ -17,8 +17,10 @@
 										<v-overlay :absolute="true" v-if="saving">
 											<v-progress-circular indeterminate color="primary"> </v-progress-circular>
 										</v-overlay>
-										<v-icon size="35px" v-if="!user.images[i].url">mdi-plus-circle-outline</v-icon>
-										<img v-else :src="user.images[i].url" alt="profile photo" />
+										<v-icon size="35px" v-if="!$auth.user.images[i].url"
+											>mdi-plus-circle-outline</v-icon
+										>
+										<img v-else :src="$auth.user.images[i].url" alt="profile photo" />
 									</v-avatar>
 								</div>
 							</ImageUploader>
@@ -30,7 +32,7 @@
 		<v-row>
 			<v-col class="text-center">
 				<v-item-group v-model="window" class="" mandatory tag="v-flex">
-					<v-item v-for="(n, i) in user.images" :key="i" v-slot="{ active, toggle }">
+					<v-item v-for="(n, i) in $auth.user.images" :key="i" v-slot="{ active, toggle }">
 						<v-btn :input-value="active" icon @click="toggle">
 							<v-icon>mdi-record</v-icon>
 						</v-btn>
@@ -44,9 +46,6 @@
 <script>
 	export default {
 		data: () => ({
-			user: {
-				images: [{}, {}, {}, {}, {}],
-			},
 			window: 0,
 			saving: false,
 			saved: true,
