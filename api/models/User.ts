@@ -6,6 +6,7 @@ import { RegisterForm } from '../init/Interfaces';
 import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
 import { LocationLL } from '../init/Interfaces';
+import UserPicture from './UserPicture';
 
 class User extends Model {
 	static tname = 'users';
@@ -47,7 +48,8 @@ class User extends Model {
 		try {
 			const user = await User.find(id);
 			user.location = xy2ll(user.location);
-			return _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location']);
+			user.images = await UserPicture.get_images(user.id);
+			return _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location', 'images']);
 		} catch (error) {
 			throw error;
 		}
