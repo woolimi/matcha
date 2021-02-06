@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
 	filename: function (req, file, cb) {
 		const ext = mime.extension(file.mimetype);
 		const { user_id, image_id } = req.params;
-		cb(null, `${user_id}_${image_id}.${ext}`);
+		cb(null, `${user_id}_${image_id}_${new Date(Date.now()).toISOString()}.${ext}`);
 	},
 });
 
