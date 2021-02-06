@@ -22,12 +22,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 Database.init();
+app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
 app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(requestIp.mw());
-app.use(express.static(__dirname + '/uploads'));
 
 // API
 app.use('/check', checkRouter);
