@@ -24,7 +24,7 @@ profileRouter.put(
 				fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
 					if (err) console.log(err);
 				});
-				res.json({ error: 'Invalid image' });
+				return res.json({ error: 'Invalid image' });
 			}
 			await UserPicture.create_or_update(req.params.user_id, req.params.image_id, req.file.path);
 			const images = await UserPicture.get_images(req.params.user_id);

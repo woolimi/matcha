@@ -1,10 +1,8 @@
 <template>
 	<div style="height: 350px; width: 100%; max-width: 250px">
-		<!-- slot for parent component to activate the file changer -->
 		<div @click="launchFilePicker()">
 			<slot name="activator"> </slot>
 		</div>
-		<!-- image input: style is set to hidden and assigned a ref so that it can be triggered -->
 		<input
 			type="file"
 			enctype="multipart/form-data"
