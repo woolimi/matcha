@@ -5,6 +5,10 @@
 				<v-window v-model="window">
 					<v-window-item v-for="(image, i) in $auth.user.images" :key="i">
 						<div class="d-flex justify-center">
+							<v-overlay :absolute="true" v-if="saving" color="transparent">
+								<v-progress-circular indeterminate color="primary"> </v-progress-circular>
+							</v-overlay>
+
 							<ImageUploader v-model="$auth.user.images[i]" :imageId="i">
 								<div slot="activator">
 									<v-avatar
@@ -12,15 +16,20 @@
 										height="350"
 										width="100%"
 										max-width="250"
-										class="mb-1 elevation-3 grey lighten-3 pointer"
+										class="elevation-10 grey lighten-3 pointer"
 									>
-										<v-overlay :absolute="true" v-if="saving">
-											<v-progress-circular indeterminate color="primary"> </v-progress-circular>
-										</v-overlay>
-										<v-icon size="35px" v-if="!$auth.user.images[i].url"
-											>mdi-plus-circle-outline</v-icon
-										>
+										<p v-if="!$auth.user.images[i].url">Click here to add photo</p>
 										<img v-else :src="$auth.user.images[i].url" alt="profile photo" />
+										<v-btn
+											style="position: absolute; z-index: 1; right: 5%; bottom: 5%"
+											fab
+											x-small
+											color="error"
+											@click.stop="deleteImage"
+											v-if="$auth.user.images[i].url"
+										>
+											<v-icon> mdi-minus </v-icon>
+										</v-btn>
 									</v-avatar>
 								</div>
 							</ImageUploader>
@@ -33,7 +42,7 @@
 			<v-col class="text-center">
 				<v-item-group v-model="window" class="" mandatory tag="v-flex">
 					<v-item v-for="(n, i) in $auth.user.images" :key="i" v-slot="{ active, toggle }">
-						<v-btn :input-value="active" icon @click="toggle">
+						<v-btn :input-value="active" icon @click="toggle" :color="i === 0 ? 'primary' : 'warning'">
 							<v-icon>mdi-record</v-icon>
 						</v-btn>
 					</v-item>
@@ -48,24 +57,10 @@
 		data: () => ({
 			window: 0,
 			saving: false,
-			saved: true,
 		}),
 		methods: {
-			uploadImage() {
-				this.saving = true;
-				setTimeout(() => this.savedAvatar(), 1000);
-			},
-			savedAvatar() {
-				this.saving = false;
-				this.saved = true;
-			},
-		},
-		watch: {
-			user: {
-				handler: function () {
-					this.saved = false;
-				},
-				deep: true,
+			deleteImage() {
+				console.log('deleteImage');
 			},
 		},
 	};
