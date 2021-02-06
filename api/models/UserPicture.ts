@@ -56,7 +56,18 @@ class UserPicture extends Model {
 				const img = images.find((img: any) => img.picture === i);
 				return {
 					url: img ? `${process.env.API}/${img.path}` : '',
+					path: img ? img.path : '',
 				};
+			});
+		} catch (error) {
+			throw error;
+		}
+	}
+	static async delete_image(user_id: number, image_id: number, image_path: string): Promise<any> {
+		try {
+			await UserPicture.query('DELETE FROM user_pictures WHERE user = ? AND picture = ?', [user_id, image_id]);
+			fs.unlink(path.resolve(__dirname, '../', image_path), (err) => {
+				if (err) console.log(err);
 			});
 		} catch (error) {
 			throw error;
