@@ -102,6 +102,12 @@ export default {
 	userLocation(req: any, res: any, next: NextFunction) {
 		const location = req.body;
 		if (_.isObject(location) && location.hasOwnProperty('lat') && location.hasOwnProperty('lng')) next();
-		else return res.setStatus(400);
+		else return res.sendStatus(400);
+	},
+	userPictures(req: any, res: any, next: NextFunction) {
+		const { user_id, image_id } = req.params;
+		if (req.user.id !== Number(user_id)) return res.sendStatus(403);
+		if (Number(image_id) < 0 || Number(image_id) > 4) return res.sendStatus(403);
+		next();
 	},
 };

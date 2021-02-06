@@ -32,7 +32,6 @@
 				this.$refs.file.click();
 			},
 			async onFileChange(fieldName, file) {
-				console.log(file);
 				const maxSize = 3;
 				const imageFile = file[0];
 				if (file.length > 0) {
@@ -67,6 +66,10 @@
 								}
 							);
 							if (data.error) throw { error: data.error };
+							this.$auth.setUser({
+								...this.$auth.user,
+								images: data.images,
+							});
 						} catch (e) {
 							if (e.error) {
 								this.$notifier.showMessage({
