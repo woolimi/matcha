@@ -57,7 +57,7 @@
 						// Emit the FormData and image URL to the parent component
 						// this.$emit('input', { formData, url });
 						try {
-							await this.$axios.put(
+							const { data } = await this.$axios.put(
 								`/api/profile/images/${this.$auth.user.id}/${this.imageId}`,
 								formData,
 								{
@@ -66,8 +66,14 @@
 									},
 								}
 							);
-						} catch (error) {
-							console.log(error);
+							if (data.error) throw { error: data.error };
+						} catch (e) {
+							if (e.error) {
+								this.$notifier.showMessage({
+									message: e.error,
+									color: 'error',
+								});
+							} else console.error(e);
 						}
 					}
 				}
