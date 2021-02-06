@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
 import { LocationLL } from '../init/Interfaces';
 import UserPicture from './UserPicture';
-import { ResultSetHeader } from 'mysql2';
+import UserTag from './UserTag';
 
 class User extends Model {
 	static tname = 'users';
@@ -29,6 +29,31 @@ class User extends Model {
 
 	static init(): Promise<any> {
 		return Model.init('users', User);
+	}
+
+	static async me(id: number) {
+		try {
+			const user = await User.find(id);
+			user.location = xy2ll(user.location);
+			user.images = await UserPicture.get_images(user.id);
+			user.tags = await UserTag.get_tags(user.id);
+			return _.pick(user, [
+				'id',
+				'email',
+				'username',
+				'lastName',
+				'firstName',
+				'verified',
+				'gender',
+				'preferences',
+				'location',
+				'images',
+				'tags',
+				'biography',
+			]);
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	static async updatePublic(user_id: number, formData: PublicInfoForm) {
@@ -55,11 +80,12 @@ class User extends Model {
 				await conn.query('INSERT INTO user_tags (`user`, `tag`) VALUES (?, ?)', [user_id, rows[0].id]);
 			}
 			await conn.query('COMMIT');
+			await conn.release();
 		} catch (error) {
 			await conn.query('ROLLBACK');
+			await conn.release();
 			throw error;
 		}
-		await conn.release();
 	}
 
 	static async register(formData: RegisterForm): Promise<any> {
@@ -71,17 +97,6 @@ class User extends Model {
 				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
 				[data.email, data.username, data.password, data.firstName, data.lastName, xy.x, xy.y]
 			);
-		} catch (error) {
-			throw error;
-		}
-	}
-
-	static async me(id: number) {
-		try {
-			const user = await User.find(id);
-			user.location = xy2ll(user.location);
-			user.images = await UserPicture.get_images(user.id);
-			return _.pick(user, ['id', 'email', 'username', 'lastName', 'firstName', 'verified', 'location', 'images']);
 		} catch (error) {
 			throw error;
 		}
