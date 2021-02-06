@@ -43,18 +43,4 @@ export const getters = {
 	list: (state) => state.list,
 	chat: (state) => state.chat,
 	messages: (state) => state.messages,
-	rows: (state) => (user) => {
-		const rows = [];
-		for (const message of state.messages) {
-			const type = message.sender == user ? 'sent' : 'received';
-			const time = new Date(message.at);
-			rows.push({
-				id: message.id,
-				type,
-				time: `${`00${time.getHours()}`.slice(-2)}:${`00${time.getMinutes()}`.slice(-2)}`,
-				content: message.content,
-			});
-		}
-		return rows;
-	},
 };
