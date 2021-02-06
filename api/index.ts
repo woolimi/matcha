@@ -12,6 +12,7 @@ import Database from './init/Database';
 import { createServer } from 'http';
 import { Server as WSServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import chatRouter from './routes/api/chat';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -24,7 +25,6 @@ const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), 
 dotenv.config();
 const app = express() as Express;
 app.users = {};
-const PORT = process.env.PORT || 5000;
 
 Database.init();
 app.use(morgan('dev', { stream: serverLog }));
@@ -40,6 +40,7 @@ app.use(cookieParser());
 // API
 app.use('/check', checkRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/users/chat', chatRouter);
 app.use('/auth', authRouter);
 
 // Start !
@@ -52,7 +53,7 @@ const io = new WSServer(server, {
 	},
 });
 io.on('connection', (socket: Socket) => {
-	console.log('connected socket', socket.id);
+	// console.log('connected socket', socket.id);
 	socket.on('login', (payload: { token: string }) => {
 		if (!payload || !payload.token) {
 			socket.emit('login response', { error: true });
@@ -64,8 +65,8 @@ io.on('connection', (socket: Socket) => {
 			if (err) {
 				socket.emit('login response', { error: true });
 			} else {
-				console.log('linked user', user, 'to socket', socket.id);
-				app.users[socket.id] = user;
+				// console.log('linked user', user, 'to socket', socket.id);
+				app.users[socket.id] = user.id;
 				socket.emit('login response', { success: true });
 			}
 		});
@@ -75,6 +76,7 @@ io.on('connection', (socket: Socket) => {
 		delete app.users[socket.id];
 	});
 });
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
 	console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
 });

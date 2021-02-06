@@ -4,6 +4,36 @@ import bcrypt from 'bcrypt';
 import { ResultSetHeader } from 'mysql2';
 import { RegisterForm } from '../init/Interfaces';
 
+export interface UserInterface {
+	id: number;
+	email: string;
+	username: string;
+	password: string;
+	lastName: string;
+	firstName: string;
+	verified: number;
+	initialized: number;
+	gender: ('male' | 'female') | null;
+	preferences: ('male' | 'female' | 'all') | null;
+	biography: string | null;
+}
+
+export interface UserPublicInterface {
+	id: number;
+	username: string;
+	lastName: string;
+	firstName: string;
+	gender: ('male' | 'female') | null;
+	preferences: ('male' | 'female' | 'all') | null;
+	biography: string | null;
+}
+
+export interface UserSimpleInterface {
+	id: number;
+	username: string;
+	picture: string | null;
+}
+
 class User extends Model {
 	static tname = 'users';
 	static table = `CREATE TABLE users (
@@ -37,6 +67,16 @@ class User extends Model {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
+		return await User.query(
+			`SELECT u.id, u.username, p.extension as picture
+			FROM ${User.tname} as u
+			LEFT JOIN user_pictures as p ON p.user = u.id
+			WHERE u.id IN (?)`,
+			[ids.join(',')]
+		);
 	}
 }
 

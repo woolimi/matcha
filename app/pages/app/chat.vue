@@ -1,13 +1,13 @@
 <template>
 	<v-row no-gutters style="height: 100%">
-		<v-col cols="12" md="3" :class="userListClass">
-			<template v-if="users.length > 0">
+		<v-col cols="12" md="3" :class="chatListClass">
+			<template v-if="chatList.length > 0">
 				<v-list width="100%">
 					<v-list-item-group>
-						<v-list-item v-for="user in users" :key="user.avatar" @click="currentUser = user">
+						<v-list-item v-for="chat in chatList" :key="chat.id" @click="selectChat">
 							<v-list-item-avatar>
 								<v-badge
-									:color="user.online ? 'green' : 'pink'"
+									:color="chat.user.online ? 'green' : 'pink'"
 									bordered
 									avatar
 									dot
@@ -16,17 +16,17 @@
 									offset-y="10"
 								>
 									<v-avatar size="40">
-										<v-img :src="user.avatar"></v-img>
+										<v-img :src="chat.user.picture ? chat.user.picture : ''"></v-img>
 									</v-avatar>
 								</v-badge>
 							</v-list-item-avatar>
 							<v-list-item-content>
 								<v-list-item-title>
-									{{ user.username }}
+									{{ chat.user.username }}
 								</v-list-item-title>
 								<v-list-item-subtitle
-									>{{ user.date.toDateString() }} &mdash;
-									{{ user.date.toLocaleTimeString() }}</v-list-item-subtitle
+									>{{ chat.last ? chat.last : 'No messages' }}
+									<!-- &mdash; {{ user.date.toLocaleTimeString() }} --></v-list-item-subtitle
 								>
 							</v-list-item-content>
 						</v-list-item>
@@ -69,6 +69,7 @@
 				</v-toolbar>
 				<v-container
 					fluid
+					ref="messages"
 					class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
 				>
 					<v-subheader> Tuesday, 28 January 2021 </v-subheader>
@@ -171,106 +172,31 @@
 						date: new Date(),
 						online: true,
 					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/2.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/3.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/4.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/5.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/6.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/7.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/8.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/9.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/10.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/11.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/12.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/13.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/14.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-						online: true,
-					},
-					{
-						avatar: `https://avatars.dicebear.com/4.5/api/female/15.svg`,
-						username: 'Username',
-						message: 'Last message',
-						date: new Date(),
-					},
 				],
 			};
 		},
+		mounted() {
+			this.$store.dispatch('chat/load');
+		},
 		computed: {
-			userListClass() {
-				return `${this.currentUser === undefined ? 'd-flex' : 'hidden-sm-and-down'} user-list`;
+			chatList() {
+				return this.$store.getters['chat/list'];
+			},
+			chatListClass() {
+				return `${this.$store.getters['chat/chat'] === undefined ? 'd-flex' : 'hidden-sm-and-down'} user-list`;
 			},
 			messageListClass() {
-				return `${this.currentUser === undefined ? 'hidden-sm-and-down' : 'd-flex'} user-chat`;
+				return `${this.$store.getters['chat/chat'] ? 'hidden-sm-and-down' : 'd-flex'} user-chat`;
+			},
+		},
+		methods: {
+			selectChat(chat) {
+				//
+			},
+			scrollToBottom() {
+				this.$nextTick(() => {
+					this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
+				});
 			},
 		},
 	};
