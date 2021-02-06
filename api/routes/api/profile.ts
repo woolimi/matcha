@@ -31,9 +31,20 @@ profileRouter.put(
 			res.json({ images });
 		} catch (error) {
 			console.error(error);
+			res.sendStatus(500);
 		}
 	}
 );
+
+profileRouter.post('/images/:user_id/:image_id', authToken, validator.userPictures, async (req: any, res) => {
+	try {
+		await UserPicture.delete_image(req.params.user_id, req.params.image_id, req.body.path);
+		res.sendStatus(200);
+	} catch (error) {
+		console.error(error);
+		res.sendStatus(500);
+	}
+});
 
 profileRouter.post('/send-email-verification', authToken, validator.userEmailVerification, async (req: any, res) => {
 	try {
