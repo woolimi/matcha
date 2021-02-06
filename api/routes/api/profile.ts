@@ -18,7 +18,7 @@ profileRouter.put('/images/:user_id/:image_id', authToken, upload.single('image'
 			await fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
 				if (err) console.log(err);
 			});
-			res.sendStatus(400);
+			res.json({ error: 'Invalid image' });
 		}
 	} catch (error) {
 		console.error(error);
