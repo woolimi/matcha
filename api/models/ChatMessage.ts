@@ -4,6 +4,14 @@ import { ResultSetHeader } from 'mysql2';
 import Chat from './Chat';
 import User from './User';
 
+interface ChatMessageInterface {
+	id: number;
+	chat: number;
+	sender: number;
+	at: string;
+	content: string;
+}
+
 class ChatMessage extends Model {
 	static tname = 'chat_messages';
 	static table = `CREATE TABLE chat_messages (
@@ -18,6 +26,10 @@ class ChatMessage extends Model {
 
 	static init(): Promise<any> {
 		return Model.init('chat_messages', ChatMessage);
+	}
+
+	static getAll(id: number): Promise<ChatMessageInterface[]> {
+		return ChatMessage.query(`SELECT * FROM ${ChatMessage.tname} WHERE chat = ?`, [id]);
 	}
 }
 

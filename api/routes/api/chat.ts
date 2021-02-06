@@ -1,6 +1,7 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
 import Chat from '../../models/Chat';
+import ChatMessage from '../../models/ChatMessage';
 import User, { UserSimpleInterface } from '../../models/User';
 
 interface ChatInterface {
@@ -44,6 +45,21 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 		});
 	}
 	res.send(result);
+});
+chatRouter.get('/:id', authToken, async (req: any, res) => {
+	if (!req.user || !req.user.id) {
+		return res.status(401).json({ error: 'Unauthorized' });
+	}
+	const id = req.user.id;
+
+	// Check if the Chat is for the User
+	const chat = await Chat.get(req.params.id);
+	if (!chat) return res.status(404).json({ error: 'Chat not found' });
+	if (chat.user1 != id && chat.user2 != id) return res.status(401).json({ error: 'Unauthorized Chat' });
+
+	// Get all messages
+	const messages = await ChatMessage.getAll(chat.id);
+	return res.json({ chat, messages });
 });
 
 export default chatRouter;
