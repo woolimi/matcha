@@ -69,8 +69,8 @@ class User extends Model {
 		}
 	}
 
-	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
-		return await User.query(
+	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
+		return User.query(
 			`SELECT u.id, u.username, p.extension as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id

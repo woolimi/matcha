@@ -30,53 +30,13 @@
 				ref="messages"
 				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
 			>
-				<v-subheader> Tuesday, 28 January 2021 </v-subheader>
-				<div class="d-flex message received">
+				<!--<v-subheader> Tuesday, 28 January 2021 </v-subheader>-->
+				<div :class="`d-flex message ${row.type}`" v-for="row in rows" :key="row.id">
 					<div class="d-flex flex-column flex-nowrap">
-						<span class="text-caption">12:04</span>
+						<span class="text-caption">{{ row.time }}</span>
 					</div>
-					<v-card color="blue" class="ma-2">
-						<div class="content pa-2">Received message</div>
-					</v-card>
-				</div>
-				<div class="d-flex message sent">
-					<div class="d-flex flex-column flex-nowrap">
-						<span class="text-caption">12:05</span>
-					</div>
-					<v-card class="ma-2">
-						<div class="content pa-2">Sent message</div>
-					</v-card>
-				</div>
-				<v-subheader> Tuesday, 29 January 2021 </v-subheader>
-				<div class="d-flex message received">
-					<div class="d-flex flex-column flex-nowrap">
-						<span class="text-caption">12:06</span>
-					</div>
-					<v-card color="blue" class="ma-2">
-						<div class="content pa-2">
-							Received very long message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In
-							pulvinar maximus mauris nec imperdiet. Maecenas eget risus nec mauris egestas feugiat eget
-							sed nunc. Curabitur eget eros congue, sagittis tortor eu, facilisis elit. Cras at diam at
-							risus vulputate cursus luctus in sem. Phasellus eleifend accumsan dolor sed lacinia. Nunc
-							dapibus sodales sapien eget fringilla. Maecenas erat enim, blandit vel ultricies vitae,
-							ultricies non odio.
-						</div>
-					</v-card>
-				</div>
-				<div class="d-flex message received">
-					<div class="d-flex flex-column flex-nowrap">
-						<span class="text-caption">12:07</span>
-					</div>
-					<v-card color="blue" class="ma-2">
-						<div class="content pa-2">Received message</div>
-					</v-card>
-				</div>
-				<div v-for="n in 20" :key="n" class="d-flex message sent">
-					<div class="d-flex flex-column flex-nowrap">
-						<span class="text-caption">12:{{ 10 + n }}</span>
-					</div>
-					<v-card class="ma-2">
-						<div class="content pa-2">Sent message</div>
+					<v-card :color="row.type == 'received' ? 'blue' : ''" class="ma-2">
+						<div class="content pa-2">{{ row.content }}</div>
 					</v-card>
 				</div>
 			</v-container>
@@ -84,7 +44,6 @@
 				fluid
 				class="d-flex justify-center flex-grow-0 align-center flex-nowrap elevation-4 message-input"
 			>
-				<!--<v-avatar size="40"> <v-img :src="self.avatar"></v-img> </v-avatar>-->
 				<v-text-field
 					v-model="message"
 					append-outer-icon="mdi-send"
@@ -118,13 +77,19 @@
 			chat() {
 				return this.$store.getters['chat/chat'];
 			},
+			messages() {
+				return this.$store.getters['chat/messages'];
+			},
+			rows() {
+				return this.$store.getters['chat/rows'](this.$auth.user.id);
+			},
 			classes() {
 				return `${this.$store.getters['chat/chat'] ? 'hidden-sm-and-down' : 'd-flex'} chat`;
 			},
 		},
 		methods: {
 			leaveChat() {
-				//
+				this.$store.dispatch('chat/leaveChat');
 			},
 			unlike() {
 				//
@@ -133,11 +98,28 @@
 				//
 			},
 			scrollToBottom() {
-				this.$nextTick(() => {
-					this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
-				});
+				if (this.$refs.messages) {
+					this.$nextTick(() => {
+						this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
+					});
+				}
 			},
 		},
+		mounted() {
+			this.scrollToBottom();
+		},
+		/*watch: {
+			chat(to, _from) {
+				if (to) {
+					this.$store.dispatch('chat/loadChat', to);
+				}
+			},
+		},
+		mounted() {
+			if (this.chat) {
+				this.$store.dispatch('chat/loadChat', this.chat);
+			}
+		},*/
 	};
 </script>
 

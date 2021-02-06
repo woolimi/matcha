@@ -3,7 +3,7 @@
 		<template v-if="chatList.length > 0">
 			<v-list width="100%">
 				<v-list-item-group>
-					<v-list-item v-for="chat in chatList" :key="chat.id" @click="selectChat">
+					<v-list-item v-for="chat in chatList" :key="chat.id" @click="selectChat(chat)">
 						<v-list-item-avatar>
 							<v-badge
 								:color="chat.user.online ? 'green' : 'pink'"
@@ -54,11 +54,11 @@
 		},
 		methods: {
 			selectChat(chat) {
-				//
+				this.$store.dispatch('chat/loadChat', chat);
 			},
 		},
-		mounted() {
-			this.$store.dispatch('chat/load');
+		beforeMount() {
+			this.$store.dispatch('chat/loadList');
 		},
 	};
 </script>
