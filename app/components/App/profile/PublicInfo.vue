@@ -57,7 +57,7 @@
 									prepend-icon="mdi-head-heart"
 									:error-messages="error.preferences"
 								>
-									<v-radio label="heterosexual" value="hetrosexual"></v-radio>
+									<v-radio label="heterosexual" value="heterosexual"></v-radio>
 									<v-radio label="bisexual" value="bisexual"></v-radio>
 								</v-radio-group>
 							</v-col>
@@ -179,7 +179,7 @@
 							message: 'Invalid form',
 							color: 'error',
 						});
-					} else console.log(error);
+					} else console.log(e);
 				}
 			},
 			resetSearch() {
