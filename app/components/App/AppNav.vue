@@ -60,7 +60,7 @@
 		},
 		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });
-			this.socket.once('login response', (response) => {
+			this.socket.once('socket/loginResponse', (response) => {
 				if (!response.success) {
 					this.$store.commit('snack/SHOW', {
 						message: 'Could not link user to WebSocket.',
@@ -68,7 +68,7 @@
 					});
 				}
 			});
-			this.socket.emit('login', { token: this.$auth.strategy.token.get() });
+			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
 		},
 		props: ['app'],
 		data: () => ({

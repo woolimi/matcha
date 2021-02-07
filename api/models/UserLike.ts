@@ -1,6 +1,5 @@
 import MySQL from '../init/MySQL';
 import Model from './Model';
-import { ResultSetHeader } from 'mysql2';
 import User from './User';
 
 class UserLike extends Model {

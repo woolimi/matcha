@@ -161,14 +161,14 @@ function generateToken(obj: object, option: string = 'access') {
 		const access = jwt.sign(obj, process.env.ACCESS_TOKEN_SECRET, {
 			expiresIn: `${ACCESS_TOKEN_EXP}s`, // 15 mins
 		});
-		console.log('access token generated');
+		console.log('⚡️[server]: access token generated');
 		return access;
 	}
 	if (option == 'refresh') {
 		const refresh = jwt.sign(obj, process.env.REFRESH_TOKEN_SECRET, {
 			expiresIn: `${REFRESH_TOKEN_EXP}s`, // 1 week
 		});
-		console.log('refresh token generated');
+		console.log('⚡️[server]: refresh token generated');
 		return refresh;
 	}
 }
