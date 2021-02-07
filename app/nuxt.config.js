@@ -123,7 +123,7 @@ export default {
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
 					// { message: mutationName }
-					mutations: [],
+					mutations: ['chat/receiveMessage'],
 					// { message: actionName }
 					actions: [],
 					// { stateChange: eventName }

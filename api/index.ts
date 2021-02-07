@@ -12,11 +12,12 @@ import Database from './init/Database';
 import { createServer } from 'http';
 import { Server as WSServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import chatRouter from './routes/api/chat';
+import chatRouter, { sendMessage } from './routes/api/chat';
 
 declare global {
 	interface Express extends CoreExpress {
 		users: { [key: string]: number };
+		sockets: { [key: number]: Socket };
 	}
 }
 
@@ -25,6 +26,7 @@ const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), 
 dotenv.config();
 const app = express() as Express;
 app.users = {};
+app.sockets = {};
 
 Database.init();
 app.use(morgan('dev', { stream: serverLog }));
@@ -53,7 +55,7 @@ const io = new WSServer(server, {
 	},
 });
 io.on('connection', (socket: Socket) => {
-	// console.log('connected socket', socket.id);
+	console.log('connected socket', socket.id);
 	socket.on('login', (payload: { token: string }) => {
 		if (!payload || !payload.token) {
 			socket.emit('login response', { error: true });
@@ -67,12 +69,17 @@ io.on('connection', (socket: Socket) => {
 			} else {
 				// console.log('linked user', user, 'to socket', socket.id);
 				app.users[socket.id] = user.id;
+				app.sockets[user.id] = socket;
 				socket.emit('login response', { success: true });
 			}
 		});
 	});
+	socket.on('chat/sendMessage', (payload) => {
+		sendMessage(app, socket, payload);
+	});
 	socket.on('disconnect', () => {
 		console.log('disconnected socket', socket.id);
+		delete app.sockets[app.users[socket.id]];
 		delete app.users[socket.id];
 	});
 });

@@ -50,16 +50,19 @@
 				fluid
 				class="d-flex justify-center flex-grow-0 align-center flex-nowrap elevation-4 message-input"
 			>
-				<v-text-field
-					v-model="message"
-					append-outer-icon="mdi-send"
-					filled
-					label="Message"
-					type="text"
-					dense
-					hide-details
-					class="mb-0"
-				></v-text-field>
+				<v-form @submit.prevent="sendMessage" style="width: 100%">
+					<v-text-field
+						v-model="message"
+						append-outer-icon="mdi-send"
+						filled
+						label="Message"
+						type="text"
+						dense
+						hide-details
+						class="mb-0"
+						:disabled="disabled"
+					></v-text-field
+				></v-form>
 			</v-container>
 		</template>
 		<template v-else>
@@ -77,6 +80,7 @@
 		data() {
 			return {
 				message: '',
+				disabled: false,
 			};
 		},
 		computed: {
@@ -114,6 +118,19 @@
 			},
 		},
 		methods: {
+			async sendMessage() {
+				this.disabled = true;
+				this.$store.dispatch('$nuxtSocket/emit', {
+					label: 'socket',
+					evt: 'chat/sendMessage',
+					msg: {
+						chat: this.$store.getters['chat/chat'].id,
+						message: this.message,
+					},
+				});
+				this.message = '';
+				this.disabled = false;
+			},
 			leaveChat() {
 				this.$store.dispatch('chat/leaveChat');
 			},
@@ -156,18 +173,24 @@
 		mounted() {
 			this.scrollToBottom();
 		},
+		updated() {
+			this.scrollToBottom();
+		},
+		unmounted() {
+			this.$store.dispatch('chat/leaveChat');
+		},
 		/*watch: {
-				chat(to, _from) {
-					if (to) {
-						this.$store.dispatch('chat/loadChat', to);
-					}
-				},
-			},
-			mounted() {
-				if (this.chat) {
-					this.$store.dispatch('chat/loadChat', this.chat);
+			chat(to, _from) {
+				if (to) {
+					this.$store.dispatch('chat/loadChat', to);
 				}
-			},*/
+			},
+		},
+		mounted() {
+			if (this.chat) {
+				this.$store.dispatch('chat/loadChat', this.chat);
+			}
+		},*/
 	};
 </script>
 
