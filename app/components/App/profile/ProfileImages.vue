@@ -29,7 +29,7 @@
 											@click.stop="deleteImage"
 											v-if="$auth.user.images[i].url"
 										>
-											<v-icon> mdi-minus </v-icon>
+											<v-icon> mdi-delete </v-icon>
 										</v-btn>
 									</v-avatar>
 								</div>

@@ -111,11 +111,10 @@
 		computed: {
 			location: {
 				get() {
-					return JSON.stringify(Object.values(this.$auth.user.location));
+					if (this.$auth.loggedIn) return JSON.stringify(Object.values(this.$auth.user.location));
+					return '[]';
 				},
-				set(val) {
-					return this.$auth.user.location;
-				},
+				set(val) {},
 			},
 		},
 		methods: {

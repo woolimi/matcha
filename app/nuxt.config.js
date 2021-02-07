@@ -80,7 +80,7 @@ export default {
 			login: '/',
 			logout: '/',
 			callback: '/',
-			home: '/app/search',
+			home: '/app',
 		},
 	},
 
