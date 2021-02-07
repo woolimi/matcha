@@ -1,68 +1,81 @@
 <template>
-	<div>
-		<!-- slot for parent component to activate the file changer -->
+	<div style="height: 350px; width: 100%; max-width: 250px">
 		<div @click="launchFilePicker()">
-			<slot name="activator"></slot>
+			<slot name="activator"> </slot>
 		</div>
-		<!-- image input: style is set to hidden and assigned a ref so that it can be triggered -->
 		<input
 			type="file"
+			enctype="multipart/form-data"
 			ref="file"
-			:name="uploadFieldName"
+			name="image"
 			@change="onFileChange($event.target.name, $event.target.files)"
 			style="display: none"
 		/>
-		<!-- error dialog displays any potential error messages -->
-		<v-dialog v-model="errorDialog" max-width="300">
-			<v-card>
-				<v-card-text class="subheading">{{ errorText }}</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn @click="errorDialog = false">Got it!</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 	</div>
 </template>
 
 <script>
 	export default {
-		name: 'image-input',
-		data: () => ({
-			errorDialog: null,
-			errorText: '',
-			uploadFieldName: 'file',
-			maxSize: 1024,
-		}),
 		props: {
-			// Use "value" to enable using v-model
-			value: Object,
+			value: Boolean,
+			imageId: Number,
 		},
 		methods: {
 			launchFilePicker() {
 				this.$refs.file.click();
 			},
-			onFileChange(fieldName, file) {
-				const { maxSize } = this;
-				let imageFile = file[0];
-				if (file.length > 0) {
-					let size = imageFile.size / maxSize / maxSize;
-					if (!imageFile.type.match('image.*')) {
-						// check whether the upload is an image
-						this.errorDialog = true;
-						this.errorText = 'Please choose an image file';
-					} else if (size > 1) {
-						// check whether the size is greater than the size limit
-						this.errorDialog = true;
-						this.errorText = 'Your file is too big! Please select an image under 1MB';
-					} else {
-						// Append file into FormData and turn file into image URL
-						let formData = new FormData();
-						const url = URL.createObjectURL(imageFile);
-						formData.append(fieldName, imageFile);
-						// Emit the FormData and image URL to the parent component
-						this.$emit('input', { formData, url });
-					}
+			async onFileChange(fieldName, file) {
+				try {
+					if (!file.length) return;
+
+					this.$emit('input', true);
+					const maxSize = 3;
+					const imageFile = file[0];
+					let size = imageFile.size / 1024 / 1024;
+
+					if (!imageFile.type.match('image.*'))
+						return this.$notifier.showMessage({
+							message: `Please choose an image file`,
+							color: 'error',
+						});
+
+					if (size > maxSize)
+						return this.$notifier.showMessage({
+							message: `Your file is too big! Please select an image under ${maxSize}MB`,
+							color: 'error',
+						});
+
+					let formData = new FormData();
+					formData.append(fieldName, imageFile);
+					const { data } = await this.$axios.put(
+						`/api/profile/images/${this.$auth.user.id}/${this.imageId}`,
+						formData,
+						{
+							headers: {
+								'content-type': 'multipart/form-data',
+							},
+						}
+					);
+
+					if (data.error) throw { error: data.error };
+
+					this.$auth.setUser({
+						...this.$auth.user,
+						images: data.images,
+					});
+					this.$notifier.showMessage({
+						message: 'Image uploaded',
+						color: 'success',
+					});
+					this.$emit('input', false);
+				} catch (e) {
+					if (e.error) {
+						this.$notifier.showMessage({
+							message: e.error,
+							color: 'error',
+						});
+					} else console.error(e);
+					this.$emit('input', false);
 				}
 			},
 		},

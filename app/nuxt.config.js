@@ -1,6 +1,10 @@
 import colors from 'vuetify/es5/util/colors';
 
 export default {
+	server: {
+		host: '0',
+		port: 3000,
+	},
 	// Global page headers (https://go.nuxtjs.dev/config-head)
 	head: {
 		titleTemplate: '%s',
@@ -17,7 +21,11 @@ export default {
 	css: ['~/assets/css/matcha.css'],
 
 	// Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-	plugins: ['~/plugins/notifier.client', '~/plugins/validator.client.ts'],
+	plugins: [
+		'~/plugins/notifier.client',
+		'~/plugins/validator.client.ts',
+		{ src: '~/plugins/vuejs-google-maps.js', mode: 'client' },
+	],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
 	components: true,
@@ -73,12 +81,13 @@ export default {
 			login: '/',
 			logout: '/',
 			callback: '/',
-			home: '/app/search',
+			home: '/app',
 		},
 	},
 
 	// Axios module configuration (https://go.nuxtjs.dev/config-axios)
 	axios: {
+		// baseURL: 'http://176.169.89.89:5000',
 		baseURL: 'http://localhost:5000',
 		credentials: true,
 		debug: true,

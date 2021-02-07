@@ -1,7 +1,7 @@
 <template>
 	<v-container fill-height fluid>
 		<v-row>
-			<v-col class="d-flex align-center justify-center">
+			<v-col class="d-flex align-center justify-center pa-0">
 				<v-card elevation="2" width="600px" class="pa-6">
 					<v-form @submit.prevent="userRegister">
 						<v-card-title> Register </v-card-title>
@@ -80,6 +80,7 @@
 					lastName: '',
 					password: '',
 					vpassword: '',
+					location: {},
 				},
 				error: {
 					email: '',
@@ -90,6 +91,14 @@
 					vpassword: '',
 				},
 			};
+		},
+		mounted() {
+			navigator.geolocation.getCurrentPosition(({ coords }) => {
+				this.user.location = {
+					lat: coords.latitude,
+					lng: coords.longitude,
+				};
+			});
 		},
 		methods: {
 			async userRegister() {
@@ -109,7 +118,7 @@
 				} catch (e) {
 					if (_.isEmpty(e.error)) {
 						console.error(e);
-						this.$notifier.showMessage({ message: 'Request error', color: 'error' });
+						this.$notifier.showMessage({ message: 'Error', color: 'error' });
 					} else {
 						this.error = e.error;
 						this.$notifier.showMessage({

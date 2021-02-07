@@ -29,6 +29,15 @@ class Tag extends Model {
 			throw error;
 		}
 	}
+
+	static async get_tags() {
+		try {
+			const rows = await Tag.query('SELECT name FROM tags');
+			return rows.map((tag: any) => tag.name);
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 export default Tag;
