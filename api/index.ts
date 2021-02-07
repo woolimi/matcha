@@ -56,21 +56,21 @@ const io = new WSServer(server, {
 });
 io.on('connection', (socket: Socket) => {
 	console.log('💨[socket]: connected', socket.id);
-	socket.on('login', (payload: { token: string }) => {
+	socket.on('socket/login', (payload: { token: string }) => {
 		if (!payload || !payload.token) {
-			socket.emit('login response', { error: true });
+			socket.emit('socket/loginResponse', { error: true });
 			return;
 		}
 		// 'Bearer {token}'
 		const token = payload.token.split(' ')[1] ?? '';
 		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, user: any) => {
 			if (err) {
-				socket.emit('login response', { error: true });
+				socket.emit('socket/loginResponse', { error: true });
 			} else {
 				// console.log('linked user', user, 'to socket', socket.id);
 				app.users[socket.id] = user.id;
 				app.sockets[user.id] = socket;
-				socket.emit('login response', { success: true });
+				socket.emit('socket/loginResponse', { success: true });
 			}
 		});
 	});

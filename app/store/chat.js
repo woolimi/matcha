@@ -25,6 +25,9 @@ export const mutations = {
 			state.messages.push(message);
 		}
 	},
+	messageError({ commit }, payload) {
+		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
+	},
 };
 
 export const actions = {
