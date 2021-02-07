@@ -91,7 +91,7 @@ authRouter.post('/register', validator.userRegister, async (req, res) => {
 
 	try {
 		const result = await User.register(formData);
-		// await send_verification_email(formData.email, result.insertId);
+		await send_verification_email(formData.email, result.insertId);
 		return res.sendStatus(201);
 	} catch (error) {
 		console.error(error);

@@ -31,12 +31,15 @@ interface PublicInfoForm {
 	biography: string;
 }
 
-async function validate_email(email: string, $axios: NuxtAxiosInstance): Promise<string> {
+interface ChangePasswordForm {
+	password: string;
+	vpassword: string;
+}
+
+function validate_email(email: string) {
 	try {
 		const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		if (!re.test(String(email).toLowerCase())) return 'Invalid email format';
-		const { data } = await $axios.post('/check/email', { email });
-		if (data.error) return data.error;
 		return '';
 	} catch (error) {
 		console.error(error);
@@ -113,7 +116,7 @@ export default ({ $axios }: Context, inject: Inject) => {
 		async userRegister(user: RegisterForm) {
 			const error: any = {};
 			let e_msg = '';
-			e_msg = await validate_email(user.email, $axios);
+			e_msg = await validate_email(user.email);
 			if (e_msg) error.email = e_msg;
 			e_msg = await validate_username(user.username, $axios);
 			if (e_msg) error.username = e_msg;
@@ -136,7 +139,7 @@ export default ({ $axios }: Context, inject: Inject) => {
 		async emailVerification(user: EmailVerification) {
 			const error: any = {};
 			let e_msg = '';
-			e_msg = await validate_email(user.email, $axios);
+			e_msg = await validate_email(user.email);
 			if (e_msg) error.email = e_msg;
 			return { error };
 		},
@@ -157,6 +160,15 @@ export default ({ $axios }: Context, inject: Inject) => {
 			if (e_msg) error.tags = e_msg;
 			e_msg = validate_biography(user.biography);
 			if (e_msg) error.biography = e_msg;
+			return { error };
+		},
+		userChangePassword(pwForm: ChangePasswordForm) {
+			const error: any = {};
+			let e_msg = '';
+			e_msg = validate_password(pwForm.password);
+			if (e_msg) error.password = e_msg;
+			e_msg = validate_vpassword(pwForm.password, pwForm.vpassword);
+			if (e_msg) error.vpassword = e_msg;
 			return { error };
 		},
 	});

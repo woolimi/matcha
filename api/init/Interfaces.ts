@@ -23,6 +23,11 @@ export interface PublicInfoForm {
 	biography: string;
 }
 
+export interface ChangePasswordForm {
+	password: string;
+	vpassword: string;
+}
+
 export interface LocationLL {
 	lat: number;
 	lng: number;
