@@ -1,7 +1,7 @@
 <template>
 	<v-container fill-height fluid>
 		<v-row>
-			<v-col class="d-flex align-center justify-center">
+			<v-col class="d-flex align-center justify-center pa-0">
 				<v-card elevation="2" width="600px" class="pa-6">
 					<v-form @submit.prevent="userLogin">
 						<v-card-title> Login </v-card-title>

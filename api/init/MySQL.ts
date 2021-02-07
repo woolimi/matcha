@@ -1,11 +1,11 @@
-import mysql from 'mysql2';
+import { connect } from 'http2';
+import mysql from 'mysql2/promise';
 import database from '../config/database.json';
 
-class MySQL {
-	static con = mysql.createConnection(database.MYSQL_CONFIG);
+const pool = mysql.createPool(database.MYSQL_CONFIG);
 
-	static CHARSET = 'utf8mb4';
-	static COLLATION = 'utf8mb4_unicode_ci';
-}
-
-export default MySQL;
+export default {
+	pool,
+	CHARSET: 'utf8mb4',
+	COLLATION: 'utf8mb4_unicode_ci',
+};

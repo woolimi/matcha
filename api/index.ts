@@ -1,6 +1,6 @@
 import express, { Express as CoreExpress } from 'express';
 import cors from 'cors';
-import usersRouter from './routes/api/users';
+import profileRouter from './routes/api/profile';
 import authRouter from './routes/auth';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -13,6 +13,8 @@ import { createServer } from 'http';
 import { Server as WSServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import chatRouter, { sendMessage } from './routes/api/chat';
+import requestIp from 'request-ip';
+import tagRouter from './routes/api/tags';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -21,29 +23,31 @@ declare global {
 	}
 }
 
-const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
-
 dotenv.config();
+const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
+const corsConfig = {
+	origin: ['http://localhost:3000', 'http://176.169.89.89'],
+	credentials: true,
+};
+
 const app = express() as Express;
 app.users = {};
 app.sockets = {};
 
 Database.init();
+app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
-app.use(
-	cors({
-		origin: 'http://localhost:3000',
-		credentials: true,
-	})
-);
+app.use(cors(corsConfig));
 app.use(cookieParser());
+app.use(requestIp.mw());
 
 // API
 app.use('/check', checkRouter);
-app.use('/api/users', usersRouter);
 app.use('/api/users/chat', chatRouter);
 app.use('/auth', authRouter);
+app.use('/api/profile', profileRouter);
+app.use('/api/tags', tagRouter);
 
 // Start !
 const server = createServer(app);
@@ -86,5 +90,5 @@ io.on('connection', (socket: Socket) => {
 });
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-	console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+	console.log(`⚡️[server]: Server is running at ${process.env.API}:${PORT}`);
 });
