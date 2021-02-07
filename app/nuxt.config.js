@@ -44,6 +44,7 @@ export default {
 		'@nuxtjs/axios',
 		'@nuxtjs/auth-next',
 		['cookie-universal-nuxt', { parseJSON: false }],
+		'nuxt-socket-io',
 	],
 
 	router: {
@@ -121,5 +122,19 @@ export default {
 				fs: 'empty',
 			};
 		},
+	},
+
+	io: {
+		sockets: [
+			{
+				url: 'http://localhost:5000',
+				default: true,
+				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
+				vuex: {
+					mutations: ['chat/receiveMessage', 'chat/messageError'],
+					actions: [],
+				},
+			},
+		],
 	},
 };

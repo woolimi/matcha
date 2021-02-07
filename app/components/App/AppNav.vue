@@ -60,6 +60,18 @@
 			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
 			this.selected = path ? path.id : 0;
 		},
+		mounted() {
+			this.socket = this.$nuxtSocket({ persist: 'socket' });
+			this.socket.once('socket/loginResponse', (response) => {
+				if (!response.success) {
+					this.$store.commit('snack/SHOW', {
+						message: 'Could not link user to WebSocket.',
+						color: 'error',
+					});
+				}
+			});
+			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
+		},
 		props: ['app'],
 		data: () => ({
 			selected: null,
@@ -96,9 +108,15 @@
 				},
 			],
 		}),
+		unmounted() {
+			this.$store.commit('io/LOGOUT');
+			this.socket.disconnect();
+		},
 		methods: {
 			userLogout() {
 				this.$auth.logout();
+				this.$store.commit('io/LOGOUT');
+				this.socket.disconnect();
 			},
 			is_disabled(title) {
 				const { verified, languages, tags, preferences, gender, images } = this.$auth.user;

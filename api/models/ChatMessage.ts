@@ -4,6 +4,14 @@ import { ResultSetHeader } from 'mysql2';
 import Chat from './Chat';
 import User from './User';
 
+interface ChatMessageInterface {
+	id: number;
+	chat: number;
+	sender: number;
+	at: string;
+	content: string;
+}
+
 class ChatMessage extends Model {
 	static tname = 'chat_messages';
 	static table = `CREATE TABLE chat_messages (
@@ -18,6 +26,30 @@ class ChatMessage extends Model {
 
 	static init(): Promise<any> {
 		return Model.init('chat_messages', ChatMessage);
+	}
+
+	static async add(message: { chat: number; sender: number; content: string }): Promise<ResultSetHeader | false> {
+		try {
+			return (await ChatMessage.query(
+				`INSERT INTO ${ChatMessage.tname} (chat, sender, content) VALUES (?, ?, ?)`,
+				[message.chat, message.sender, message.content]
+			)) as ResultSetHeader;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
+
+	static async get(id: number): Promise<ChatMessageInterface | null> {
+		const result = await ChatMessage.query(`SELECT * FROM ${ChatMessage.tname} WHERE id = ?`, [id]);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return null;
+	}
+
+	static getAll(id: number): Promise<ChatMessageInterface[]> {
+		return ChatMessage.query(`SELECT * FROM ${ChatMessage.tname} WHERE chat = ?`, [id]);
 	}
 }
 
