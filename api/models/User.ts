@@ -7,6 +7,7 @@ import { ll2xy, xy2ll } from '../services/Location';
 import { LocationLL } from '../init/Interfaces';
 import UserPicture from './UserPicture';
 import UserTag from './UserTag';
+import UserLanguage from './UserLanguage';
 
 class User extends Model {
 	static tname = 'users';
@@ -37,6 +38,7 @@ class User extends Model {
 			user.location = xy2ll(user.location);
 			user.images = await UserPicture.get_images(user.id);
 			user.tags = await UserTag.get_tags(user.id);
+			user.languages = await UserLanguage.get_languages(user.id);
 			return _.pick(user, [
 				'id',
 				'email',
@@ -50,6 +52,7 @@ class User extends Model {
 				'images',
 				'tags',
 				'biography',
+				'languages',
 			]);
 		} catch (error) {
 			throw error;
@@ -71,6 +74,7 @@ class User extends Model {
 					user_id,
 				]
 			);
+			// tag
 			for (const tag of formData.tags) {
 				await conn.query('INSERT IGNORE INTO tags (`name`) VALUES (?)', [tag]);
 			}
@@ -78,6 +82,11 @@ class User extends Model {
 			for (const tag of formData.tags) {
 				const [rows, fields]: [any, any] = await conn.query('SELECT * FROM tags WHERE name = ? LIMIT 1', [tag]);
 				await conn.query('INSERT INTO user_tags (`user`, `tag`) VALUES (?, ?)', [user_id, rows[0].id]);
+			}
+			// language
+			await conn.query('DELETE FROM user_languages WHERE user = ?', user_id);
+			for (const lang of formData.languages) {
+				await conn.query('INSERT INTO user_languages (`user`, `language`) VALUES (?, ?)', [user_id, lang]);
 			}
 			await conn.query('COMMIT');
 			await conn.release();

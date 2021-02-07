@@ -32,7 +32,8 @@ class Tag extends Model {
 
 	static async get_tags() {
 		try {
-			return await Tag.query('SELECT name FROM tags');
+			const rows = await Tag.query('SELECT name FROM tags');
+			return rows.map((tag: any) => tag.name);
 		} catch (error) {
 			throw error;
 		}
