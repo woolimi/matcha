@@ -5,7 +5,7 @@
 			<v-toolbar></v-toolbar>
 			<v-list nav dense>
 				<v-list-item-group v-model="selected" active-class="primary--text text--accent-4">
-					<v-list-item v-for="list in navList" :key="list.title">
+					<v-list-item v-for="list in navList" :key="list.title" :disabled="is_disabled(list.title)">
 						<template v-if="list.title === 'Logout'">
 							<a @click="userLogout">
 								<v-list-item-icon>
@@ -19,7 +19,9 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
+								<v-list-item-title :class="is_disabled(list.title) ? 'grey--text' : 'black--text'">{{
+									list.title
+								}}</v-list-item-title>
 							</NuxtLink>
 						</template>
 					</v-list-item>
@@ -97,6 +99,13 @@
 		methods: {
 			userLogout() {
 				this.$auth.logout();
+			},
+			is_disabled(title) {
+				const { verified, languages, tags, preferences, gender } = this.$auth.user;
+				if (title === 'Profile' || title === 'Logout') return false;
+				if (!verified) return true;
+				if (!languages.length || !tags.length || !preferences || !gender) return true;
+				return false;
 			},
 		},
 	};
