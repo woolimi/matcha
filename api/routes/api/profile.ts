@@ -78,10 +78,20 @@ profileRouter.post('/location', authToken, validator.userLocation, async (req, r
 profileRouter.post('/public-info', authToken, validator.userPublic, async (req: any, res) => {
 	try {
 		await User.updatePublic(req.user.id, req.body);
+		return res.sendStatus(200);
+	} catch (error) {
+		console.error(error);
+		return res.sendStatus(200);
+	}
+});
+
+profileRouter.post('/change-password', authToken, validator.userChangePassword, async (req: any, res) => {
+	try {
+		await User.changePassword(req.body);
 		res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
-		res.sendStatus(200);
+		return res.sendStatus(500);
 	}
 });
 

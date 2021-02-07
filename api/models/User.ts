@@ -1,7 +1,7 @@
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import bcrypt from 'bcrypt';
-import { RegisterForm, PublicInfoForm } from '../init/Interfaces';
+import { RegisterForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
 import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
 import { LocationLL } from '../init/Interfaces';
@@ -115,6 +115,16 @@ class User extends Model {
 		try {
 			const xy = ll2xy(ll);
 			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326)', [xy.x, xy.y]);
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	static async changePassword(pwForm: ChangePasswordForm) {
+		try {
+			const data = { ...pwForm };
+			data.password = await bcrypt.hash(pwForm.password, 10);
+			return await User.query('UPDATE users SET password = ?', [data.password]);
 		} catch (error) {
 			throw error;
 		}
