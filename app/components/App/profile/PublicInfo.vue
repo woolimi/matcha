@@ -74,9 +74,11 @@
 							hide-selected
 							multiple
 							persistent-hint
+							auto-select-first
 							chips
 							color="primary"
 							:error-messages="error.tags"
+							@change="resetSearch"
 						>
 							<template v-slot:no-data>
 								<v-list-item>
@@ -121,10 +123,10 @@
 				user: {
 					firstName: this.$auth.user.firstName,
 					lastName: this.$auth.user.lastName,
-					languages: [],
+					languages: [...this.$auth.user.languages],
 					gender: this.$auth.user.gender,
 					preferences: this.$auth.user.preferences,
-					tags: this.$auth.user.tags,
+					tags: [...this.$auth.user.tags],
 					biography: this.$auth.user.biography,
 				},
 				error: {
@@ -149,7 +151,7 @@
 		async fetch() {
 			try {
 				const { data } = await this.$axios.get('/api/tags');
-				this.tags = data.tags;
+				this.interest.tags = data.tags;
 			} catch (error) {
 				this.$notifier.showMessage({
 					message: 'cannot get tag list from server',
@@ -179,6 +181,9 @@
 						});
 					} else console.log(error);
 				}
+			},
+			resetSearch() {
+				this.interest.search = '';
 			},
 		},
 	};
