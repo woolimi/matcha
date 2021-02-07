@@ -132,6 +132,8 @@
 						message: 'password changed',
 						color: 'success',
 					});
+					this.user.password = '';
+					this.user.vpassword = '';
 				} catch (e) {
 					if (_.isEmpty(e.error)) {
 						this.$notifier.showMessage({ message: 'Error', color: 'error' });

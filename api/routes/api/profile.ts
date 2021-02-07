@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import mime from 'mime-types';
 import FileType from 'file-type';
 import express from 'express';
 import authToken from '../../middleware/authToken';
@@ -20,7 +19,7 @@ profileRouter.put(
 	async (req: any, res) => {
 		try {
 			const fileType = await FileType.fromFile(req.file.path);
-			if (!fileType || fileType.ext !== mime.extension(req.file.mimetype)) {
+			if (!fileType || fileType.mime !== req.file.mimetype) {
 				fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
 					if (err) console.log(err);
 				});
