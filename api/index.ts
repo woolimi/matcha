@@ -55,7 +55,7 @@ const io = new WSServer(server, {
 	},
 });
 io.on('connection', (socket: Socket) => {
-	console.log('connected socket', socket.id);
+	console.log('💨[socket]: connected', socket.id);
 	socket.on('login', (payload: { token: string }) => {
 		if (!payload || !payload.token) {
 			socket.emit('login response', { error: true });
@@ -75,10 +75,11 @@ io.on('connection', (socket: Socket) => {
 		});
 	});
 	socket.on('chat/sendMessage', (payload) => {
+		console.log('💨[socket]: receive chat/sendMessage from', socket.id);
 		sendMessage(app, socket, payload);
 	});
 	socket.on('disconnect', () => {
-		console.log('disconnected socket', socket.id);
+		console.log('💨[socket]: disconnected', socket.id);
 		delete app.sockets[app.users[socket.id]];
 		delete app.users[socket.id];
 	});

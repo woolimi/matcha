@@ -75,7 +75,6 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 
 	// Save the message
 	const queryResult = await ChatMessage.add({ chat: chat.id, sender: user, content: payload.message });
-	console.log(queryResult);
 	if (queryResult === false) {
 		return socket.emit('chat/messageError', { error: 'Could not save message' });
 	}
@@ -84,8 +83,10 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 	// Send the message
 	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
 	if (app.sockets[otherUser]) {
+		console.log('💨[socket]: send chat/receiveMessage to ', app.sockets[otherUser].id);
 		app.sockets[otherUser]!.emit('chat/receiveMessage', chatMessage);
 	}
+	console.log('💨[socket]: send chat/receiveMessage to ', app.sockets[user].id);
 	app.sockets[user]!.emit('chat/receiveMessage', chatMessage);
 }
 
