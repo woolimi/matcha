@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
 	filename: function (req, file, cb) {
 		const ext = mime.extension(file.mimetype);
 		const { user_id, image_id } = req.params;
-		cb(null, `${user_id}_${image_id}_${new Date(Date.now()).toISOString()}.${ext}`);
+		cb(null, `${user_id}_${image_id}_${Date.now()}.${ext}`);
 	},
 });
 
@@ -25,5 +25,5 @@ export const upload = multer({
 		fileSize: 1024 * 1024 * 3, // 3MB
 		files: 1,
 	},
-	fileFilter: fileFilter,
+	fileFilter,
 });
