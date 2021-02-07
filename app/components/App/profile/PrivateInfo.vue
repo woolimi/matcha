@@ -29,16 +29,21 @@
 				</template>
 			</v-text-field>
 			<div class="text-right">
+				<v-btn v-if="sentEmail" outlined small text :ripple="false" color="info" class="no-cursor">
+					sent
+				</v-btn>
 				<v-btn
 					:loading="loading.email"
-					v-if="!user.verified || $auth.user.email !== user.email"
+					v-else-if="!user.verified || $auth.user.email !== user.email"
 					outlined
 					small
 					color="error"
 					@click="emailVerification"
 					>send verification</v-btn
 				>
-				<v-btn v-else small text outlined :ripple="false" class="no-cursor" color="success">verified</v-btn>
+				<v-btn v-if="user.verified" small text outlined :ripple="false" class="no-cursor" color="success"
+					>verified</v-btn
+				>
 			</div>
 
 			<v-text-field
@@ -56,7 +61,7 @@
 				prepend-icon="mdi-lock"
 			/>
 			<div class="text-right">
-				<v-btn small text outlined color="warning">change password</v-btn>
+				<v-btn small text outlined color="warning" @click="changePassword">change password</v-btn>
 			</div>
 
 			<div class="text-right">
@@ -88,12 +93,17 @@
 				user: {
 					email: this.$auth.user.email,
 					verified: this.$auth.user.verified,
+					password: '',
+					vpassword: '',
 				},
 				loading: {
 					email: false,
 				},
+				sentEmail: false,
 				error: {
 					email: '',
+					password: '',
+					vpassword: '',
 				},
 				map: false,
 			};
@@ -109,6 +119,28 @@
 			},
 		},
 		methods: {
+			async changePassword() {
+				try {
+					const change_password_form = {
+						password: this.user.password,
+						vpassword: this.user.vpassword,
+					};
+					const validated = await this.$validator.userChangePassword(change_password_form);
+					if (!_.isEmpty(validated.error)) throw { error: validated.error };
+					const { data } = await this.$axios.post('/api/profile/change-password', change_password_form);
+					if (!_.isEmpty(data.error)) throw { error: data.error };
+					this.$notifier.showMessage({
+						message: 'password changed',
+						color: 'success',
+					});
+				} catch (e) {
+					if (_.isEmpty(e.error)) {
+						this.$notifier.showMessage({ message: 'Error', color: 'error' });
+					} else {
+						this.error = e.error;
+					}
+				}
+			},
 			async emailVerification() {
 				try {
 					this.loading.email = true;
@@ -131,6 +163,7 @@
 					});
 					this.$auth.setUser({ ...this.$auth.user, email: this.user.email });
 					this.loading.email = false;
+					this.sentEmail = true;
 				} catch (e) {
 					if (_.isEmpty(e.error)) {
 						console.error(e);

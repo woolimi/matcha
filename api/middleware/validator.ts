@@ -1,11 +1,17 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
-import { RegisterForm, LoginForm, PublicInfoForm } from '../init/Interfaces';
+import { RegisterForm, LoginForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
 import LanguageSet from '../init/languages';
+import User from '../models/User';
 
-function validate_email(email: string): string {
+async function validate_email(email: string, option: any = false): Promise<string> {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	if (!re.test(String(email).toLowerCase())) return 'Invalid email format';
+
+	if (option && option.prev_email === email) return '';
+
+	const rows = await User.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+	if (rows.length !== 0) return 'email is already taken';
 	return '';
 }
 
@@ -86,48 +92,66 @@ function fieldsChecker(formData: RegisterForm | LoginForm | PublicInfoForm, expe
 }
 
 export default {
-	userRegister(req: any, res: any, next: NextFunction): any {
-		const user: RegisterForm = req.body;
-		if (!fieldsChecker(user, ['email', 'username', 'firstName', 'lastName', 'password', 'vpassword', 'location']))
-			return res.sendStatus(403);
+	async userRegister(req: any, res: any, next: NextFunction): Promise<any> {
+		try {
+			const user: RegisterForm = req.body;
+			if (
+				!fieldsChecker(user, [
+					'email',
+					'username',
+					'firstName',
+					'lastName',
+					'password',
+					'vpassword',
+					'location',
+				])
+			)
+				return res.sendStatus(403);
 
-		const error: any = {};
-		let e_msg = '';
-		e_msg = validate_email(user.email);
-		if (e_msg) error.email = e_msg;
-		e_msg = validate_username(user.username);
-		if (e_msg) error.username = e_msg;
-		e_msg = validate_firstName(user.firstName);
-		if (e_msg) error.firstName = e_msg;
-		e_msg = validate_lastName(user.lastName);
-		if (e_msg) error.lastName = e_msg;
-		e_msg = validate_password(user.password);
-		if (e_msg) error.password = e_msg;
-		e_msg = validate_vpassword(user.password, user.vpassword);
-		if (e_msg) error.vpassword = e_msg;
+			const error: any = {};
+			let e_msg = '';
+			e_msg = await validate_email(user.email);
+			if (e_msg) error.email = e_msg;
+			e_msg = validate_username(user.username);
+			if (e_msg) error.username = e_msg;
+			e_msg = validate_firstName(user.firstName);
+			if (e_msg) error.firstName = e_msg;
+			e_msg = validate_lastName(user.lastName);
+			if (e_msg) error.lastName = e_msg;
+			e_msg = validate_password(user.password);
+			if (e_msg) error.password = e_msg;
+			e_msg = validate_vpassword(user.password, user.vpassword);
+			if (e_msg) error.vpassword = e_msg;
 
-		if (!_.isEmpty(error)) {
-			return res.json({ error });
+			if (!_.isEmpty(error)) {
+				return res.json({ error });
+			}
+			next();
+		} catch (error) {
+			console.error(error);
+			return res.sendStatus(500);
 		}
-		next();
 	},
 	userLogin(req: any, res: any, next: NextFunction): any {
 		const user: LoginForm = req.body;
 		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(400);
 		next();
 	},
-	userEmailVerification(req: any, res: any, next: NextFunction): any {
-		const data = req.body;
-		if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(400);
+	async userEmailVerification(req: any, res: any, next: NextFunction): Promise<any> {
+		try {
+			const data = req.body;
+			if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(400);
 
-		const error: any = {};
-		let e_msg = '';
-		e_msg = validate_email(data.email);
-		if (e_msg) error.email = e_msg;
-
-		if (!_.isEmpty(error)) return res.json({ error });
-
-		next();
+			const error: any = {};
+			let e_msg = '';
+			e_msg = await validate_email(data.email, { prev_email: data.prev_email });
+			if (e_msg) error.email = e_msg;
+			if (!_.isEmpty(error)) return res.json({ error });
+			next();
+		} catch (error) {
+			console.error(error);
+			res.sendStatus(500);
+		}
 	},
 	userLocation(req: any, res: any, next: NextFunction) {
 		const location = req.body;
@@ -160,6 +184,19 @@ export default {
 		if (e_msg) error.tags = e_msg;
 		e_msg = validate_biography(user.biography);
 		if (e_msg) error.biography = e_msg;
+
+		if (!_.isEmpty(error)) return res.json({ error });
+		next();
+	},
+	userChangePassword(req: any, res: any, next: NextFunction) {
+		const pwForm: ChangePasswordForm = req.body;
+		const error: any = {};
+		let e_msg = '';
+		e_msg = validate_password(pwForm.password);
+		if (e_msg) error.password = e_msg;
+		e_msg = validate_vpassword(pwForm.password, pwForm.vpassword);
+		if (e_msg) error.vpassword = e_msg;
+
 		if (!_.isEmpty(error)) return res.json({ error });
 		next();
 	},
