@@ -101,10 +101,10 @@
 				this.$auth.logout();
 			},
 			is_disabled(title) {
-				const { verified, languages, tags, preferences, gender } = this.$auth.user;
+				const { verified, languages, tags, preferences, gender, images } = this.$auth.user;
 				if (title === 'Profile' || title === 'Logout') return false;
 				if (!verified) return true;
-				if (!languages.length || !tags.length || !preferences || !gender) return true;
+				if (!languages.length || !tags.length || !preferences || !gender || !images[0].url) return true;
 				return false;
 			},
 		},
