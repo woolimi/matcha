@@ -59,11 +59,9 @@
 			this.selected = path ? path.id : 0;
 		},
 		mounted() {
-			this.socket = this.$nuxtSocket({});
+			this.socket = this.$nuxtSocket({ persist: 'socket' });
 			this.socket.once('login response', (response) => {
-				if (response.success) {
-					this.$store.commit('io/LOGIN');
-				} else {
+				if (!response.success) {
 					this.$store.commit('snack/SHOW', {
 						message: 'Could not link user to WebSocket.',
 						color: 'error',

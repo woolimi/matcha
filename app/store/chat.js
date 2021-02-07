@@ -21,7 +21,9 @@ export const mutations = {
 		state.messages.push(...messages);
 	},
 	receiveMessage(state, message) {
-		state.messages.push(message);
+		if (state.chat && state.chat.id == message.chat) {
+			state.messages.push(message);
+		}
 	},
 };
 
