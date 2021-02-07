@@ -9,6 +9,36 @@ import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
 
+export interface UserInterface {
+	id: number;
+	email: string;
+	username: string;
+	password: string;
+	lastName: string;
+	firstName: string;
+	verified: number;
+	initialized: number;
+	gender: ('male' | 'female') | null;
+	preferences: ('male' | 'female' | 'all') | null;
+	biography: string | null;
+}
+
+export interface UserPublicInterface {
+	id: number;
+	username: string;
+	lastName: string;
+	firstName: string;
+	gender: ('male' | 'female') | null;
+	preferences: ('male' | 'female' | 'all') | null;
+	biography: string | null;
+}
+
+export interface UserSimpleInterface {
+	id: number;
+	username: string;
+	picture: string | null;
+}
+
 class User extends Model {
 	static tname = 'users';
 	static table = `CREATE TABLE users (
@@ -103,12 +133,27 @@ class User extends Model {
 			data.password = await bcrypt.hash(formData.password, 10);
 			const xy = ll2xy(data.location);
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) \
+				VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
 				[data.email, data.username, data.password, data.firstName, data.lastName, xy.x, xy.y]
 			);
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
+		return (User.query(
+			`SELECT u.id, u.username, p.path as picture
+			FROM ${User.tname} as u
+			LEFT JOIN user_pictures as p ON p.user = u.id
+			WHERE u.id IN (?)`,
+			[ids.join(',')]
+		) as Promise<UserSimpleInterface[]>).then((users) =>
+			users.map((user) => {
+				return { ...user, picture: `${process.env.API}/${user.picture}` };
+			})
+		);
 	}
 
 	static async updateLocation(ll: LocationLL) {

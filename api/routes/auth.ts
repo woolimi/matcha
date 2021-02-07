@@ -2,14 +2,13 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
-import { ResultSetHeader } from 'mysql2';
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
 import path from 'path';
-import { setRefreshToken, deleteRefreshToken, generateToken } from '../services/Token';
 import { send_verification_email } from '../services/Mailing';
 import geoip from 'geoip-lite';
+import { deleteRefreshToken, generateToken, setRefreshToken } from '../services/Token';
 
 const authRouter = express.Router();
 

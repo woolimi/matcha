@@ -1,6 +1,6 @@
 <template>
 	<v-app :style="!isLandingPage ? { height: '100vh' } : ''">
-		<template v-if="this.$route.path === '/'">
+		<template v-if="isLandingPage">
 			<HomeNav app />
 			<div class="align-center justify-center d-flex flex-column landing">
 				<h1 class="white--text">Find your Love</h1>
