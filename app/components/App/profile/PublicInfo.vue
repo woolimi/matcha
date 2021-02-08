@@ -74,7 +74,6 @@
 							hide-selected
 							multiple
 							persistent-hint
-							auto-select-first
 							chips
 							color="primary"
 							:error-messages="error.tags"
