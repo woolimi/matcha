@@ -28,6 +28,22 @@ export const mutations = {
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
 	},
+	userLogin(state, payload) {
+		for (const chat of state.list) {
+			if (chat.user.id == payload.user) {
+				chat.user.online = true;
+				break;
+			}
+		}
+	},
+	userLogout(state, payload) {
+		for (const chat of state.list) {
+			if (chat.user.id == payload.user) {
+				chat.user.online = false;
+				break;
+			}
+		}
+	},
 };
 
 export const actions = {

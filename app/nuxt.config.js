@@ -131,7 +131,12 @@ export default {
 				default: true,
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
-					mutations: ['chat/receiveMessage', 'chat/messageError'],
+					mutations: [
+						'chat/receiveMessage',
+						'chat/messageError',
+						'userLogin --> chat/userLogin',
+						'userLogout --> chat/userLogout',
+					],
 					actions: [],
 				},
 			},
