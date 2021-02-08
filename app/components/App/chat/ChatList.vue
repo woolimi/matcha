@@ -48,7 +48,9 @@
 				return this.$store.getters['chat/list'];
 			},
 			classes() {
-				return `${this.$store.getters['chat/chat'] === undefined ? 'd-flex' : 'hidden-sm-and-down'} chat-list`;
+				return `${
+					this.$store.getters['chat/chat'] == undefined ? 'd-flex' : 'hidden-sm-and-down'
+				} chat-list justify-center`;
 			},
 		},
 		methods: {
