@@ -97,9 +97,9 @@
 				},
 				{
 					id: 3,
-					title: 'Notification',
+					title: 'Notifications',
 					icon: 'mdi-bell',
-					path: '/app/notification',
+					path: '/app/notifications',
 				},
 				{
 					id: 4,

@@ -67,7 +67,7 @@
 			</v-container>
 		</template>
 		<template v-else>
-			<div class="pa-2" style="display: flex; justify-content: center; align-items: center">
+			<div class="pa-2 d-flex justify-center align-center">
 				<v-alert border="left" elevation="2" outlined text type="info" icon="mdi-chevron-left">
 					Select an User you want to talk to on the left.
 				</v-alert>
@@ -115,7 +115,7 @@
 				return rows;
 			},
 			classes() {
-				return `${this.$store.getters['chat/chat'] ? 'hidden-sm-and-down' : 'd-flex'} chat`;
+				return `${this.$store.getters['chat/chat'] == undefined ? 'hidden-sm-and-down' : 'd-flex'} chat`;
 			},
 		},
 		methods: {
@@ -135,7 +135,7 @@
 				}
 			},
 			leaveChat() {
-				this.$store.dispatch('chat/leaveChat');
+				this.$store.commit('chat/leaveChat');
 			},
 			unlike() {
 				//
