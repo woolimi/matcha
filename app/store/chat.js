@@ -33,9 +33,6 @@ export const mutations = {
 			}
 		}
 	},
-	messageError({ commit }, payload) {
-		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
-	},
 	userLogin(state, payload) {
 		for (const chat of state.list) {
 			if (chat.user.id == payload.user) {
@@ -65,6 +62,9 @@ export const actions = {
 		this.$axios.get(`http://localhost:5000/api/users/chat/${chat.id}`).then((response) => {
 			commit('setMessages', response.data.messages);
 		});
+	},
+	messageError({ commit }, payload) {
+		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
 	},
 };
 
