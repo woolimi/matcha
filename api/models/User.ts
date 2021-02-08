@@ -37,6 +37,7 @@ export interface UserSimpleInterface {
 	id: number;
 	username: string;
 	picture: string | null;
+	online: boolean | undefined;
 }
 
 class User extends Model {
@@ -151,7 +152,7 @@ class User extends Model {
 			[ids.join(',')]
 		) as Promise<UserSimpleInterface[]>).then((users) =>
 			users.map((user) => {
-				return { ...user, picture: `${process.env.API}/${user.picture}` };
+				return { ...user, online: false, picture: `${process.env.API}/${user.picture}` };
 			})
 		);
 	}
