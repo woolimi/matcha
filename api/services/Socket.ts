@@ -13,7 +13,7 @@ async function sendStatusChange(status: Status, app: Express, user: number) {
 	for (const chat of chats) {
 		const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
 		if (app.sockets[otherUser]) {
-			app.sockets[otherUser].emit(status == Status.Logout ? 'userLogout' : 'userLogin', { user: user });
+			app.sockets[otherUser].emit(status == Status.Logout ? 'userLogout' : 'userLogin', { user });
 		}
 	}
 }
