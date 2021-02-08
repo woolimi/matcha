@@ -20,9 +20,17 @@ export const mutations = {
 		state.messages.length = 0;
 		state.messages.push(...messages);
 	},
-	receiveMessage(state, message) {
-		if (state.chat && state.chat.id == message.chat) {
-			state.messages.push(message);
+	receiveMessage(state, payload) {
+		// Display the message if it's the current chat
+		if (state.chat && state.chat.id == payload.chat) {
+			state.messages.push(payload);
+		}
+		// Update the last message in the list
+		for (const chat of state.list) {
+			if (chat.id == payload.chat) {
+				chat.last = payload.at;
+				break;
+			}
 		}
 	},
 	messageError({ commit }, payload) {

@@ -1,17 +1,9 @@
 import express from 'express';
 import { Socket } from 'socket.io';
 import authToken from '../../middleware/authToken';
-import Chat from '../../models/Chat';
+import Chat, { ChatInterface } from '../../models/Chat';
 import ChatMessage from '../../models/ChatMessage';
 import User, { UserSimpleInterface } from '../../models/User';
-
-interface ChatInterface {
-	id: number;
-	user1: number;
-	user2: number;
-	start: string;
-	last: string | null;
-}
 
 const chatRouter = express.Router();
 
@@ -83,6 +75,8 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 		return socket.emit('chat/messageError', { error: 'Could not save message' });
 	}
 	const chatMessage = await ChatMessage.get(queryResult.insertId);
+	// Update lastMessage
+	await Chat.updateLastMessage(chat.id);
 
 	// Send the message
 	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;

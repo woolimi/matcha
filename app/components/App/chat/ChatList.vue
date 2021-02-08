@@ -23,10 +23,9 @@
 							<v-list-item-title>
 								{{ chat.user.username }}
 							</v-list-item-title>
-							<v-list-item-subtitle
-								>{{ chat.last ? chat.last : 'No messages' }}
-								<!-- &mdash; {{ user.date.toLocaleTimeString() }} --></v-list-item-subtitle
-							>
+							<v-list-item-subtitle>{{
+								chat.last ? new Date(chat.last).toLocaleString() : 'No messages'
+							}}</v-list-item-subtitle>
 						</v-list-item-content>
 					</v-list-item>
 				</v-list-item-group>

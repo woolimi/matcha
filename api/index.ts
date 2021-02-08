@@ -61,5 +61,5 @@ const io = new WSServer(server, {
 bindSocket(app, io);
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-	console.log(`⚡️[server]: Server is running at ${process.env.API}:${PORT}`);
+	console.log(`⚡️[server]: Server is running at ${process.env.API}`);
 });

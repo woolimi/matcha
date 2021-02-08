@@ -1,3 +1,4 @@
+import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import User from './User';
@@ -37,6 +38,10 @@ class Chat extends Model {
 
 	static getAllForUser(id: number): Promise<ChatInterface[]> {
 		return Chat.query(`SELECT * FROM ${Chat.tname} WHERE user1 = ? OR user2 = ?`, [id, id]);
+	}
+
+	static updateLastMessage(id: number): Promise<ResultSetHeader> {
+		return Chat.query(`UPDATE ${Chat.tname} SET last = NOW() WHERE id = ?`, [id]);
 	}
 }
 
