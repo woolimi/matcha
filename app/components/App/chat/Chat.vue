@@ -28,7 +28,7 @@
 			<v-container
 				fluid
 				ref="messages"
-				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
+				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill mb-0"
 			>
 				<template v-for="row in rows">
 					<template v-if="row.type == 'separator'">
@@ -119,17 +119,19 @@
 		},
 		methods: {
 			async sendMessage() {
-				this.disabled = true;
-				this.$store.dispatch('$nuxtSocket/emit', {
-					label: 'socket',
-					evt: 'chat/sendMessage',
-					msg: {
-						chat: this.$store.getters['chat/chat'].id,
-						message: this.message,
-					},
-				});
-				this.message = '';
-				this.disabled = false;
+				if (this.message.length > 0) {
+					this.disabled = true;
+					this.$store.dispatch('$nuxtSocket/emit', {
+						label: 'socket',
+						evt: 'chat/sendMessage',
+						msg: {
+							chat: this.$store.getters['chat/chat'].id,
+							message: this.message,
+						},
+					});
+					this.message = '';
+					this.disabled = false;
+				}
 			},
 			leaveChat() {
 				this.$store.dispatch('chat/leaveChat');

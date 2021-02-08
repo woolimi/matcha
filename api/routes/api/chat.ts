@@ -31,7 +31,7 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	const simpleUsers = await User.getAllSimple(userIds);
 	const users: { [key: number]: UserSimpleInterface } = {};
 	for (const user of simpleUsers) {
-		users[user.id] = user;
+		users[user.id] = { ...user, online: req.app.sockets[user.id] != undefined };
 	}
 
 	// Construct result object
@@ -65,6 +65,10 @@ chatRouter.get('/:id', authToken, async (req: any, res) => {
 
 export async function sendMessage(app: Express, socket: Socket, payload: { chat: number; message: string }) {
 	// Check if it's a valid message
+	if (typeof payload.chat !== 'number' || typeof payload.message !== 'string') {
+		return socket.emit('chat/messageError', { error: 'Invalid payload' });
+	}
+	if (!payload.message) return socket.emit('chat/messageError', { error: 'Empty message' });
 	const user = app.users[socket.id];
 	if (!user) return socket.emit('chat/messageError', { error: 'Invalid user' });
 	const chat = await Chat.get(payload.chat);

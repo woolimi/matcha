@@ -11,10 +11,10 @@ import path from 'path';
 import Database from './init/Database';
 import { createServer } from 'http';
 import { Server as WSServer, Socket } from 'socket.io';
-import jwt from 'jsonwebtoken';
-import chatRouter, { sendMessage } from './routes/api/chat';
+import chatRouter from './routes/api/chat';
 import requestIp from 'request-ip';
 import tagRouter from './routes/api/tags';
+import { bindSocket } from './services/Socket';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -58,36 +58,7 @@ const io = new WSServer(server, {
 		credentials: true,
 	},
 });
-io.on('connection', (socket: Socket) => {
-	console.log('💨[socket]: connected', socket.id);
-	socket.on('socket/login', (payload: { token: string }) => {
-		if (!payload || !payload.token) {
-			socket.emit('socket/loginResponse', { error: true });
-			return;
-		}
-		// 'Bearer {token}'
-		const token = payload.token.split(' ')[1] ?? '';
-		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, user: any) => {
-			if (err) {
-				socket.emit('socket/loginResponse', { error: true });
-			} else {
-				// console.log('linked user', user, 'to socket', socket.id);
-				app.users[socket.id] = user.id;
-				app.sockets[user.id] = socket;
-				socket.emit('socket/loginResponse', { success: true });
-			}
-		});
-	});
-	socket.on('chat/sendMessage', (payload) => {
-		console.log('💨[socket]: receive chat/sendMessage from', socket.id);
-		sendMessage(app, socket, payload);
-	});
-	socket.on('disconnect', () => {
-		console.log('💨[socket]: disconnected', socket.id);
-		delete app.sockets[app.users[socket.id]];
-		delete app.users[socket.id];
-	});
-});
+bindSocket(app, io);
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
 	console.log(`⚡️[server]: Server is running at ${process.env.API}:${PORT}`);
