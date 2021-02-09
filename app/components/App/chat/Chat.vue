@@ -33,6 +33,7 @@
 				<template v-for="row in rows">
 					<template v-if="row.type == 'separator'">
 						<v-subheader :key="row.date">{{ row.date }}</v-subheader>
+						<v-divider :key="row.date"></v-divider>
 					</template>
 					<template v-else>
 						<div :class="`d-flex message ${row.type}`" :key="row.id">
@@ -184,18 +185,6 @@
 		unmounted() {
 			this.$store.dispatch('chat/leaveChat');
 		},
-		/*watch: {
-			chat(to, _from) {
-				if (to) {
-					this.$store.dispatch('chat/loadChat', to);
-				}
-			},
-		},
-		mounted() {
-			if (this.chat) {
-				this.$store.dispatch('chat/loadChat', this.chat);
-			}
-		},*/
 	};
 </script>
 
