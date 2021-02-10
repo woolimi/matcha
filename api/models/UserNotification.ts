@@ -46,7 +46,7 @@ class UserNotification extends Model {
 	}
 
 	static getAll(id: number): Promise<NotificationInterface[]> {
-		return UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE user = ?`, [id]);
+		return UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE user = ? ORDER BY id DESC`, [id]);
 	}
 
 	static async add(sender: number, user: number, type: Notification): Promise<ResultSetHeader | false> {
@@ -59,6 +59,10 @@ class UserNotification extends Model {
 			console.error(error);
 			return false;
 		}
+	}
+
+	static setAsRead(id: number): Promise<ResultSetHeader> {
+		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE id = ?`, [id]);
 	}
 }
 
