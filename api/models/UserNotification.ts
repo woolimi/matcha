@@ -1,6 +1,24 @@
+import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import User from './User';
+
+export const enum Notification {
+	Visit = 'profile:visited',
+	MessageReceived = 'message:received',
+	LikeReceived = 'like:received',
+	LikeMatched = 'like:match',
+	LikeRemoved = 'like:removed',
+}
+
+export interface NotificationInterface {
+	id: number;
+	user: number;
+	type: Notification;
+	at: string;
+	sender: number;
+	status: boolean;
+}
 
 class UserNotification extends Model {
 	static tname = 'user_notifications';
@@ -9,12 +27,38 @@ class UserNotification extends Model {
 			user INT UNSIGNED NOT NULL,
 			type ENUM('profile:visited', 'message:received', 'like:received', 'like:match', 'like:removed') NOT NULL,
 			at DATETIME DEFAULT NOW(),
-			content TEXT NOT NULL,
-			FOREIGN KEY (user) REFERENCES ${User.tname} (id) ON DELETE CASCADE
+			sender INT UNSIGNED NULL,
+			status TINYINT UNSIGNED DEFAULT '0',
+			FOREIGN KEY (user) REFERENCES ${User.tname} (id) ON DELETE CASCADE,
+			FOREIGN KEY (sender) REFERENCES ${User.tname} (id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
 
 	static init(): Promise<any> {
 		return Model.init('user_notifications', UserNotification);
+	}
+
+	static async get(id: number): Promise<NotificationInterface | null> {
+		const result = await UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE id = ?`, [id]);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return null;
+	}
+
+	static getAll(id: number): Promise<NotificationInterface[]> {
+		return UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE user = ?`, [id]);
+	}
+
+	static async add(sender: number, user: number, type: Notification): Promise<ResultSetHeader | false> {
+		try {
+			return UserNotification.query(
+				`INSERT INTO ${UserNotification.tname} (user, type, sender) VALUES (?, ?, ?)`,
+				[user, type, sender]
+			) as Promise<ResultSetHeader>;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
 	}
 }
 

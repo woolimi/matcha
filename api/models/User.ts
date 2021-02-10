@@ -143,6 +143,24 @@ class User extends Model {
 		}
 	}
 
+	static mainPictureUrl(path: string | null): string {
+		return `${process.env.API}/${path}`;
+	}
+
+	static getSimple(id: number): Promise<UserSimpleInterface[]> {
+		return (User.query(
+			`SELECT u.id, u.username, p.path as picture
+			FROM ${User.tname} as u
+			LEFT JOIN user_pictures as p ON p.user = u.id
+			WHERE u.id = ?`,
+			[id]
+		) as Promise<UserSimpleInterface[]>).then((users) =>
+			users.map((user) => {
+				return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
+			})
+		);
+	}
+
 	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
 		return (User.query(
 			`SELECT u.id, u.username, p.path as picture
@@ -152,7 +170,7 @@ class User extends Model {
 			[ids.join(',')]
 		) as Promise<UserSimpleInterface[]>).then((users) =>
 			users.map((user) => {
-				return { ...user, online: false, picture: `${process.env.API}/${user.picture}` };
+				return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
 			})
 		);
 	}
