@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<v-container fluid>
 		<!-- Profile card -->
 		<v-row>
 			<v-col cols="12" sm="6">
