@@ -133,11 +133,11 @@ export default {
 				vuex: {
 					mutations: [
 						'chat/receiveMessage',
-						'chat/messageError',
 						'userLogin --> chat/userLogin',
 						'userLogout --> chat/userLogout',
+						'notification --> notifications/receive',
 					],
-					actions: [],
+					actions: ['chat/messageError'],
 				},
 			},
 		],

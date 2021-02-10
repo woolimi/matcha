@@ -9,7 +9,7 @@ const enum Status {
 }
 
 async function sendStatusChange(status: Status, app: Express, user: number) {
-	const chats = await Chat.getAllForUser(user);
+	const chats = await Chat.getAll(user);
 	for (const chat of chats) {
 		const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
 		if (app.sockets[otherUser]) {

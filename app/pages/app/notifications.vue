@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<template v-if="notifications.length == 0">
+		<template v-if="rows.length == 0">
 			<div class="pa-2">
 				<v-alert border="left" elevation="2" outlined text type="info">
 					No notifications yet ! Start matching to interact with other peoples.
@@ -9,42 +9,16 @@
 		</template>
 		<template v-else>
 			<v-list two-line>
-				<template v-for="item in notifications">
-					<template v-if="item.header">
-						<v-subheader :key="item.header">{{ item.header }}</v-subheader>
-						<v-divider :key="item.header"></v-divider>
+				<template v-for="row in rows">
+					<template v-if="row.header">
+						<v-subheader :key="row.header">{{ row.header }}</v-subheader>
+						<v-divider :key="`div_${row.header}`"></v-divider>
 					</template>
-					<v-list-item v-else :key="item.id">
-						<v-list-item-avatar>
-							<v-icon>{{ item.icon }}</v-icon>
-						</v-list-item-avatar>
-
-						<v-list-item-content>
-							<v-list-item-title>
-								{{ item.content }}
-								<v-tooltip bottom>
-									<template v-slot:activator="{ on, attrs }">
-										<v-btn color="action" small icon v-bind="attrs" v-on="on">
-											<v-icon>mdi-arrow-right</v-icon>
-										</v-btn>
-									</template>
-									<span>Visit User</span>
-								</v-tooltip>
-							</v-list-item-title>
-							<v-list-item-subtitle> {{ new Date(item.at).toLocaleString() }} </v-list-item-subtitle>
-						</v-list-item-content>
-
-						<v-list-item-action v-if="!item.read">
-							<v-tooltip left>
-								<template v-slot:activator="{ on, attrs }">
-									<v-btn color="primary" icon v-bind="attrs" v-on="on">
-										<v-icon>mdi-check</v-icon>
-									</v-btn>
-								</template>
-								<span>Mark as Read</span>
-							</v-tooltip>
-						</v-list-item-action>
-					</v-list-item>
+					<MessageReceived v-else-if="row.type == 'message:received'" :row="row" :key="row.id" />
+					<ProfileVisited v-else-if="row.type == 'profile:visited'" :row="row" :key="row.id" />
+					<LikeReceived v-else-if="row.type == 'like:received'" :row="row" :key="row.id" />
+					<LikedBack v-else-if="row.type == 'like:match'" :row="row" :key="row.id" />
+					<LikeRemoved v-else-if="row.type == 'like:removed'" :row="row" :key="row.id" />
 				</template>
 			</v-list>
 		</template>
@@ -56,57 +30,67 @@
 		auth: true,
 		data() {
 			return {
-				// likeReceived, profileVisited, messageReceived, likedBack, likeRemoved
-				notifications: [
+				rows2: [
 					{ header: 'Tuesday 9 February 2021' },
 					{
 						id: 1,
-						user: 1,
-						type: 'likeReceived',
-						icon: 'mdi-heart',
+						user: { id: 1, username: 'Username' },
+						type: 'like:received',
 						at: '2021-02-07 22:09:21',
-						content: 'You received a like from User1 !',
-						read: false,
+						status: false,
 					},
 					{
 						id: 2,
-						user: 1,
-						type: 'profileVisited',
-						icon: 'mdi-account-clock',
+						user: { id: 1, username: 'Username' },
+						type: 'profile:visited',
 						at: '2021-02-07 22:09:21',
-						content: 'User1 visited your profile !',
-						read: true,
+						status: true,
 					},
 					{
 						id: 3,
-						user: 1,
-						type: 'messageReceived',
-						icon: 'mdi-email',
+						user: { id: 1, username: 'Username' },
+						type: 'message:received',
 						at: '2021-02-07 22:09:21',
-						content: 'User1 sent you a message !',
-						read: false,
+						status: false,
 					},
 					{ header: 'Tuesday 10 February 2021' },
 					{
 						id: 4,
-						user: 1,
-						type: 'likedBack',
-						icon: 'mdi-heart-plus',
+						user: { id: 1, username: 'Username' },
+						type: 'like:match',
 						at: '2021-02-10 22:09:21',
-						content: 'User1 liked your profie !',
-						read: false,
+						status: false,
 					},
 					{
 						id: 5,
-						user: 1,
-						type: 'likeRemoved',
-						icon: 'mdi-heart-minus',
+						user: { id: 1, username: 'Username' },
+						type: 'like:removed',
 						at: '2021-02-11 22:09:21',
-						content: 'User1 removed his like :(',
-						read: true,
+						status: true,
 					},
 				],
 			};
+		},
+		computed: {
+			list() {
+				return this.$store.getters['notifications/list'];
+			},
+			rows() {
+				const rows = [];
+				let lastDate = '';
+				for (const notification of this.list) {
+					const date = new Date(notification.at);
+					const parts = this.dateParts(date);
+					const currentDate = `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}`;
+					// Add a new row if the notification is on a different date
+					if (lastDate != currentDate) {
+						lastDate = currentDate;
+						rows.push({ header: currentDate });
+					}
+					rows.push(notification);
+				}
+				return rows;
+			},
 		},
 	};
 </script>

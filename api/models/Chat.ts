@@ -36,8 +36,8 @@ class Chat extends Model {
 		return null;
 	}
 
-	static getAllForUser(id: number): Promise<ChatInterface[]> {
-		return Chat.query(`SELECT * FROM ${Chat.tname} WHERE user1 = ? OR user2 = ?`, [id, id]);
+	static getAll(id: number): Promise<ChatInterface[]> {
+		return Chat.query(`SELECT * FROM ${Chat.tname} WHERE user1 = ? OR user2 = ? ORDER BY last DESC`, [id, id]);
 	}
 
 	static updateLastMessage(id: number): Promise<ResultSetHeader> {

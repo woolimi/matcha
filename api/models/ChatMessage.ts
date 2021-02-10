@@ -4,7 +4,7 @@ import { ResultSetHeader } from 'mysql2';
 import Chat from './Chat';
 import User from './User';
 
-interface ChatMessageInterface {
+export interface ChatMessageInterface {
 	id: number;
 	chat: number;
 	sender: number;
@@ -28,11 +28,11 @@ class ChatMessage extends Model {
 		return Model.init('chat_messages', ChatMessage);
 	}
 
-	static async add(message: { chat: number; sender: number; content: string }): Promise<ResultSetHeader | false> {
+	static async add(chat: number, sender: number, content: string): Promise<ResultSetHeader | false> {
 		try {
 			return (await ChatMessage.query(
 				`INSERT INTO ${ChatMessage.tname} (chat, sender, content) VALUES (?, ?, ?)`,
-				[message.chat, message.sender, message.content]
+				[chat, sender, content]
 			)) as ResultSetHeader;
 		} catch (error) {
 			console.error(error);

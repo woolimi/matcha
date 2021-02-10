@@ -31,20 +31,18 @@
 				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
 			>
 				<template v-for="row in rows">
-					<template v-if="row.type == 'separator'">
-						<v-subheader :key="row.date">{{ row.date }}</v-subheader>
-						<v-divider :key="row.date"></v-divider>
+					<template v-if="row.header">
+						<v-subheader :key="row.header">{{ row.header }}</v-subheader>
+						<v-divider :key="`div_${row.header}`"></v-divider>
 					</template>
-					<template v-else>
-						<div :class="`d-flex message ${row.type}`" :key="row.id">
-							<div class="d-flex flex-column flex-nowrap">
-								<span class="text-caption">{{ row.time }}</span>
-							</div>
-							<v-card :color="row.type == 'received' ? 'blue' : ''" class="ma-2">
-								<div class="content pa-2">{{ row.content }}</div>
-							</v-card>
+					<div v-else :class="`d-flex message ${row.type}`" :key="row.id">
+						<div class="d-flex flex-column flex-nowrap">
+							<span class="text-caption">{{ row.time }}</span>
 						</div>
-					</template>
+						<v-card :color="row.type == 'received' ? 'blue' : ''" class="ma-2">
+							<div class="content pa-2">{{ row.content }}</div>
+						</v-card>
+					</div>
 				</template>
 			</v-container>
 			<v-container
@@ -103,7 +101,7 @@
 					// Add a new row if the message is on a different date
 					if (lastDate != currentDate) {
 						lastDate = currentDate;
-						rows.push({ type: 'separator', date: currentDate });
+						rows.push({ header: currentDate });
 					}
 					// Message row
 					rows.push({

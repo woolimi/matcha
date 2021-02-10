@@ -11,6 +11,7 @@ import path from 'path';
 import Database from './init/Database';
 import { createServer } from 'http';
 import { Server as WSServer, Socket } from 'socket.io';
+import notificationsRouter from './routes/api/notifications';
 import chatRouter from './routes/api/chat';
 import requestIp from 'request-ip';
 import tagRouter from './routes/api/tags';
@@ -44,6 +45,7 @@ app.use(requestIp.mw());
 
 // API
 app.use('/check', checkRouter);
+app.use('/api/users/notifications', notificationsRouter);
 app.use('/api/users/chat', chatRouter);
 app.use('/auth', authRouter);
 app.use('/api/profile', profileRouter);
