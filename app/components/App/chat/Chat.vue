@@ -1,5 +1,5 @@
 <template>
-	<v-col cols="12" md="9" :class="classes">
+	<v-col cols="12" md="9" class="chat" :class="classes">
 		<template v-if="chat">
 			<v-toolbar class="flex-grow-0" style="z-index: 1">
 				<v-icon class="hidden-md-and-up" @click="leaveChat">mdi-chevron-left</v-icon>
@@ -95,9 +95,8 @@
 				let lastDate = '';
 				for (const message of this.messages) {
 					const type = message.sender == this.$auth.user.id ? 'sent' : 'received';
-					const date = new Date(message.at);
-					const parts = this.dateParts(date);
-					const currentDate = `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}`;
+					const parts = this.$date.parts(new Date(message.at));
+					const currentDate = this.$date.simpleDate(parts);
 					// Add a new row if the message is on a different date
 					if (lastDate != currentDate) {
 						lastDate = currentDate;
@@ -107,14 +106,14 @@
 					rows.push({
 						id: message.id,
 						type,
-						time: `${`00${date.getHours()}`.slice(-2)}:${`00${date.getMinutes()}`.slice(-2)}`,
+						time: this.$date.simpleTime(parts),
 						content: message.content,
 					});
 				}
 				return rows;
 			},
 			classes() {
-				return `${this.$store.getters['chat/chat'] == undefined ? 'hidden-sm-and-down' : 'd-flex'} chat`;
+				return this.$store.getters['chat/chat'] == undefined ? 'hidden-sm-and-down' : 'd-flex';
 			},
 		},
 		methods: {
@@ -141,28 +140,6 @@
 			},
 			block() {
 				//
-			},
-			dateParts(date) {
-				const intl = new Intl.DateTimeFormat('en', {
-					hour12: false,
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric',
-					weekday: 'long',
-					hour: 'numeric',
-					minute: 'numeric',
-					second: 'numeric',
-				});
-				const parts = intl.formatToParts(date);
-				return {
-					weekday: parts[0].value,
-					month: parts[2].value,
-					day: parts[4].value,
-					year: parts[6].value,
-					hour: parts[8].value,
-					minute: parts[10].value,
-					second: parts[12].value,
-				};
 			},
 			scrollToBottom() {
 				if (this.$refs.messages) {

@@ -1,5 +1,5 @@
 <template>
-	<v-col cols="12" md="3" :class="classes">
+	<v-col cols="12" md="3" class="chat-list justify-center" :class="classes">
 		<template v-if="chatList.length > 0">
 			<v-list width="100%">
 				<v-list-item-group>
@@ -48,9 +48,7 @@
 				return this.$store.getters['chat/list'];
 			},
 			classes() {
-				return `${
-					this.$store.getters['chat/chat'] == undefined ? 'd-flex' : 'hidden-sm-and-down'
-				} chat-list justify-center`;
+				return this.$store.getters['chat/chat'] == undefined ? 'd-flex' : 'hidden-sm-and-down';
 			},
 		},
 		methods: {

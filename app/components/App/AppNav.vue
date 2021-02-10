@@ -61,6 +61,7 @@
 			this.selected = path ? path.id : 0;
 		},
 		mounted() {
+			this.$store.dispatch('notifications/loadList');
 			this.socket = this.$nuxtSocket({ persist: 'socket' });
 			this.socket.once('socket/loginResponse', (response) => {
 				if (!response.success) {
@@ -109,13 +110,11 @@
 			],
 		}),
 		unmounted() {
-			this.$store.commit('io/LOGOUT');
 			this.socket.disconnect();
 		},
 		methods: {
 			userLogout() {
 				this.$auth.logout();
-				this.$store.commit('io/LOGOUT');
 				this.socket.disconnect();
 			},
 			is_disabled(title) {

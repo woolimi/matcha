@@ -25,6 +25,7 @@ export default {
 		'~/plugins/notifier.client',
 		'~/plugins/validator.client.ts',
 		{ src: '~/plugins/vuejs-google-maps.js', mode: 'client' },
+		'~/plugins/date.client.ts',
 	],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
