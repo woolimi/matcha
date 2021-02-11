@@ -9,16 +9,7 @@
 			<v-list-item-subtitle> {{ new Date(row.at).toLocaleString() }} </v-list-item-subtitle>
 		</v-list-item-content>
 
-		<v-list-item-action v-if="!row.status">
-			<v-tooltip left>
-				<template v-slot:activator="{ on, attrs }">
-					<v-btn color="primary" icon v-bind="attrs" v-on="on">
-						<v-icon>mdi-check</v-icon>
-					</v-btn>
-				</template>
-				<span>Mark as Read</span>
-			</v-tooltip>
-		</v-list-item-action>
+		<MarkAsRead v-if="!row.status" :id="row.id" />
 	</v-list-item>
 </template>
 

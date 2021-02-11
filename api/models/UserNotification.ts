@@ -45,11 +45,22 @@ class UserNotification extends Model {
 		return null;
 	}
 
+	static async getLast(user: number): Promise<NotificationInterface | null> {
+		const result = await UserNotification.query(
+			`SELECT * FROM ${UserNotification.tname} WHERE user = ? ORDER BY id DESC LIMIT 1`,
+			[user]
+		);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return null;
+	}
+
 	static getAll(id: number): Promise<NotificationInterface[]> {
 		return UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE user = ? ORDER BY id DESC`, [id]);
 	}
 
-	static async add(sender: number, user: number, type: Notification): Promise<ResultSetHeader | false> {
+	static async add(user: number, sender: number, type: Notification): Promise<ResultSetHeader | false> {
 		try {
 			return UserNotification.query(
 				`INSERT INTO ${UserNotification.tname} (user, type, sender) VALUES (?, ?, ?)`,

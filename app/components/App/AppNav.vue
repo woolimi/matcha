@@ -14,6 +14,19 @@
 								<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
 							</a>
 						</template>
+						<template v-else-if="list.title === 'Notifications'">
+							<NuxtLink :to="{ path: list.path }">
+								<v-list-item-icon>
+									<v-icon>{{ list.icon }}</v-icon>
+								</v-list-item-icon>
+								<v-list-item-title :class="is_disabled(list.title) ? 'grey--text' : 'black--text'">
+									{{ list.title }}
+								</v-list-item-title>
+								<v-list-item-action v-if="unreadNotifications.length > 0">
+									<v-badge color="primary" inline :content="unreadNotifications.length"></v-badge>
+								</v-list-item-action>
+							</NuxtLink>
+						</template>
 						<template v-else>
 							<NuxtLink :to="{ path: list.path }">
 								<v-list-item-icon>
@@ -123,6 +136,11 @@
 				if (!verified) return true;
 				if (!languages.length || !tags.length || !preferences || !gender || !images[0].url) return true;
 				return false;
+			},
+		},
+		computed: {
+			unreadNotifications() {
+				return this.$store.getters['notifications/unread'];
 			},
 		},
 	};
