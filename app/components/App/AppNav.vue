@@ -73,8 +73,11 @@
 			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
 			this.selected = path ? path.id : 0;
 		},
-		mounted() {
+		beforeCreate() {
 			this.$store.dispatch('notifications/loadList');
+			this.$store.dispatch('chat/loadList');
+		},
+		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });
 			this.socket.once('socket/loginResponse', (response) => {
 				if (!response.success) {

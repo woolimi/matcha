@@ -29,15 +29,15 @@
 </template>
 
 <script>
+	import { mapGetters } from 'vuex';
+
 	export default {
 		auth: true,
 		computed: {
-			list() {
-				return this.$store.getters['notifications/list'];
-			},
-			unreadNotifications() {
-				return this.$store.getters['notifications/unread'];
-			},
+			...mapGetters({
+				list: 'notifications/list',
+				unreadNotifications: 'notifications/unread',
+			}),
 			rows() {
 				// Add a new row if the notification is on a different date
 				const rows = [];
@@ -54,7 +54,9 @@
 			},
 		},
 		methods: {
-			markAllAsRead() {},
+			markAllAsRead() {
+				this.$store.dispatch('chat');
+			},
 		},
 	};
 </script>
