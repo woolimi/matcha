@@ -147,18 +147,19 @@ class User extends Model {
 		return `${process.env.API}/${path}`;
 	}
 
-	static getSimple(id: number): Promise<UserSimpleInterface[]> {
-		return (User.query(
+	static async getSimple(id: number): Promise<UserSimpleInterface | null> {
+		const result: UserSimpleInterface[] = await User.query(
 			`SELECT u.id, u.username, p.path as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id
-			WHERE u.id = ?`,
+			WHERE u.id = ?
+			LIMIT 1`,
 			[id]
-		) as Promise<UserSimpleInterface[]>).then((users) =>
-			users.map((user) => {
-				return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
-			})
 		);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return null;
 	}
 
 	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {

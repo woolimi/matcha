@@ -2,6 +2,11 @@ export const state = () => ({
 	list: [],
 });
 
+export const getters = {
+	list: (state) => state.list,
+	unread: (state) => state.list.filter((n) => !n.status),
+};
+
 export const mutations = {
 	setList(state, list) {
 		state.list.length = 0;
@@ -9,6 +14,14 @@ export const mutations = {
 	},
 	receive(state, notification) {
 		state.list.unshift(notification);
+	},
+	setAsRead(state, id) {
+		for (const notification of state.list) {
+			if (notification.id == id) {
+				notification.status = true;
+				break;
+			}
+		}
 	},
 };
 
@@ -18,8 +31,9 @@ export const actions = {
 			commit('setList', response.data);
 		});
 	},
-};
-
-export const getters = {
-	list: (state) => state.list,
+	markAsRead({ commit }, id) {
+		this.$axios.post(`http://localhost:5000/api/users/notifications/read`, { id }).then(() => {
+			commit('setAsRead', id);
+		});
+	},
 };

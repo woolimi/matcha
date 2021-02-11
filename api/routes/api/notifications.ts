@@ -21,5 +21,23 @@ notificationRouter.get('/list', authToken, async (req: any, res) => {
 			.filter((n) => n !== undefined)
 	);
 });
+notificationRouter.post('/read', authToken, async (req: any, res) => {
+	const id = req.body.id;
+	if (!id || typeof id != 'number' || isNaN(id) || id < 1) {
+		return res.status(400).send({ error: 'Missing or invalid notification ID' });
+	}
+
+	const notification = await UserNotification.get(id);
+	if (!notification) {
+		return res.status(400).send({ error: 'Notification does not exists' });
+	}
+
+	const result = await UserNotification.setAsRead(id);
+	if (!result) {
+		return res.status(500).send({ error: 'Could not update the notification' });
+	}
+
+	return res.send({ success: true });
+});
 
 export default notificationRouter;

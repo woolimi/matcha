@@ -4,6 +4,12 @@ export const state = () => ({
 	messages: [],
 });
 
+export const getters = {
+	list: (state) => state.list,
+	chat: (state) => state.chat,
+	messages: (state) => state.messages,
+};
+
 export const mutations = {
 	setList(state, list) {
 		state.list.length = 0;
@@ -66,10 +72,4 @@ export const actions = {
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
 	},
-};
-
-export const getters = {
-	list: (state) => state.list,
-	chat: (state) => state.chat,
-	messages: (state) => state.messages,
 };

@@ -1,4 +1,5 @@
 import express from 'express';
+import { ResultSetHeader } from 'mysql2';
 import { Socket } from 'socket.io';
 import authToken from '../../middleware/authToken';
 import Chat, { ChatInterface } from '../../models/Chat';
@@ -73,20 +74,30 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 	await Chat.updateLastMessage(chat.id);
 
 	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
-	// Add the notification
-	const notifResult = await UserNotification.add(user, otherUser, Notification.MessageReceived);
+	// Add the notification -- only if the last one wasn't the exact same one
+	const lastNotification = await UserNotification.getLast(otherUser);
+	let notifResult: ResultSetHeader | false = false;
+	if (
+		!lastNotification ||
+		lastNotification.type != Notification.MessageReceived ||
+		lastNotification.sender != user ||
+		lastNotification.status
+	) {
+		notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
+	}
 	// Send the message
 	if (app.sockets[otherUser]) {
 		console.log('💨[socket]: send chat/receiveMessage to ', app.sockets[otherUser].id);
 		app.sockets[otherUser]!.emit('chat/receiveMessage', chatMessage);
 		if (notifResult) {
 			const notification = await UserNotification.get(notifResult.insertId);
-			const user = await User.getSimple(otherUser);
-			app.sockets[otherUser]!.emit('notification', { ...notification, user });
+			const currentUser = await User.getSimple(user);
+			console.log('💨[socket]: send notification to ', app.sockets[otherUser].id);
+			app.sockets[otherUser]!.emit('notification', { ...notification, user: currentUser });
 		}
 	}
-	console.log('💨[socket]: send chat/receiveMessage to ', app.sockets[user].id);
-	app.sockets[user]!.emit('chat/receiveMessage', chatMessage);
+	console.log('💨[socket]: send chat/receiveMessage to ', socket.id);
+	socket.emit('chat/receiveMessage', chatMessage);
 }
 
 export default chatRouter;

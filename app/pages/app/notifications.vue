@@ -21,6 +21,9 @@
 					<LikeRemoved v-else-if="row.type == 'like:removed'" :row="row" :key="row.id" />
 				</template>
 			</v-list>
+			<v-btn v-if="unreadNotifications.length > 0" color="primary" class="mark-all" @click="markAllAsRead">
+				Mark All as Read
+			</v-btn>
 		</template>
 	</div>
 </template>
@@ -31,6 +34,9 @@
 		computed: {
 			list() {
 				return this.$store.getters['notifications/list'];
+			},
+			unreadNotifications() {
+				return this.$store.getters['notifications/unread'];
 			},
 			rows() {
 				// Add a new row if the notification is on a different date
@@ -47,7 +53,17 @@
 				return rows;
 			},
 		},
+		methods: {
+			markAllAsRead() {},
+		},
 	};
 </script>
 
-<style scoped></style>
+<style scoped>
+	.mark-all {
+		position: sticky;
+		bottom: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+</style>
