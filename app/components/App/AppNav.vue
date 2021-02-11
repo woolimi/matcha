@@ -84,6 +84,9 @@
 					});
 				}
 			});
+			this.socket.on('socket/loggedOut', () => {
+				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
+			});
 			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
 		},
 		props: ['app'],

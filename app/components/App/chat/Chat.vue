@@ -35,14 +35,7 @@
 						<v-subheader :key="row.header">{{ row.header }}</v-subheader>
 						<v-divider :key="`div_${row.header}`"></v-divider>
 					</template>
-					<div v-else :class="`d-flex message ${row.type}`" :key="row.id">
-						<div class="d-flex flex-column flex-nowrap">
-							<span class="text-caption">{{ row.time }}</span>
-						</div>
-						<v-card :color="row.type == 'received' ? 'blue' : ''" class="ma-2">
-							<div class="content pa-2">{{ row.content }}</div>
-						</v-card>
-					</div>
+					<Message v-else :type="row.type" :time="row.time" :content="row.content" :key="row.id" />
 				</template>
 			</v-container>
 			<v-container
@@ -60,7 +53,6 @@
 						hide-details
 						class="mb-0"
 						:disabled="disabled"
-						counter="500"
 					></v-text-field
 				></v-form>
 			</v-container>
@@ -178,28 +170,5 @@
 	.messages {
 		flex-grow: 0;
 		overflow: auto;
-	}
-	.message {
-		width: auto;
-		max-width: 50%;
-		align-items: center;
-		position: relative;
-	}
-	.message.received .v-card:first-child {
-		margin-left: 40px;
-	}
-	.message.received .v-card {
-		border-top-right-radius: 1rem;
-		border-bottom-right-radius: 1rem;
-		border-bottom-left-radius: 1rem;
-	}
-	.message.sent {
-		align-self: flex-end;
-		flex-direction: row-reverse;
-	}
-	.message.sent .v-card {
-		border-top-right-radius: 1rem;
-		border-top-left-radius: 1rem;
-		border-bottom-left-radius: 1rem;
 	}
 </style>
