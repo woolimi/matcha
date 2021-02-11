@@ -9,7 +9,7 @@
 				{{ row.user.username }} has visited your profile.
 				<v-tooltip bottom>
 					<template v-slot:activator="{ on, attrs }">
-						<v-btn color="action" small icon v-bind="attrs" v-on="on">
+						<v-btn :to="`/app/user/${row.user.id}`" color="action" small icon v-bind="attrs" v-on="on">
 							<v-icon>mdi-arrow-right</v-icon>
 						</v-btn>
 					</template>
