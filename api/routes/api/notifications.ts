@@ -39,5 +39,10 @@ notificationRouter.post('/read', authToken, async (req: any, res) => {
 
 	return res.send({ success: true });
 });
+notificationRouter.post('/read', authToken, async (req: any, res) => {
+	const result = await UserNotification.setAllAsRead(req.user.id);
+	if (!result) return res.status(500).send({ error: 'Could not update the notification' });
+	return res.send({ success: true });
+});
 
 export default notificationRouter;

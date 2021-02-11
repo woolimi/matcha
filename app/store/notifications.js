@@ -23,6 +23,11 @@ export const mutations = {
 			}
 		}
 	},
+	setAllAsRead(state) {
+		for (const notification of state.list) {
+			notification.status = true;
+		}
+	},
 };
 
 export const actions = {
@@ -34,6 +39,11 @@ export const actions = {
 	markAsRead({ commit }, id) {
 		this.$axios.post(`http://localhost:5000/api/users/notifications/read`, { id }).then(() => {
 			commit('setAsRead', id);
+		});
+	},
+	markAllAsRead({ commit }) {
+		this.$axios.get(`http://localhost:5000/api/users/notifications/read/all`).then((response) => {
+			commit('setAllAsRead');
 		});
 	},
 };

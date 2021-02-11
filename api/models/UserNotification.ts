@@ -75,6 +75,10 @@ class UserNotification extends Model {
 	static setAsRead(id: number): Promise<ResultSetHeader> {
 		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE id = ?`, [id]);
 	}
+
+	static setAllAsRead(user: number): Promise<ResultSetHeader> {
+		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE user = ?`, [user]);
+	}
 }
 
 export default UserNotification;

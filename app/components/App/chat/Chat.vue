@@ -68,6 +68,8 @@
 </template>
 
 <script>
+	import { mapGetters } from 'vuex';
+
 	export default {
 		data() {
 			return {
@@ -76,12 +78,10 @@
 			};
 		},
 		computed: {
-			chat() {
-				return this.$store.getters['chat/chat'];
-			},
-			messages() {
-				return this.$store.getters['chat/messages'];
-			},
+			...mapGetters({
+				chat: 'chat/chat',
+				messages: 'chat/messages',
+			}),
 			rows() {
 				const rows = [];
 				let lastDate = '';

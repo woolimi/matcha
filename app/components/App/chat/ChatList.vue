@@ -56,9 +56,6 @@
 				this.$store.dispatch('chat/loadChat', chat);
 			},
 		},
-		beforeMount() {
-			this.$store.dispatch('chat/loadList');
-		},
 	};
 </script>
 
