@@ -9,7 +9,7 @@
 				{{ row.user.username }} has sent you a message.
 				<v-tooltip bottom>
 					<template v-slot:activator="{ on, attrs }">
-						<v-btn color="action" small icon v-bind="attrs" v-on="on">
+						<v-btn to="/app/chat" color="action" small icon v-bind="attrs" v-on="on">
 							<v-icon>mdi-arrow-right</v-icon>
 						</v-btn>
 					</template>
