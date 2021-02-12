@@ -1,9 +1,11 @@
 <template>
 	<div>
-		<v-expansion-panels accordion class="d-md-none">
+		<v-expansion-panels accordion class="d-md-none" style="position: fixed">
 			<SmallSearchFilter />
 			<SmallSearchTag />
 		</v-expansion-panels>
+		<div style="height: 6.5em" class="d-md-none"></div>
+		<Results />
 	</div>
 </template>
 
@@ -11,11 +13,6 @@
 	export default {
 		auth: true,
 		data: () => ({
-			tags: {
-				selected: [],
-				items: ['a', 'b'],
-				search: null,
-			},
 			mode: 1,
 			open: true,
 		}),
