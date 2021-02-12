@@ -1,7 +1,7 @@
 <template>
 	<v-row no-gutters style="height: 100%">
 		<ChatList />
-		<Chat />
+		<NuxtChild />
 	</v-row>
 </template>
 

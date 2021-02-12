@@ -55,7 +55,7 @@
 		},
 		methods: {
 			markAllAsRead() {
-				this.$store.dispatch('chat');
+				this.$store.dispatch('notifications/markAllAsRead');
 			},
 		},
 	};

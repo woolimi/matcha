@@ -10,7 +10,8 @@ const notificationRouter = express.Router();
 notificationRouter.get('/list', authToken, async (req: any, res) => {
 	const id = req.user.id as number;
 	const notifications = await UserNotification.getAll(id);
-	const otherUsers = await User.getAllSimple(notifications.map((notification) => notification.sender));
+	const userIds = new Set(notifications.map((notification) => notification.sender));
+	const otherUsers = await User.getAllSimple(Array.from(userIds));
 	res.send(
 		notifications
 			.map((notification): NotificationWithUserInterface | undefined => {

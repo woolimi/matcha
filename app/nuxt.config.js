@@ -137,6 +137,7 @@ export default {
 						'userLogin --> chat/userLogin',
 						'userLogout --> chat/userLogout',
 						'notification --> notifications/receive',
+						'notification/setAsRead --> notifications/setAsRead',
 					],
 					actions: ['chat/messageError'],
 				},

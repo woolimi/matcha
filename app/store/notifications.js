@@ -42,7 +42,7 @@ export const actions = {
 		});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/users/notifications/read/all`).then((response) => {
+		this.$axios.post(`http://localhost:5000/api/users/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
 	},
