@@ -37,15 +37,15 @@ class UserNotification extends Model {
 		return Model.init('user_notifications', UserNotification);
 	}
 
-	static async get(id: number): Promise<NotificationInterface | null> {
+	static async get(id: number): Promise<NotificationInterface | undefined> {
 		const result = await UserNotification.query(`SELECT * FROM ${UserNotification.tname} WHERE id = ?`, [id]);
 		if (result && result.length == 1) {
 			return result[0];
 		}
-		return null;
+		return undefined;
 	}
 
-	static async getLast(user: number): Promise<NotificationInterface | null> {
+	static async getLast(user: number): Promise<NotificationInterface | undefined> {
 		const result = await UserNotification.query(
 			`SELECT * FROM ${UserNotification.tname} WHERE user = ? ORDER BY id DESC LIMIT 1`,
 			[user]
@@ -53,7 +53,18 @@ class UserNotification extends Model {
 		if (result && result.length == 1) {
 			return result[0];
 		}
-		return null;
+		return undefined;
+	}
+
+	static async getLastMessage(user: number, sender: number): Promise<NotificationInterface | undefined> {
+		const result = await UserNotification.query(
+			`SELECT * FROM ${UserNotification.tname} WHERE user = ? AND sender = ? AND type = '${Notification.MessageReceived}' ORDER BY id DESC LIMIT 1`,
+			[user, sender]
+		);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return undefined;
 	}
 
 	static getAll(id: number): Promise<NotificationInterface[]> {

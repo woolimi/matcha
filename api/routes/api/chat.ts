@@ -2,7 +2,7 @@ import express from 'express';
 import { ResultSetHeader } from 'mysql2';
 import { Socket } from 'socket.io';
 import authToken from '../../middleware/authToken';
-import Chat, { ChatInterface } from '../../models/Chat';
+import Chat from '../../models/Chat';
 import ChatMessage from '../../models/ChatMessage';
 import User, { UserSimpleInterface } from '../../models/User';
 import UserNotification, { Notification } from '../../models/UserNotification';
@@ -15,7 +15,7 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	const user = req.user.id as number;
 	const chats = await Chat.getAll(user);
 	// Get users associated with each chats
-	const userIds: number[] = chats.map((chat: ChatInterface) => {
+	const userIds: number[] = chats.map((chat) => {
 		if (chat.user1 == user) return chat.user2;
 		return chat.user1;
 	});
@@ -45,9 +45,16 @@ chatRouter.get('/:id', authToken, async (req: any, res) => {
 	if (!chat) return res.status(404).json({ error: 'Chat not found' });
 	if (chat.user1 != user && chat.user2 != user) return res.status(401).json({ error: 'Unauthorized Chat' });
 
+	// Mark last notification as read
+	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
+	const notification = await UserNotification.getLastMessage(user, otherUser);
+	if (notification && !notification.status) {
+		await UserNotification.setAsRead(notification.id);
+	}
+
 	// Get all messages
 	const messages = await ChatMessage.getAll(chat.id);
-	return res.json({ chat, messages });
+	return res.json({ chat, notification: notification?.id, messages });
 });
 
 export async function sendMessage(app: Express, socket: Socket, payload: { chat: number; message: string }) {

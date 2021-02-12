@@ -2,24 +2,30 @@ export const state = () => ({
 	list: [],
 	chat: undefined,
 	messages: [],
+	loaded: false,
 });
 
 export const getters = {
 	list: (state) => state.list,
 	chat: (state) => state.chat,
 	messages: (state) => state.messages,
+	loaded: (state) => state.loaded,
 };
 
 export const mutations = {
 	setList(state, list) {
 		state.list.length = 0;
 		state.list.push(...list);
+		state.loaded = true;
 	},
-	selectChat(state, chat) {
-		state.chat = chat;
+	selectChat(state, id) {
+		state.chat = state.list.find((chat) => chat.id == id);
 	},
 	leaveChat(state) {
 		state.chat = undefined;
+		state.messages.length = 0;
+	},
+	resetMessages(state) {
 		state.messages.length = 0;
 	},
 	setMessages(state, messages) {
@@ -63,10 +69,14 @@ export const actions = {
 			commit('setList', response.data);
 		});
 	},
-	loadChat({ commit }, chat) {
-		commit('selectChat', chat);
-		this.$axios.get(`http://localhost:5000/api/users/chat/${chat.id}`).then((response) => {
+	loadChat({ commit }, id) {
+		//commit('resetMessages');
+		commit('selectChat', id);
+		this.$axios.get(`http://localhost:5000/api/users/chat/${id}`).then((response) => {
 			commit('setMessages', response.data.messages);
+			if (response.data.notification) {
+				commit('notifications/setAsRead', response.data.notification, { root: true });
+			}
 		});
 	},
 	messageError({ commit }, payload) {

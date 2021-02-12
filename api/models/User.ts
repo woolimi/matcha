@@ -162,18 +162,17 @@ class User extends Model {
 		return null;
 	}
 
-	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
-		return (User.query(
+	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
+		const users: UserSimpleInterface[] = await User.query(
 			`SELECT u.id, u.username, p.path as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id
-			WHERE u.id IN (?)`,
-			[ids.join(',')]
-		) as Promise<UserSimpleInterface[]>).then((users) =>
-			users.map((user) => {
-				return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
-			})
+			WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
+			[...ids]
 		);
+		return users.map((user) => {
+			return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
+		});
 	}
 
 	static async updateLocation(ll: LocationLL) {
