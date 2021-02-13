@@ -5,7 +5,7 @@
 			<v-toolbar></v-toolbar>
 			<v-list nav dense>
 				<v-list-item-group v-model="selected" active-class="primary--text text--accent-4">
-					<v-list-item v-for="list in navList" :key="list.title" :disabled="is_disabled(list.title)">
+					<v-list-item v-for="list in navList" :key="list.title" :disabled="isDisabled(list.title)">
 						<template v-if="list.title === 'Logout'">
 							<a @click="userLogout">
 								<v-list-item-icon>
@@ -19,7 +19,7 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title :class="is_disabled(list.title) ? 'grey--text' : 'black--text'">
+								<v-list-item-title :class="isDisabled(list.title) ? 'grey--text' : 'black--text'">
 									{{ list.title }}
 								</v-list-item-title>
 								<v-list-item-action v-if="unreadNotifications.length > 0">
@@ -32,7 +32,7 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title :class="is_disabled(list.title) ? 'grey--text' : 'black--text'">{{
+								<v-list-item-title :class="isDisabled(list.title) ? 'grey--text' : 'black--text'">{{
 									list.title
 								}}</v-list-item-title>
 							</NuxtLink>
@@ -79,18 +79,19 @@
 		},
 		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });
-			this.socket.once('socket/loginResponse', (response) => {
+			this.socket.on('socket/loggedOut', () => {
+				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
+			});
+			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() }, (response) => {
 				if (!response.success) {
 					this.$store.commit('snack/SHOW', {
 						message: 'Could not link user to WebSocket.',
 						color: 'error',
 					});
+				} else {
+					this.socket.emit('user/changePage', { name: this.$route.name, params: this.$route.params });
 				}
 			});
-			this.socket.on('socket/loggedOut', () => {
-				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
-			});
-			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
 		},
 		props: ['app'],
 		data: () => ({
@@ -136,7 +137,7 @@
 				this.$auth.logout();
 				this.socket.disconnect();
 			},
-			is_disabled(title) {
+			isDisabled(title) {
 				const { verified, languages, tags, preferences, gender, images } = this.$auth.user;
 				if (title === 'Profile' || title === 'Logout') return false;
 				if (!verified) return true;
@@ -147,6 +148,11 @@
 		computed: {
 			unreadNotifications() {
 				return this.$store.getters['notifications/unread'];
+			},
+		},
+		watch: {
+			$route(to, _from) {
+				this.socket.emit('user/changePage', { name: to.name, params: to.params });
 			},
 		},
 	};

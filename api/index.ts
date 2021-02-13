@@ -21,6 +21,7 @@ declare global {
 	interface Express extends CoreExpress {
 		users: { [key: string]: number };
 		sockets: { [key: number]: Socket };
+		currentPage: { [key: string]: { name: string; params: { id?: string } } };
 	}
 }
 
@@ -34,6 +35,7 @@ const corsConfig = {
 const app = express() as Express;
 app.users = {};
 app.sockets = {};
+app.currentPage = {};
 
 Database.init();
 app.use('/uploads', express.static(__dirname + '/uploads'));
