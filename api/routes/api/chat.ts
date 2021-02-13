@@ -108,21 +108,24 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 		app.currentPage[otherSocket.id]?.name != 'app-chat-id' ||
 		parseInt(app.currentPage[otherSocket.id]?.params?.id ?? '0') != chat.id;
 	if (addNotification) {
-		// Add the notification -- only if the last one wasn't the exact same one
-		const lastNotification = await UserNotification.getLast(otherUser);
-		if (
-			!lastNotification ||
-			lastNotification.type != Notification.MessageReceived ||
-			lastNotification.sender != user ||
-			lastNotification.status
-		) {
-			const notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
-			if (notifResult) {
-				const notification = await UserNotification.get(notifResult.insertId);
-				const currentUser = await User.getSimple(user);
-				if (otherSocket) {
-					console.log('💨[socket]: send notification to ', otherSocket.id);
-					otherSocket!.emit('notification', { ...notification, user: currentUser });
+		// Create a new one if the last one wasn't the exact same
+		const lastMessage = await UserNotification.getLastMessage(otherUser, user);
+		if (!lastMessage || lastMessage.status) {
+			const lastNotification = await UserNotification.getLast(user);
+			if (
+				!lastNotification ||
+				lastNotification.type != Notification.MessageReceived ||
+				lastNotification.sender != user ||
+				lastNotification.status
+			) {
+				const notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
+				if (notifResult) {
+					const notification = await UserNotification.get(notifResult.insertId);
+					const currentUser = await User.getSimple(user);
+					if (otherSocket) {
+						console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
+						otherSocket.emit('notifications/receive', { ...notification, user: currentUser });
+					}
 				}
 			}
 		}

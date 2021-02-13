@@ -83,8 +83,18 @@ class UserNotification extends Model {
 		}
 	}
 
+	// Status update
+
+	private static setAs(id: number, status: boolean): Promise<ResultSetHeader> {
+		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = ? WHERE id = ?`, [status, id]);
+	}
+
 	static setAsRead(id: number): Promise<ResultSetHeader> {
-		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE id = ?`, [id]);
+		return this.setAs(id, true);
+	}
+
+	static setAsUnread(id: number): Promise<ResultSetHeader> {
+		return this.setAs(id, false);
 	}
 
 	static setAllAsRead(user: number): Promise<ResultSetHeader> {
