@@ -28,12 +28,23 @@ class Chat extends Model {
 		return Model.init('chats', Chat);
 	}
 
-	static async get(id: number): Promise<ChatInterface | null> {
+	static async get(id: number): Promise<ChatInterface | undefined> {
 		const result = await Chat.query(`SELECT * FROM ${Chat.tname} WHERE id = ?`, [id]);
 		if (result && result.length == 1) {
 			return result[0];
 		}
-		return null;
+		return undefined;
+	}
+
+	static async getForUser(user: number, otherUser: number | string): Promise<ChatInterface | undefined> {
+		const result = await Chat.query(
+			`SELECT * FROM ${Chat.tname} WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?) LIMIT 1`,
+			[user, otherUser, otherUser, user]
+		);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return undefined;
 	}
 
 	static getAll(id: number): Promise<ChatInterface[]> {
