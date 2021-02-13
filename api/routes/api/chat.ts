@@ -56,6 +56,17 @@ chatRouter.get('/:id', authToken, async (req: any, res) => {
 	const messages = await ChatMessage.getAll(chat.id);
 	return res.json({ chat, notification: notification?.id, messages });
 });
+chatRouter.get('/user/:id', authToken, async (req: any, res) => {
+	const user = req.user.id as number;
+
+	// Check if the Chat is for the User
+	const chat = await Chat.getForUser(user, req.params.id);
+	if (!chat) {
+		return res.status(404).send({ error: 'No Chat found with this user' });
+	}
+
+	return res.json(chat);
+});
 
 export async function sendMessage(app: Express, socket: Socket, payload: { chat: number; message: string }) {
 	// Check if it's a valid message
