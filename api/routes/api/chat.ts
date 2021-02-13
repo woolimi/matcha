@@ -94,29 +94,40 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 	// Update lastMessage
 	await Chat.updateLastMessage(chat.id);
 
-	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
-	// Add the notification -- only if the last one wasn't the exact same one
-	const lastNotification = await UserNotification.getLast(otherUser);
-	let notifResult: ResultSetHeader | false = false;
-	if (
-		!lastNotification ||
-		lastNotification.type != Notification.MessageReceived ||
-		lastNotification.sender != user ||
-		lastNotification.status
-	) {
-		notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
-	}
 	// Send the message
-	if (app.sockets[otherUser]) {
-		console.log('💨[socket]: send chat/receiveMessage to ', app.sockets[otherUser].id);
-		app.sockets[otherUser]!.emit('chat/receiveMessage', chatMessage);
-		if (notifResult) {
-			const notification = await UserNotification.get(notifResult.insertId);
-			const currentUser = await User.getSimple(user);
-			console.log('💨[socket]: send notification to ', app.sockets[otherUser].id);
-			app.sockets[otherUser]!.emit('notification', { ...notification, user: currentUser });
+	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
+	const otherSocket = app.sockets[otherUser];
+	if (otherSocket) {
+		console.log('💨[socket]: send chat/receiveMessage to ', otherSocket.id);
+		otherSocket.emit('chat/receiveMessage', chatMessage);
+	}
+
+	// Send the notification -- only if we're not already in chat or if the user is not logged in
+	let addNotification =
+		!otherSocket ||
+		app.currentPage[otherSocket.id]?.name != 'app-chat-id' ||
+		parseInt(app.currentPage[otherSocket.id]?.params?.id ?? '0') != chat.id;
+	if (addNotification) {
+		// Add the notification -- only if the last one wasn't the exact same one
+		const lastNotification = await UserNotification.getLast(otherUser);
+		if (
+			!lastNotification ||
+			lastNotification.type != Notification.MessageReceived ||
+			lastNotification.sender != user ||
+			lastNotification.status
+		) {
+			const notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
+			if (notifResult) {
+				const notification = await UserNotification.get(notifResult.insertId);
+				const currentUser = await User.getSimple(user);
+				if (otherSocket) {
+					console.log('💨[socket]: send notification to ', otherSocket.id);
+					otherSocket!.emit('notification', { ...notification, user: currentUser });
+				}
+			}
 		}
 	}
+
 	console.log('💨[socket]: send chat/receiveMessage to ', socket.id);
 	socket.emit('chat/receiveMessage', chatMessage);
 }

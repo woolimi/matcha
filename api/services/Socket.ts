@@ -21,21 +21,20 @@ async function sendStatusChange(status: Status, app: Express, user: number) {
 export function bindSocket(app: Express, io: Server) {
 	io.on('connection', (socket: Socket) => {
 		console.log('💨[socket]: connected', socket.id);
-		socket.on('socket/login', (payload: { token: string }) => {
+		socket.on('socket/login', (payload: { token: string }, callback) => {
 			if (!payload || !payload.token) {
-				socket.emit('socket/loginResponse', { error: true });
-				return;
+				return callback({ error: true });
 			}
 			// 'Bearer {token}'
 			const token = payload.token.split(' ')[1] ?? '';
 			jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err: any, user: any) => {
 				if (err) {
-					socket.emit('socket/loginResponse', { error: true });
+					callback({ error: true });
 				} else {
 					console.log('💨[socket]: linked user', user.id, 'to socket', socket.id);
 					app.users[socket.id] = user.id;
 					app.sockets[user.id] = socket;
-					socket.emit('socket/loginResponse', { success: true });
+					callback({ success: true });
 
 					// Update login status to all liked users
 					sendStatusChange(Status.Login, app, user.id);
@@ -46,6 +45,10 @@ export function bindSocket(app: Express, io: Server) {
 			console.log('💨[socket]: receive chat/sendMessage from', socket.id);
 			sendMessage(app, socket, payload);
 		});
+		socket.on('user/changePage', (payload: { name: string; params: { id?: string } }) => {
+			console.log('💨[socket]: receive user/changePage from', socket.id);
+			app.currentPage[socket.id] = payload;
+		});
 		socket.on('disconnect', async () => {
 			console.log('💨[socket]: disconnected', socket.id);
 
@@ -54,6 +57,7 @@ export function bindSocket(app: Express, io: Server) {
 
 			delete app.sockets[userId];
 			delete app.users[socket.id];
+			delete app.currentPage[socket.id];
 		});
 	});
 }
