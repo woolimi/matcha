@@ -84,6 +84,7 @@ class User extends Model {
 				'tags',
 				'biography',
 				'languages',
+				'birthdate',
 			]);
 		} catch (error) {
 			throw error;
@@ -95,13 +96,14 @@ class User extends Model {
 		try {
 			await conn.query('START TRANSACTION');
 			await conn.query(
-				'UPDATE users SET firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ? WHERE id = ?',
+				'UPDATE users SET firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ?, birthdate = ? WHERE id = ?',
 				[
 					formData.firstName,
 					formData.lastName,
 					formData.gender,
 					formData.preferences,
 					formData.biography,
+					formData.birthdate,
 					user_id,
 				]
 			);

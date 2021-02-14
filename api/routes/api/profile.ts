@@ -80,7 +80,7 @@ profileRouter.post('/public-info', authToken, validator.userPublic, async (req: 
 		return res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
-		return res.sendStatus(200);
+		return res.sendStatus(500);
 	}
 });
 
