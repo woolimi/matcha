@@ -14,9 +14,16 @@
 
 <script>
 	export default {
-		data: () => ({
-			mode: 'image',
-		}),
+		computed: {
+			mode: {
+				get() {
+					return this.$store.state.search.mode;
+				},
+				set(val) {
+					this.$store.commit('search/SET_SEARCH_MODE', val);
+				},
+			},
+		},
 	};
 </script>
 
