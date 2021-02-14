@@ -54,6 +54,7 @@ class User extends Model {
 			preferences ENUM('heterosexual','bisexual') DEFAULT NULL,
 			biography TEXT DEFAULT NULL,
 			location POINT SRID 4326 NOT NULL,
+			birthdate DATE DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
