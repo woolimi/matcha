@@ -23,10 +23,6 @@
 <script>
 	export default {
 		auth: true,
-		data: () => ({
-			mode: 'image',
-			open: true,
-		}),
 	};
 </script>
 

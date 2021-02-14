@@ -2,36 +2,44 @@
 	<v-expansion-panel>
 		<v-expansion-panel-header>
 			<v-row no-gutters>
-				<v-col cols="3"> Filter </v-col>
-				<v-col cols="3" class="text--secondary">
+				<v-col cols="3" class="d-flex align-center"> Filter </v-col>
+				<v-col cols="3" class="text--secondary d-flex align-center">
 					<v-icon small>mdi-account-tie</v-icon>
-					<template v-if="age[1] < 50">{{ age[0] }} ~ {{ age[1] }}</template>
-					<template v-else>{{ age[0] }} ~ <v-icon>mdi-infinity</v-icon></template>
+					<span v-if="age[1] < 50" class="d-flex align-center">{{ age[0] }} ~ {{ age[1] }}</span>
+					<span v-else class="d-flex align-center">{{ age[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-col>
-				<v-col cols="3" class="text--secondary">
+				<v-col cols="3" class="text--secondary d-flex align-center">
 					<v-icon small>mdi-map-marker-distance</v-icon>
-					<template v-if="distance < 100"> &lsaquo; {{ distance }} km </template>
-					<template v-else> &lsaquo; <v-icon>mdi-infinity</v-icon> </template>
+					<span v-if="distance < 100" class="d-flex align-center">
+						<v-icon small>mdi-less-than</v-icon> {{ distance }} km
+					</span>
+					<span v-else class="d-flex align-center">
+						<v-icon small>mdi-less-than</v-icon> <v-icon>mdi-infinity</v-icon>
+					</span>
 				</v-col>
-				<v-col cols="3" class="text--secondary">
+				<v-col cols="3" class="text--secondary d-flex align-center">
 					<v-icon small>mdi-heart</v-icon>
-					<template v-if="likes < 10"> &lsaquo; {{ likes }} </template>
-					<template v-else> &lsaquo; <v-icon>mdi-infinity</v-icon> </template>
+					<span v-if="likes < 10" class="d-flex align-center">
+						<v-icon small>mdi-less-than</v-icon> {{ likes }}
+					</span>
+					<span v-else class="d-flex align-center">
+						<v-icon small>mdi-less-than</v-icon> <v-icon>mdi-infinity</v-icon>
+					</span>
 				</v-col>
 			</v-row>
 		</v-expansion-panel-header>
 		<v-expansion-panel-content>
-			<v-range-slider dense v-model="age" min="18" max="50">
+			<v-range-slider dense v-model="age" min="18" max="50" track-color="grey">
 				<template v-slot:label>
 					<div style="width: 60px">Age</div>
 				</template>
 			</v-range-slider>
-			<v-slider dense v-model="distance" min="0" max="100">
+			<v-slider dense v-model="distance" min="0" max="100" track-color="grey">
 				<template v-slot:label>
 					<div style="width: 60px">Distance</div>
 				</template>
 			</v-slider>
-			<v-slider dense v-model="likes" min="0" max="10">
+			<v-slider dense v-model="likes" min="0" max="10" track-color="grey">
 				<template v-slot:label>
 					<div style="width: 60px">Likes</div>
 				</template>
@@ -42,11 +50,32 @@
 
 <script>
 	export default {
-		data: () => ({
-			age: [18, 30],
-			distance: 10,
-			likes: 5,
-		}),
+		computed: {
+			age: {
+				get() {
+					return this.$store.state.search.age;
+				},
+				set(val) {
+					this.$store.commit('search/SET_AGE', val);
+				},
+			},
+			distance: {
+				get() {
+					return this.$store.state.search.distance;
+				},
+				set(val) {
+					this.$store.commit('search/SET_DISTANCE', val);
+				},
+			},
+			likes: {
+				get() {
+					return this.$store.state.search.likes;
+				},
+				set(val) {
+					this.$store.commit('search/SET_LIKES', val);
+				},
+			},
+		},
 	};
 </script>
 
