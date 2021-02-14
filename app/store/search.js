@@ -7,13 +7,8 @@ export const state = () => ({
 		search: '',
 		items: ['vegan'],
 	},
+	mode: 'image' /* image or map mode*/,
 });
-
-export const getters = {
-	getterValue: (state) => {
-		return state.value;
-	},
-};
 
 export const mutations = {
 	SET_AGE: (state, payload) => {
@@ -31,10 +26,7 @@ export const mutations = {
 	SET_TAGS_SEARCH: (state, payload) => {
 		state.tags.search = payload;
 	},
-};
-
-export const actions = {
-	updateActionValue({ commit }) {
-		commit('updateValue', payload);
+	SET_SEARCH_MODE: (state, payload) => {
+		state.mode = payload;
 	},
 };

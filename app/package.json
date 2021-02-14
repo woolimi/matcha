@@ -25,6 +25,7 @@
     "nuxt": "^2.14.12",
     "nuxt-socket-io": "^1.1.14",
     "socket.io-client": "^3.1.1",
+    "vue2-gmap-custom-marker": "^6.0.0",
     "vue2-google-maps": "^0.10.7"
   },
   "devDependencies": {
