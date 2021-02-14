@@ -5,6 +5,7 @@
 		"password": "root",
 		"database": "matcha",
 		"charset": "utf8mb4_unicode_ci",
-		"connectionLimit": 30
+		"connectionLimit": 30,
+		"timezone": "UTC"
 	}
 }

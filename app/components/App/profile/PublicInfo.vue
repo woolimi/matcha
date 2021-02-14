@@ -155,18 +155,9 @@
 					preferences: this.$auth.user.preferences,
 					tags: [...this.$auth.user.tags],
 					biography: this.$auth.user.biography,
-					birthdate: this.$auth.user.birthdate,
+					birthdate: new Date(this.$auth.user.birthdate).toISOString().substr(0, 10),
 				},
-				error: {
-					firstName: '',
-					lastName: '',
-					languages: '',
-					gender: '',
-					preferences: '',
-					tags: '',
-					biography: '',
-					birthdate: '',
-				},
+				error: {},
 				interest: {
 					tags: [],
 					search: '',
@@ -207,6 +198,7 @@
 						message: 'updated',
 						color: 'success',
 					});
+					this.error = {};
 				} catch (e) {
 					if (e.error) {
 						this.error = e.error;
