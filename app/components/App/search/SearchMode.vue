@@ -1,7 +1,7 @@
 <template>
 	<v-container class="d-flex justify-space-between align-center">
 		<span class="grey--text text--darken-2">Total 7 results</span>
-		<v-btn-toggle mandatory v-model="mode">
+		<v-btn-toggle mandatory v-model="mode" dense>
 			<v-btn value="image">
 				<v-icon> mdi-image-multiple-outline </v-icon>
 			</v-btn>
