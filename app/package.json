@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dipaktelangre/age-calculator": "^1.0.7",
     "@nuxt/typescript-runtime": "^2.0.1",
     "@nuxtjs/auth-next": "^5.0.0-1611574754.9020f2a",
     "@nuxtjs/axios": "^5.12.5",
