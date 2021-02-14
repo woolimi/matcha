@@ -3,7 +3,7 @@
 		<v-row>
 			<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 				<v-card elevation="10" style="border-radius: 15px">
-					<v-img :src="user.url" width="100%" height="100%" aspect-ratio="0.75" class="">
+					<v-img :src="user.url" width="100%" height="100%" aspect-ratio="0.75">
 						<v-container class="d-flex align-start flex-column" style="height: 100%">
 							<v-spacer></v-spacer>
 							<div class="font-weight-black white--text text-shadow">
