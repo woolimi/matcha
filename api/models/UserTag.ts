@@ -22,7 +22,8 @@ class UserTag extends Model {
 				'SELECT tags.name AS name FROM user_tags \
 			LEFT JOIN users ON user_tags.user = users.id \
 			LEFT JOIN tags ON user_tags.tag = tags.id \
-			WHERE user_tags.user = users.id'
+			WHERE user_tags.user = ?',
+				[user_id]
 			);
 			return rows.map((tag: any) => tag.name);
 		} catch (error) {
