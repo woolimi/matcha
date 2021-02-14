@@ -65,6 +65,34 @@
 					</v-col>
 
 					<v-col col="12" sm="6">
+						<v-menu
+							ref="menu"
+							v-model="menu"
+							:close-on-content-click="false"
+							transition="scale-transition"
+							min-width="auto"
+							offset-overflow
+						>
+							<v-date-picker
+								ref="picker"
+								v-model="user.birthdate"
+								:max="new Date().toISOString().substr(0, 10)"
+								min="1950-01-01"
+								@change="setDate"
+							></v-date-picker>
+							<template v-slot:activator="{ on, attrs }">
+								<v-text-field
+									v-model="user.birthdate"
+									label="Birth date"
+									prepend-icon="mdi-calendar"
+									readonly
+									v-bind="attrs"
+									v-on="on"
+									:error-messages="error.birthdate"
+								></v-text-field>
+							</template>
+						</v-menu>
+
 						<v-combobox
 							v-model="user.tags"
 							label="Interest"
@@ -127,6 +155,7 @@
 					preferences: this.$auth.user.preferences,
 					tags: [...this.$auth.user.tags],
 					biography: this.$auth.user.biography,
+					birthdate: this.$auth.user.birthdate,
 				},
 				error: {
 					firstName: '',
@@ -136,6 +165,7 @@
 					preferences: '',
 					tags: '',
 					biography: '',
+					birthdate: '',
 				},
 				interest: {
 					tags: [],
@@ -145,6 +175,7 @@
 					items: languages,
 					search: '',
 				},
+				menu: false,
 			};
 		},
 		async fetch() {
@@ -157,6 +188,11 @@
 					color: 'error',
 				});
 			}
+		},
+		watch: {
+			menu(val) {
+				val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'));
+			},
 		},
 		methods: {
 			async setPublicInfo() {
@@ -178,11 +214,19 @@
 							message: 'Invalid form',
 							color: 'error',
 						});
-					} else console.log(e);
+					} else {
+						this.$notifier.showMessage({
+							message: 'Server error',
+							color: 'error',
+						});
+					}
 				}
 			},
 			resetSearch() {
 				this.interest.search = '';
+			},
+			setDate(date) {
+				this.$refs.menu.save(date);
 			},
 		},
 	};

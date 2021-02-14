@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { RegisterForm, LoginForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
 import LanguageSet from '../init/languages';
 import User from '../models/User';
+import { AgeCalculator } from '@dipaktelangre/age-calculator';
 
 async function validate_email(email: string, option: any = false): Promise<string> {
 	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -72,6 +73,12 @@ function validate_tags(tags: Array<string>) {
 function validate_biography(biography: string) {
 	if (!biography.length) return 'biography is required';
 	if (biography.length > 150) return 'Too long';
+	return '';
+}
+
+function validate_birthdate(birthdate: string) {
+	if (!birthdate) return 'birthdate is required';
+	if (AgeCalculator.getAgeIn(new Date(birthdate), 'years') < 18) return 'You must be at least 18 years old';
 	return '';
 }
 
@@ -166,7 +173,18 @@ export default {
 	},
 	userPublic(req: any, res: any, next: NextFunction) {
 		const user: PublicInfoForm = req.body;
-		if (!fieldsChecker(user, ['firstName', 'lastName', 'languages', 'gender', 'preferences', 'tags', 'biography']))
+		if (
+			!fieldsChecker(user, [
+				'firstName',
+				'lastName',
+				'languages',
+				'gender',
+				'preferences',
+				'tags',
+				'biography',
+				'birthdate',
+			])
+		)
 			return res.sendStatus(403);
 		const error: any = {};
 		let e_msg = '';
@@ -184,6 +202,8 @@ export default {
 		if (e_msg) error.tags = e_msg;
 		e_msg = validate_biography(user.biography);
 		if (e_msg) error.biography = e_msg;
+		e_msg = validate_birthdate(user.birthdate);
+		if (e_msg) error.birthdate = e_msg;
 
 		if (!_.isEmpty(error)) return res.json({ error });
 		next();
