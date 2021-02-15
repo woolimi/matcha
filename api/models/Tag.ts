@@ -16,7 +16,7 @@ class Tag extends Model {
 
 	static async search(name: string): Promise<ResultSetHeader> {
 		try {
-			return await Tag.query(`SELECT * FROM ${this.table} WHERE name = ?`, [name]);
+			return await Tag.query(`SELECT * FROM ${this.tname} WHERE name = ?`, [name]);
 		} catch (error) {
 			throw error;
 		}
@@ -24,7 +24,7 @@ class Tag extends Model {
 
 	static async add(name: string): Promise<ResultSetHeader> {
 		try {
-			return await Tag.query(`INSERT INTO ${this.table} SET (name) VALUES (?)`, [name]);
+			return await Tag.query('INSERT IGNORE INTO tags (`name`) VALUES (?)', [name]);
 		} catch (error) {
 			throw error;
 		}
@@ -34,6 +34,15 @@ class Tag extends Model {
 		try {
 			const rows = await Tag.query('SELECT name FROM tags');
 			return rows.map((tag: any) => tag.name);
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	static async get_tag_ids() {
+		try {
+			const rows = await Tag.query('SELECT id FROM tags');
+			return rows.map((tag: any) => tag.id);
 		} catch (error) {
 			throw error;
 		}

@@ -81,10 +81,10 @@ authRouter.post('/register', validator.userRegister, async (req, res) => {
 	// Find location by IP if browser gps diabled
 	if (_.isEmpty(formData.location)) {
 		const ip: any = req.clientIp;
-		let location = geoip.lookup(ip)?.ll;
-		if (!location) {
-			location = [48.8566, 2.3522];
-		}
+		let ll = geoip.lookup(ip)?.ll;
+		let location = { lat: 48.8566, lng: 2.3522 }; // set paris by default
+		if (ll) location = { lat: ll[0], lng: ll[1] };
+
 		formData.location = location;
 	}
 
@@ -126,9 +126,11 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 	const id = req.user.id;
 	try {
 		const user = await User.me(id);
-		res.send({ user });
+		return res.send({ user });
 	} catch (error) {
 		console.log(error);
+		deleteRefreshToken(res);
+		return res.sendStatus(400);
 	}
 });
 

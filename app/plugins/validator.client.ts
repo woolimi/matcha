@@ -1,6 +1,7 @@
 import { Context } from '@nuxt/types';
 import { Inject } from '@nuxt/types/app';
 import { NuxtAxiosInstance } from '@nuxtjs/axios';
+import { AgeCalculator } from '@dipaktelangre/age-calculator';
 
 interface RegisterForm {
 	email: string;
@@ -29,6 +30,7 @@ interface PublicInfoForm {
 	preferences: string;
 	tags: Array<string>;
 	biography: string;
+	birthdate: string;
 }
 
 interface ChangePasswordForm {
@@ -111,6 +113,12 @@ function validate_biography(biography: string) {
 	return '';
 }
 
+function validate_birthdate(birthdate: string) {
+	if (!birthdate) return 'birthdate is required';
+	if (AgeCalculator.getAgeIn(new Date(birthdate), 'years') < 18) return 'You must be at least 18 years old';
+	return '';
+}
+
 export default ({ $axios }: Context, inject: Inject) => {
 	inject('validator', {
 		async userRegister(user: RegisterForm) {
@@ -160,6 +168,9 @@ export default ({ $axios }: Context, inject: Inject) => {
 			if (e_msg) error.tags = e_msg;
 			e_msg = validate_biography(user.biography);
 			if (e_msg) error.biography = e_msg;
+			e_msg = validate_birthdate(user.birthdate);
+			if (e_msg) error.birthdate = e_msg;
+
 			return { error };
 		},
 		userChangePassword(pwForm: ChangePasswordForm) {

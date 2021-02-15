@@ -21,6 +21,7 @@ export interface PublicInfoForm {
 	preferences: string;
 	tags: Array<string>;
 	biography: string;
+	birthdate: string;
 }
 
 export interface ChangePasswordForm {

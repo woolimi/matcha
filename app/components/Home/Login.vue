@@ -70,6 +70,10 @@
 						this.error = e.error;
 					} else {
 						console.error(e);
+						this.$notifier.showMessage({
+							message: 'Server error',
+							color: 'error',
+						});
 					}
 				}
 			},

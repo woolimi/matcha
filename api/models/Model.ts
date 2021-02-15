@@ -31,6 +31,7 @@ abstract class Model {
 	static async find(id: number) {
 		try {
 			const rows = await Model.query(`SELECT * FROM ${this.tname} WHERE id = ? LIMIT 1`, [id]);
+			if (rows.length < 1) throw 'User not found';
 			return rows[0];
 		} catch (error) {
 			throw error;
