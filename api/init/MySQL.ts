@@ -1,4 +1,3 @@
-import { connect } from 'http2';
 import mysql from 'mysql2/promise';
 import database from '../config/database.json';
 
