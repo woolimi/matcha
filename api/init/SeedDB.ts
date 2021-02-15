@@ -7,12 +7,12 @@ import Model from '../models/Model';
 import faker from 'faker';
 import UserTag from '../models/UserTag';
 import UserLanguage from '../models/UserLanguage';
-import languages from './languages';
 
 faker.locale = 'fr';
 
 async function create_seed_tags() {
 	try {
+		// INSERT IGNORE INTO
 		await Tag.add('vegan');
 		await Tag.add('geek');
 		await Tag.add('piercing');
@@ -35,8 +35,7 @@ async function create_seed_users() {
 		const current_year = new Date().getFullYear();
 		const tags = await Tag.get_tag_ids();
 		const langs = ['English', 'English', 'English', 'English', 'French', 'French', 'French', 'Korean'];
-		// for (let i = 0; i < genders.length; i++) {
-		for (let i = 0; i < 1; i++) {
+		for (let i = 0; i < genders.length; i++) {
 			const lastName = faker.name.lastName(genders[i]);
 			const firstName = faker.name.firstName(genders[i]);
 			const user = {
