@@ -30,10 +30,18 @@ export const mutations = {
 	SET_SEARCH_MODE: (state, payload) => {
 		state.mode = payload;
 	},
+	SET_USERS: (state, payload) => {
+		state.users = payload;
+	},
 };
 
 export const actions = {
-	updateUsers({ commit }) {
-		commit('UPDATE_USERS', payload);
+	async updateUsers({ commit }, params) {
+		try {
+			const { data } = await this.$axios.get('/api/search', { params });
+			commit('SET_USERS', data.users);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 };
