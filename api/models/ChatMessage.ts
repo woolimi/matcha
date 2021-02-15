@@ -48,8 +48,14 @@ class ChatMessage extends Model {
 		return null;
 	}
 
-	static getAll(id: number): Promise<ChatMessageInterface[]> {
-		return ChatMessage.query(`SELECT * FROM ${ChatMessage.tname} WHERE chat = ?`, [id]);
+	static async getAllPage(id: number, fromId?: number): Promise<ChatMessageInterface[]> {
+		if (fromId) {
+			return ChatMessage.query(
+				`SELECT * FROM ${ChatMessage.tname} WHERE chat = ? AND id < ? ORDER BY id DESC LIMIT 20`,
+				[id, fromId]
+			);
+		}
+		return ChatMessage.query(`SELECT * FROM ${ChatMessage.tname} WHERE chat = ? ORDER BY id DESC LIMIT 20`, [id]);
 	}
 }
 

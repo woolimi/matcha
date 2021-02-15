@@ -1,5 +1,4 @@
 import express from 'express';
-import { ResultSetHeader } from 'mysql2';
 import { Socket } from 'socket.io';
 import authToken from '../../middleware/authToken';
 import Chat from '../../models/Chat';
@@ -38,23 +37,27 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	}
 	res.send(result);
 });
-chatRouter.get('/:id', authToken, async (req: any, res) => {
+chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	// Check if the Chat is for the User
 	const user = req.user.id as number;
 	const chat = await Chat.get(req.params.id);
 	if (!chat) return res.status(404).json({ error: 'Chat not found' });
 	if (chat.user1 != user && chat.user2 != user) return res.status(401).json({ error: 'Unauthorized Chat' });
 
-	// Mark last notification as read
-	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
-	const notification = await UserNotification.getLastMessage(user, otherUser);
-	if (notification && !notification.status) {
-		await UserNotification.setAsRead(notification.id);
+	// Get all messages -- 20 per page and from "from" if it's present
+	const from = req.params.from ? parseInt(req.params.from) : undefined;
+	const messages = await ChatMessage.getAllPage(chat.id, from);
+	const completed = messages.length < 20;
+	if (!from) {
+		// Mark last notification as read -- only on the first page
+		const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
+		const notification = await UserNotification.getLastMessage(user, otherUser);
+		if (notification && !notification.status) {
+			await UserNotification.setAsRead(notification.id);
+		}
+		return res.json({ chat, notification: notification?.id, messages, completed });
 	}
-
-	// Get all messages
-	const messages = await ChatMessage.getAll(chat.id);
-	return res.json({ chat, notification: notification?.id, messages });
+	return res.json({ messages, completed });
 });
 chatRouter.get('/user/:id', authToken, async (req: any, res) => {
 	const user = req.user.id as number;
