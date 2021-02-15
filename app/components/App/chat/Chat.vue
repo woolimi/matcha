@@ -2,7 +2,9 @@
 	<v-col cols="12" md="9" class="chat" :class="classes">
 		<template v-if="chat">
 			<v-toolbar class="flex-grow-0" style="z-index: 1">
-				<v-icon class="hidden-md-and-up" @click="leaveChat">mdi-chevron-left</v-icon>
+				<NuxtLink to="/app/chat">
+					<v-icon class="hidden-md-and-up" @click="leaveChat">mdi-chevron-left</v-icon>
+				</NuxtLink>
 
 				<v-badge
 					:color="chat.user.online ? 'green' : 'pink'"
@@ -29,13 +31,24 @@
 				fluid
 				ref="messages"
 				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
+				@scroll.passive="onScroll"
 			>
+				<div class="loading" v-show="!loadedChat || loadingMore">
+					<v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
+				</div>
 				<template v-for="row in rows">
 					<template v-if="row.header">
 						<v-subheader :key="row.header">{{ row.header }}</v-subheader>
 						<v-divider :key="`div_${row.header}`"></v-divider>
 					</template>
-					<Message v-else :type="row.type" :time="row.time" :content="row.content" :key="row.id" />
+					<Message
+						v-else
+						:type="row.type"
+						:time="row.time"
+						:content="row.content"
+						:flash="isNewRow(row.id)"
+						:key="row.id"
+					/>
 				</template>
 			</v-container>
 			<v-container
@@ -75,33 +88,44 @@
 			return {
 				message: '',
 				disabled: false,
+				lastHeight: 0,
+				newRows: [],
 			};
 		},
 		computed: {
 			...mapGetters({
 				chat: 'chat/chat',
 				messages: 'chat/messages',
+				loadedChat: 'chat/loadedChat',
+				loadingMore: 'chat/loadingMore',
+				completed: 'chat/completed',
+				lastEvent: 'chat/lastEvent',
 			}),
 			rows() {
 				const rows = [];
-				let lastDate = '';
-				for (const message of this.messages) {
-					const type = message.sender == this.$auth.user.id ? 'sent' : 'received';
-					const parts = this.$date.parts(new Date(message.at));
-					const currentDate = this.$date.simpleDate(parts);
-					// Add a new row if the message is on a different date
-					if (lastDate != currentDate) {
-						lastDate = currentDate;
-						rows.push({ header: currentDate });
+				if (this.messages.length > 0) {
+					if (this.messages.length < 20 || this.completed) {
+						rows.push({ header: 'Your conversation starts here !' });
 					}
-					// Message row
-					rows.push({
-						id: message.id,
-						type,
-						time: this.$date.simpleTime(parts),
-						content: message.content,
-					});
-				}
+					let lastDate = '';
+					for (const message of this.messages) {
+						const type = message.sender == this.$auth.user.id ? 'sent' : 'received';
+						const parts = this.$date.parts(new Date(message.at));
+						const currentDate = this.$date.simpleDate(parts);
+						// Add a new row if the message is on a different date
+						if (lastDate != currentDate) {
+							lastDate = currentDate;
+							rows.push({ header: currentDate });
+						}
+						// Message row
+						rows.push({
+							id: message.id,
+							type,
+							time: this.$date.simpleTime(parts),
+							content: message.content,
+						});
+					}
+				} else rows.push({ header: 'No messages yet !' });
 				return rows;
 			},
 			classes() {
@@ -133,23 +157,66 @@
 			block() {
 				//
 			},
+			onScroll() {
+				if (
+					this.$refs?.messages &&
+					this.$refs.messages.scrollTop == 0 &&
+					!this.loadingMore &&
+					!this.completed
+				) {
+					this.$store.dispatch('chat/loadMore');
+				}
+			},
 			scrollToBottom() {
-				if (this.$refs.messages) {
+				this.$nextTick(() => {
+					if (this.$refs.messages) {
+						this.$refs.messages.scrollTo({
+							top: this.$refs.messages.scrollHeight,
+							behavior: 'smooth',
+						});
+					}
+				});
+			},
+			isNewRow(id) {
+				return this.newRows.indexOf(id) >= 0;
+			},
+		},
+		watch: {
+			loadingMore(to, _from) {
+				// Save the current scroll height before updates
+				if (to) {
+					this.lastHeight = this.$refs.messages.scrollHeight;
+				} else {
+					// Get new scrollHeight after it's rendered
 					this.$nextTick(() => {
-						this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
+						if (this.$refs.messages) {
+							this.$refs.messages.scrollTo({
+								top:
+									this.$refs.messages.scrollHeight -
+									this.lastHeight -
+									this.$refs.messages.offsetHeight / 2,
+								behavior: 'smooth',
+							});
+						}
 					});
 				}
 			},
-		},
-		mounted() {
-			this.scrollToBottom();
-		},
-		watch: {
-			rows() {
-				this.scrollToBottom();
+			rows(to, from) {
+				this.newRows = [];
+				if (this.lastEvent != 'initialLoad') {
+					for (const row of to) {
+						if (from.find((r) => !r.header && r.id == row.id) === undefined) {
+							this.newRows.push(row.id);
+						}
+					}
+				}
+				if (this.lastEvent == 'newMessage' || this.lastEvent == 'initialLoad') {
+					this.scrollToBottom();
+				}
 			},
 		},
 		unmounted() {
+			this.newRows.length = 0;
 			this.$store.dispatch('chat/leaveChat');
 		},
 	};
@@ -161,6 +228,7 @@
 		flex-flow: column nowrap;
 		height: 100%;
 		overflow: auto;
+		position: relative;
 	}
 
 	.v-subheader {
@@ -170,5 +238,9 @@
 	.messages {
 		flex-grow: 0;
 		overflow: auto;
+	}
+
+	.loading {
+		text-align: center;
 	}
 </style>

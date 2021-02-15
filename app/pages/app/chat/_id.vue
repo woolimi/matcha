@@ -10,7 +10,7 @@
 				return this.$route.params.id;
 			},
 			loaded() {
-				return this.$store.getters['chat/loaded'];
+				return this.$store.getters['chat/loadedList'];
 			},
 		},
 		mounted() {
