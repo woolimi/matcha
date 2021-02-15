@@ -5,9 +5,10 @@ export const state = () => ({
 	tags: {
 		selected: [],
 		search: '',
-		items: ['vegan'],
+		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
+	users: [],
 });
 
 export const mutations = {
@@ -28,5 +29,11 @@ export const mutations = {
 	},
 	SET_SEARCH_MODE: (state, payload) => {
 		state.mode = payload;
+	},
+};
+
+export const actions = {
+	updateUsers({ commit }) {
+		commit('UPDATE_USERS', payload);
 	},
 };
