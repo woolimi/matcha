@@ -203,7 +203,7 @@ class User extends Model {
 				return { ...user, online: false, picture: User.mainPictureUrl(user.picture) };
 			});
 		} catch (error) {
-			console.error(error);
+			throw error;
 		}
 	}
 
