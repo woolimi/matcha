@@ -35,12 +35,18 @@ async function create_seed_users() {
 		const current_year = new Date().getFullYear();
 		const tags = await Tag.get_tag_ids();
 		const langs = ['English', 'English', 'English', 'English', 'French', 'French', 'French', 'Korean'];
+		const unique_pairs: string[] = [];
 		for (let i = 0; i < genders.length; i++) {
-			const lastName = faker.name.lastName(genders[i]);
-			const firstName = faker.name.firstName(genders[i]);
+			let lastName, firstName, username;
+			do {
+				lastName = faker.name.lastName(genders[i]);
+				firstName = faker.name.firstName(genders[i]);
+				username = `${lastName}.${firstName}`;
+			} while (unique_pairs.indexOf(username) >= 0);
+			unique_pairs.push(username);
 			const user = {
 				email: faker.internet.email(),
-				username: `${lastName}.${firstName}`,
+				username,
 				password,
 				lastName,
 				firstName,
