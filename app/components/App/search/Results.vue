@@ -3,20 +3,22 @@
 		<v-row>
 			<template v-if="$store.state.search.mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
-					<v-card elevation="10" style="border-radius: 15px">
-						<v-img :src="user.url" width="100%" height="100%" aspect-ratio="0.75">
-							<v-container class="d-flex align-start flex-column" style="height: 100%">
-								<v-spacer></v-spacer>
-								<div class="font-weight-black white--text text-shadow">
-									{{ user.username }}, {{ user.age }}
-								</div>
-								<div class="font-weight-black white--text">
-									<v-icon color="primary">mdi-heart</v-icon>
-									<span class="text-shadow">{{ user.likes }}</span>
-								</div>
-							</v-container>
-						</v-img>
-					</v-card>
+					<NuxtLink :to="{ path: `/app/profile/users/${user.id}` }" custom v-slot="{ navigate }">
+						<v-card @click="navigate" role="link" elevation="10" style="border-radius: 15px">
+							<v-img :src="user.url" width="100%" height="100%" aspect-ratio="0.75">
+								<v-container class="d-flex align-start flex-column" style="height: 100%">
+									<v-spacer></v-spacer>
+									<div class="font-weight-black white--text text-shadow">
+										{{ user.username }}, {{ user.age }}
+									</div>
+									<div class="font-weight-black white--text">
+										<v-icon color="primary">mdi-heart</v-icon>
+										<span class="text-shadow">{{ user.likes }}</span>
+									</div>
+								</v-container>
+							</v-img>
+						</v-card>
+					</NuxtLink>
 				</v-col>
 			</template>
 			<template v-else>
