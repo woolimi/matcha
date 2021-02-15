@@ -30,6 +30,13 @@ class UserTag extends Model {
 			throw error;
 		}
 	}
+	static async add_tag(user_id: number, tag_id: number) {
+		try {
+			await UserTag.query('INSERT IGNORE INTO user_tags (`user`, `tag`) VALUES (?, ?)', [user_id, tag_id]);
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 export default UserTag;

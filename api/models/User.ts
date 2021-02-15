@@ -145,6 +145,30 @@ class User extends Model {
 		}
 	}
 
+	static async create_fake_user(user: any): Promise<any> {
+		try {
+			return await User.query(
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`) \
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true)',
+				[
+					user.email,
+					user.username,
+					user.password,
+					user.lastName,
+					user.firstName,
+					user.gender,
+					user.preferences,
+					user.biography,
+					user.birthdate,
+					user.lng,
+					user.lat,
+				]
+			);
+		} catch (error) {
+			throw error;
+		}
+	}
+
 	static getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
 		return (User.query(
 			`SELECT u.id, u.username, p.path as picture
