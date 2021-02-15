@@ -26,6 +26,16 @@ class UserLanguage extends Model {
 			throw error;
 		}
 	}
+	static async add(user_id: number, language: string) {
+		try {
+			await UserLanguage.query('INSERT IGNORE INTO user_languages (`user`, `language`) VALUES (?, ?)', [
+				user_id,
+				language,
+			]);
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 export default UserLanguage;

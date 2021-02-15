@@ -155,7 +155,9 @@
 					preferences: this.$auth.user.preferences,
 					tags: [...this.$auth.user.tags],
 					biography: this.$auth.user.biography,
-					birthdate: new Date(this.$auth.user.birthdate).toISOString().substr(0, 10),
+					birthdate: this.$auth.user.birthdate
+						? new Date(this.$auth.user.birthdate).toISOString().substr(0, 10)
+						: '',
 				},
 				error: {},
 				interest: {

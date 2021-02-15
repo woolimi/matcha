@@ -1,4 +1,3 @@
-import MySQL from './MySQL';
 import Chat from '../models/Chat';
 import ChatMessage from '../models/ChatMessage';
 import Tag from '../models/Tag';

@@ -126,9 +126,11 @@ authRouter.get('/me', authToken, async (req: any, res) => {
 	const id = req.user.id;
 	try {
 		const user = await User.me(id);
-		res.send({ user });
+		return res.send({ user });
 	} catch (error) {
 		console.log(error);
+		deleteRefreshToken(res);
+		return res.sendStatus(400);
 	}
 });
 
