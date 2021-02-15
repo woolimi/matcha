@@ -15,6 +15,7 @@ import jwt from 'jsonwebtoken';
 import chatRouter, { sendMessage } from './routes/api/chat';
 import requestIp from 'request-ip';
 import tagRouter from './routes/api/tags';
+import searchRouter from './routes/api/search';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -48,6 +49,7 @@ app.use('/api/users/chat', chatRouter);
 app.use('/auth', authRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/tags', tagRouter);
+app.use('/api/search', searchRouter);
 
 // Start !
 const server = createServer(app);
