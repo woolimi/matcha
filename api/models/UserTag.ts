@@ -22,9 +22,17 @@ class UserTag extends Model {
 				'SELECT tags.name AS name FROM user_tags \
 			LEFT JOIN users ON user_tags.user = users.id \
 			LEFT JOIN tags ON user_tags.tag = tags.id \
-			WHERE user_tags.user = users.id'
+			WHERE user_tags.user = ?',
+				[user_id]
 			);
 			return rows.map((tag: any) => tag.name);
+		} catch (error) {
+			throw error;
+		}
+	}
+	static async add_tag(user_id: number, tag_id: number) {
+		try {
+			await UserTag.query('INSERT IGNORE INTO user_tags (`user`, `tag`) VALUES (?, ?)', [user_id, tag_id]);
 		} catch (error) {
 			throw error;
 		}

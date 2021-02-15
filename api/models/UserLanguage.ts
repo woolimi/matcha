@@ -19,9 +19,20 @@ class UserLanguage extends Model {
 			const rows = await UserLanguage.query(
 				'SELECT language FROM user_languages \
 			LEFT JOIN users ON user_languages.user = users.id \
-			WHERE user_languages.user = users.id'
+			WHERE user_languages.user = ?',
+				[user_id]
 			);
 			return rows.map((l: any) => l.language);
+		} catch (error) {
+			throw error;
+		}
+	}
+	static async add(user_id: number, language: string) {
+		try {
+			await UserLanguage.query('INSERT IGNORE INTO user_languages (`user`, `language`) VALUES (?, ?)', [
+				user_id,
+				language,
+			]);
 		} catch (error) {
 			throw error;
 		}

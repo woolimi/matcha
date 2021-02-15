@@ -37,9 +37,11 @@ class UserPicture extends Model {
 					image_path,
 				]);
 			} else {
-				fs.unlink(path.resolve(__dirname, '../', p[0].path), (err) => {
-					if (err) console.log(err);
-				});
+				if (!p[0].path.match(/^https:\/\//)) {
+					fs.unlink(path.resolve(__dirname, '../', p[0].path), (err) => {
+						if (err) console.log(err);
+					});
+				}
 				await UserPicture.query(
 					'UPDATE user_pictures SET added = NOW(), path = ? WHERE user = ? AND picture = ? ',
 					[image_path, user_id, image_id]
@@ -54,10 +56,15 @@ class UserPicture extends Model {
 			const images = await UserPicture.query('SELECT * FROM user_pictures WHERE user = ?', [user_id]);
 			return [0, 1, 2, 3, 4].map((i) => {
 				const img = images.find((img: any) => img.picture === i);
-				return {
-					url: img ? `${process.env.API}/${img.path}` : '',
-					path: img ? img.path : '',
+				const ret = {
+					url: '',
+					path: '',
 				};
+				if (!img) return ret;
+				if (img.path.match(/^https:\/\//)) ret.url = img.path;
+				else if (img.path) ret.url = `${process.env.API}/${img.path}`;
+				ret.path = img.path;
+				return ret;
 			});
 		} catch (error) {
 			throw error;
@@ -66,9 +73,11 @@ class UserPicture extends Model {
 	static async delete_image(user_id: number, image_id: number, image_path: string): Promise<any> {
 		try {
 			await UserPicture.query('DELETE FROM user_pictures WHERE user = ? AND picture = ?', [user_id, image_id]);
-			fs.unlink(path.resolve(__dirname, '../', image_path), (err) => {
-				if (err) console.log(err);
-			});
+			if (!image_path.match(/^https:\/\//)) {
+				fs.unlink(path.resolve(__dirname, '../', image_path), (err) => {
+					if (err) console.log(err);
+				});
+			}
 		} catch (error) {
 			throw error;
 		}

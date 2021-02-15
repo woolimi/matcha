@@ -55,6 +55,7 @@ class User extends Model {
 			preferences ENUM('heterosexual','bisexual') DEFAULT NULL,
 			biography TEXT DEFAULT NULL,
 			location POINT SRID 4326 NOT NULL,
+			birthdate DATETIME DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
@@ -84,6 +85,7 @@ class User extends Model {
 				'tags',
 				'biography',
 				'languages',
+				'birthdate',
 			]);
 		} catch (error) {
 			throw error;
@@ -95,13 +97,14 @@ class User extends Model {
 		try {
 			await conn.query('START TRANSACTION');
 			await conn.query(
-				'UPDATE users SET firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ? WHERE id = ?',
+				'UPDATE users SET firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ?, birthdate = ? WHERE id = ?',
 				[
 					formData.firstName,
 					formData.lastName,
 					formData.gender,
 					formData.preferences,
 					formData.biography,
+					formData.birthdate,
 					user_id,
 				]
 			);
@@ -160,6 +163,30 @@ class User extends Model {
 			return result[0];
 		}
 		return null;
+	}
+
+	static async create_fake_user(user: any): Promise<any> {
+		try {
+			return await User.query(
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`) \
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true)',
+				[
+					user.email,
+					user.username,
+					user.password,
+					user.lastName,
+					user.firstName,
+					user.gender,
+					user.preferences,
+					user.biography,
+					user.birthdate,
+					user.lng,
+					user.lat,
+				]
+			);
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {

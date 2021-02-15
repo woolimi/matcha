@@ -6,7 +6,18 @@
 				<v-btn @click="setLocationBySearch" class="primary">Set Location</v-btn>
 			</label>
 		</v-container>
-		<gmap-map :center="center" @click="setLocation" :zoom="12" style="width: 100%; height: 50vh">
+		<gmap-map
+			:options="{
+				mapTypeControl: false,
+				streetViewControl: false,
+				rotateControl: false,
+				fullscreenControl: false,
+			}"
+			:center="center"
+			@click="setLocation"
+			:zoom="12"
+			style="width: 100%; height: 50vh"
+		>
 			<gmap-marker :position="location"></gmap-marker>
 		</gmap-map>
 	</v-container>

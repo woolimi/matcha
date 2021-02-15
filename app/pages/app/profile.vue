@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<v-container fluid>
 		<!-- Profile card -->
 		<v-row>
 			<v-col cols="12" sm="6">
@@ -16,8 +16,6 @@
 </template>
 
 <script>
-	import { mapState } from 'vuex';
-
 	export default {
 		auth: true,
 	};

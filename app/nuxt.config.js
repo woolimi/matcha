@@ -26,6 +26,7 @@ export default {
 		'~/plugins/validator.client.ts',
 		{ src: '~/plugins/vuejs-google-maps.js', mode: 'client' },
 		'~/plugins/date.client.ts',
+		{ src: '~/plugins/google-maps-marker.js', mode: 'client' },
 	],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
@@ -118,6 +119,7 @@ export default {
 
 	// Build Configuration (https://go.nuxtjs.dev/config-build)
 	build: {
+		transpile: [/^vue2-google-maps($|\/)/, /^vue2-gmap-custom-marker($|\/)/],
 		extend: function (config, { isDev, isClient }) {
 			config.node = {
 				fs: 'empty',
