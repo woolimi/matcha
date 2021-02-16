@@ -60,7 +60,9 @@
 			};
 		},
 		mounted() {
-			this.$store.dispatch('search/updateUsers', {});
+			const { age, distance, likes, tags } = this.$store.state.search;
+			const params = { age, distance, likes, tags: tags.selected };
+			this.$store.dispatch('search/updateUsers', params);
 		},
 		computed: {
 			imageCols() {

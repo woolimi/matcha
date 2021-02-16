@@ -1,5 +1,6 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
+import User from '../../models/User';
 
 const searchRouter = express.Router();
 
@@ -83,10 +84,20 @@ const users = [
 	},
 ];
 
-searchRouter.get('/', authToken, async (req, res) => {
+// TODO : validate filter
+searchRouter.get('/', authToken, async (req: any, res) => {
 	try {
-		console.log(req.params);
-		return res.json({ users: users });
+		const query: { age?: [string, string]; distance?: string; likes?: string } = req.query;
+		if (!query || !query.age || !query.distance || !query.likes) throw 'Invalid query';
+		const user = req.user;
+
+		await User.searchedBy(
+			req.user.id,
+			query.age.map((s) => parseInt(s)),
+			parseInt(query.distance),
+			parseInt(query.likes)
+		);
+		return res.json({ users });
 	} catch (error) {
 		console.error(error);
 		res.status(400);
