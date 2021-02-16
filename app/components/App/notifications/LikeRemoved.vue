@@ -9,12 +9,15 @@
 			<v-list-item-subtitle> {{ new Date(row.at).toLocaleString() }} </v-list-item-subtitle>
 		</v-list-item-content>
 
-		<MarkAsRead v-if="!row.status" :id="row.id" />
+		<MarkAsRead v-if="manageable && !row.status" :id="row.id" />
 	</v-list-item>
 </template>
 
 <script>
 	export default {
-		props: { row: { type: Object, required: true } },
+		props: {
+			row: { type: Object, required: true },
+			manageable: { type: Boolean, required: true },
+		},
 	};
 </script>
