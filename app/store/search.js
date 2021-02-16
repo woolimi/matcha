@@ -1,6 +1,8 @@
+import qs from 'qs';
+
 export const state = () => ({
 	age: [18, 30],
-	distance: 10,
+	distance: 100,
 	likes: 5,
 	tags: {
 		selected: [],
@@ -38,7 +40,9 @@ export const mutations = {
 export const actions = {
 	async updateUsers({ commit }, params) {
 		try {
-			const { data } = await this.$axios.get('/api/search', { params });
+			const { data } = await this.$axios.get('/api/search', {
+				params,
+			});
 			commit('SET_USERS', data.users);
 		} catch (error) {
 			console.log(error);

@@ -225,6 +225,41 @@ class User extends Model {
 			throw error;
 		}
 	}
+
+	static async searchedBy(user_id: number, age: number[], distance: number, likes: number) {
+		try {
+			const { preferences, location, gender } = await User.find(user_id);
+			let preferences_query = '';
+			if (distance >= 100) distance = Number.MAX_SAFE_INTEGER;
+			if (likes >= 10) likes = Number.MAX_SAFE_INTEGER;
+			if (age[1] >= 50) age[1] = Number.MAX_SAFE_INTEGER;
+			if (preferences === 'heterosexual') {
+				preferences_query = `gender = '${gender === 'male' ? 'female' : 'male'}'`;
+			} else if (preferences === 'bisexual') {
+				if (gender === 'male')
+					preferences_query = `(gender = 'female' OR (gender = 'male' AND preference = 'bisexual'))`;
+				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preference = 'bisexual'))`;
+			}
+			const rows = await User.query(
+				`SELECT users.id, username, lastName, firstName, gender,\
+					timestampdiff(YEAR, users.birthdate, CURDATE()) AS age, \
+					ST_Distance(users.location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
+					COUNT(user_likes.liked) AS likes \
+					FROM users \
+					LEFT JOIN user_likes \
+					ON users.id = user_likes.liked \
+					GROUP BY users.id \
+					HAVING users.id != ? \
+						AND ${preferences_query} AND distance < ? \
+						AND age >= ? AND age <= ? AND likes <= ?`,
+				[location.y, location.x, user_id, distance, age[0], age[1], likes]
+			);
+			console.log(rows);
+			return rows;
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 export default User;
