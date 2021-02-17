@@ -18,6 +18,7 @@ import tagRouter from './routes/api/tags';
 import { bindSocket } from './services/Socket';
 import searchRouter from './routes/api/search';
 import likeRouter from './routes/api/like';
+import blockRouter from './routes/api/block';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -49,13 +50,14 @@ app.use(requestIp.mw());
 
 // API
 app.use('/check', checkRouter);
-app.use('/api/users/notifications', notificationsRouter);
-app.use('/api/users/chat', chatRouter);
 app.use('/auth', authRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/like', likeRouter);
+app.use('/api/block', blockRouter);
+app.use('/api/notifications', notificationsRouter);
+app.use('/api/chat', chatRouter);
 
 // Start !
 const server = createServer(app);

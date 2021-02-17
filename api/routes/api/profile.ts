@@ -103,17 +103,16 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 	try {
 		const id = req.params.id;
 		// Check if the user is not blocked
-		const isBlocked = await UserBlock.check(id, req.user.id);
-		if (isBlocked != null) return res.status(401).json({ error: 'The User has blocked you.' });
+		const isBlocked = await UserBlock.status(id, req.user.id);
+		if (isBlocked) return res.status(401).json({ error: 'The User has blocked you.' });
 
 		// Get the profile informations
 		const profile = await User.getPublicProfile(id);
 		if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
-		// Like status
-		const likeStatus = await UserLike.status(req.user.id, id);
-
 		// Get all other informations
+		const likeStatus = await UserLike.status(req.user.id, id);
+		const blockStatus = await UserBlock.status(req.user.id, id);
 		const images = (await UserPicture.get_images(id)).filter((i) => i.path != '');
 		const tags = await UserTag.get_tags(id);
 		const languages = await UserLanguage.get_languages(id);
@@ -124,6 +123,7 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 		return res.json({
 			...profile,
 			like: likeStatus,
+			blocked: blockStatus,
 			images,
 			tags,
 			languages,

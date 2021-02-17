@@ -32,17 +32,17 @@ export const mutations = {
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/users/notifications/list`).then((response) => {
+		this.$axios.get(`http://localhost:5000/api/notifications/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	markAsRead({ commit }, id) {
-		this.$axios.post(`http://localhost:5000/api/users/notifications/read`, { id }).then(() => {
+		this.$axios.post(`http://localhost:5000/api/notifications/read`, { id }).then(() => {
 			commit('setAsRead', id);
 		});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.post(`http://localhost:5000/api/users/notifications/read/all`).then(() => {
+		this.$axios.post(`http://localhost:5000/api/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
 	},
