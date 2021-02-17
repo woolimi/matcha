@@ -3,6 +3,14 @@ import Model from './Model';
 import fs from 'fs';
 import path from 'path';
 
+export interface UserPictureInterface {
+	id: number;
+	user: number;
+	picture: number;
+	path: string;
+	added: string;
+}
+
 class UserPicture extends Model {
 	static tname = 'user_pictures';
 	static table = `CREATE TABLE user_pictures (
@@ -51,11 +59,15 @@ class UserPicture extends Model {
 			throw error;
 		}
 	}
-	static async get_images(user_id: number): Promise<any> {
+
+	static async get_images(user_id: number): Promise<{ url: string; path: string }[]> {
 		try {
-			const images = await UserPicture.query('SELECT * FROM user_pictures WHERE user = ?', [user_id]);
+			const images: UserPictureInterface[] = await UserPicture.query(
+				'SELECT * FROM user_pictures WHERE user = ?',
+				[user_id]
+			);
 			return [0, 1, 2, 3, 4].map((i) => {
-				const img = images.find((img: any) => img.picture === i);
+				const img = images.find((img) => img.picture === i);
 				const ret = {
 					url: '',
 					path: '',
@@ -70,6 +82,7 @@ class UserPicture extends Model {
 			throw error;
 		}
 	}
+
 	static async delete_image(user_id: number, image_id: number, image_path: string): Promise<any> {
 		try {
 			await UserPicture.query('DELETE FROM user_pictures WHERE user = ? AND picture = ?', [user_id, image_id]);

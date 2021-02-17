@@ -8,6 +8,9 @@ import User from '../../models/User';
 import { send_verification_email } from '../../services/Mailing';
 import validator from '../../middleware/validator';
 import UserPicture from '../../models/UserPicture';
+import UserNotification, { NotificationWithUserInterface } from '../../models/UserNotification';
+import UserTag from '../../models/UserTag';
+import UserLanguage from '../../models/UserLanguage';
 
 const profileRouter = express.Router();
 
@@ -88,6 +91,40 @@ profileRouter.post('/change-password', authToken, validator.userChangePassword, 
 	try {
 		await User.changePassword(req.body);
 		res.sendStatus(200);
+	} catch (error) {
+		console.error(error);
+		return res.sendStatus(500);
+	}
+});
+
+profileRouter.get('/:id', authToken, async (req: any, res) => {
+	try {
+		// Get the profile informations
+		const id = req.params.id;
+		const profile = await User.getPublicProfile(id);
+		if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+		// Get all other informations
+		const images = (await UserPicture.get_images(id)).filter((i) => i.path != '');
+		const tags = await UserTag.get_tags(id);
+		const languages = await UserLanguage.get_languages(id);
+		const history = await UserNotification.getHistory(req.user.id, id);
+		const userIds = Array.from(new Set(history.map((n) => n.sender)));
+		const otherUsers = await User.getAllSimple(userIds);
+
+		return res.json({
+			...profile,
+			images,
+			tags,
+			languages,
+			history: history
+				.map((n): NotificationWithUserInterface | undefined => {
+					const otherUser = otherUsers.find((user) => user.id == n.sender);
+					if (otherUser) return { ...n, user: otherUser };
+					return undefined;
+				})
+				.filter((n) => n !== undefined),
+		});
 	} catch (error) {
 		console.error(error);
 		return res.sendStatus(500);

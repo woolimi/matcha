@@ -1,7 +1,7 @@
 import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
-import User from './User';
+import User, { UserSimpleInterface } from './User';
 
 export const enum Notification {
 	Visit = 'profile:visited',
@@ -19,6 +19,8 @@ export interface NotificationInterface {
 	sender: number;
 	status: boolean;
 }
+
+export type NotificationWithUserInterface = NotificationInterface | { user: UserSimpleInterface };
 
 class UserNotification extends Model {
 	static tname = 'user_notifications';
@@ -81,6 +83,14 @@ class UserNotification extends Model {
 			console.error(error);
 			return false;
 		}
+	}
+
+	static async getHistory(user: number, sender: number): Promise<NotificationInterface[]> {
+		const result = await UserNotification.query(
+			`SELECT * FROM ${UserNotification.tname} WHERE user = ? AND sender = ? ORDER BY id DESC`,
+			[user, sender]
+		);
+		return result;
 	}
 
 	// Status update

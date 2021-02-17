@@ -1,61 +1,77 @@
 <template>
 	<v-container fluid>
-		<!-- Profile card -->
-		<v-row>
+		<div v-if="$fetchState.pending" class="text-center">
+			<v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
+		</div>
+		<div v-else-if="$fetchState.error" class="text-center">
+			<v-alert border="left" colored-border type="error" elevation="2">
+				{{ $fetchState.error.message }}
+			</v-alert>
+		</div>
+		<v-row v-else-if="profile.id">
 			<v-col cols="12" sm="6">
 				<v-card elevation="4" class="pa-2 mb-2">
 					<v-carousel cycle hide-delimiter-background show-arrows-on-hover>
-						<v-carousel-item v-for="(path, i) in images" :key="i" :src="path" transition="fade-transition">
+						<v-carousel-item
+							v-for="(image, i) in profile.images"
+							:key="i"
+							:src="image.url"
+							transition="fade-transition"
+						>
 						</v-carousel-item>
 					</v-carousel>
 				</v-card>
 			</v-col>
 			<v-col cols="12" sm="6">
-				<v-subheader>Informations</v-subheader>
-				<v-card elevation="4" class="pa-2 mb-2">
-					<v-row class="text-center">
-						<v-col cols="12"> {{ firstName }} {{ lastName }} </v-col>
-					</v-row>
-					<v-row class="text-center">
-						<v-col cols="12"> {{ birthdate }} </v-col>
-					</v-row>
-				</v-card>
-				<v-subheader>Interests</v-subheader>
 				<v-row class="text-center">
 					<v-col cols="6">
-						<v-chip :color="gender == 'Male' ? 'blue lighten-2' : 'pink lighten-2'"> {{ gender }} </v-chip>
+						<v-subheader><v-icon left> mdi-card-account-details </v-icon> Name</v-subheader>
+						{{ profile.firstName }} {{ profile.lastName }}
 					</v-col>
 					<v-col cols="6">
-						<v-chip :color="preferences == 'Heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5'">
-							{{ preferences }}
+						<v-subheader><v-icon left> mdi-calendar </v-icon> Birthday</v-subheader>
+						{{ new Date(profile.birthdate).toLocaleDateString() }}
+					</v-col>
+				</v-row>
+				<v-row class="text-center">
+					<v-col cols="6">
+						<v-subheader><v-icon left> mdi-human-male-female </v-icon> Gender</v-subheader>
+						<v-chip :color="genderColor">
+							{{ profile.gender }}
+						</v-chip>
+					</v-col>
+					<v-col cols="6">
+						<v-subheader><v-icon left> mdi-head-heart </v-icon> Sexual Preferences</v-subheader>
+						<v-chip :color="preferencesColor">
+							{{ profile.preferences }}
 						</v-chip>
 					</v-col>
 				</v-row>
-				<v-subheader>Biography</v-subheader>
+				<v-subheader><v-icon left> mdi-notebook </v-icon> Biography</v-subheader>
 				<v-card elevation="4" class="pa-2 mb-2">
 					<v-row>
 						<v-col cols="12">
-							{{ biography }}
+							{{ profile.biography }}
 						</v-col>
 					</v-row>
 				</v-card>
 				<v-row>
 					<v-col cols="6">
-						<v-subheader>Tags</v-subheader>
-						<v-chip class="ma-2" v-for="(tag, i) in tags" :key="i">
+						<v-subheader><v-icon left> mdi-music-circle </v-icon> Interests</v-subheader>
+						<v-chip class="ma-2" v-for="(tag, i) in profile.tags" :key="i">
 							{{ tag }}
 						</v-chip>
 					</v-col>
 					<v-col cols="6">
-						<v-subheader>Languages</v-subheader>
-						<v-chip class="ma-2" v-for="(language, i) in languages" :key="i">
+						<v-subheader><v-icon left> mdi-web </v-icon> Languages</v-subheader>
+						<v-chip class="ma-2" v-for="(language, i) in profile.languages" :key="i">
 							{{ language }}
 						</v-chip>
 					</v-col>
 				</v-row>
 				<v-row>
 					<v-col cols="12" class="text-center">
-						<v-subheader>Actions</v-subheader>
+						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
 						<v-bottom-sheet inset>
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn class="ma-2" outlined color="success" v-bind="attrs" v-on="on">
@@ -70,18 +86,18 @@
 										rotateControl: false,
 										fullscreenControl: false,
 									}"
-									:center="location"
+									:center="profile.location"
 									:zoom="10"
 									style="width: 100%; height: 65vh"
 								>
 									<gmap-custom-marker :marker="$auth.user.location" :data-user-id="$auth.user.id">
 										<v-avatar color="primary" size="50">
-											<v-img :src="$auth.user.images[0].path" class="marker-avatar" />
+											<v-img :src="$auth.user.images[0].url" class="marker-avatar" />
 										</v-avatar>
 									</gmap-custom-marker>
-									<gmap-custom-marker :marker="location" :data-user-id="id">
+									<gmap-custom-marker :marker="profile.location" :data-user-id="id">
 										<v-avatar color="primary" size="50">
-											<v-img :src="images[0]" class="marker-avatar" />
+											<v-img :src="profile.images[0].url" class="marker-avatar" />
 										</v-avatar>
 									</gmap-custom-marker>
 								</gmap-map>
@@ -96,54 +112,49 @@
 								</v-btn>
 							</template>
 							<v-card tile>
-								<NotificationsList :manageable="false" :list="notificationsList" />
+								<NotificationsList
+									:manageable="false"
+									:list="profile.history"
+									:emptyMessage="noHistoryMessage"
+								/>
 							</v-card>
 						</v-bottom-sheet>
 					</v-col>
 				</v-row>
 			</v-col>
 		</v-row>
-		<!--<v-row>
-			<v-col cols="12">
-				<v-subheader>Location</v-subheader>
-			</v-col>
-		</v-row>-->
 	</v-container>
 </template>
 
 <script>
 	export default {
 		auth: true,
+		validate({ params }) {
+			return /^\d+$/.test(params.id);
+		},
+		async fetch() {
+			const profile = await this.$axios.get(`/api/profile/${this.id}`);
+			if (profile.status == 200) {
+				this.profile = profile.data;
+			} else this.$fetchState;
+		},
 		data() {
 			return {
-				email: 'test@mail.com',
-				username: 'Username',
-				lastName: 'First Name',
-				firstName: 'Last Name',
-				gender: 'Male',
-				preferences: 'Heterosexual',
-				location: { lat: 48.345, lng: -0.479 },
-				images: ['https://i.pravatar.cc/300?img=2'],
-				tags: ['Vegan', 'Occult'],
-				biography: 'I am totally not a robot.',
-				languages: ['French', 'English'],
-				birthdate: '20 November 2020',
-				notificationsList: [
-					{
-						id: 1,
-						type: 'message:received',
-						user: { id: 1, username: 'Username' },
-						at: new Date().toISOString(),
-					},
-				],
+				profile: {},
 			};
 		},
 		computed: {
 			id() {
 				return this.$route.params.id;
 			},
+			genderColor() {
+				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
+			},
+			preferencesColor() {
+				return this.profile?.preferences == 'heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5';
+			},
 			noHistoryMessage() {
-				return `No notifications yet ! Like or interact with ${this.firstName} ${this.lastName}.`;
+				return `No History with ${this.profile?.firstName} ${this.profile?.lastName} yet.`;
 			},
 		},
 	};

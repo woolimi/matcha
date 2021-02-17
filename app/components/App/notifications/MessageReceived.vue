@@ -6,7 +6,7 @@
 
 		<v-list-item-content>
 			<v-list-item-title>
-				{{ row.user.username }} has sent you a message.
+				{{ row.user.firstName }} {{ row.user.lastName }} has sent you a message.
 				<v-tooltip bottom>
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn
