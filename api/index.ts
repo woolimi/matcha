@@ -17,6 +17,7 @@ import requestIp from 'request-ip';
 import tagRouter from './routes/api/tags';
 import { bindSocket } from './services/Socket';
 import searchRouter from './routes/api/search';
+import likeRouter from './routes/api/like';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -54,6 +55,7 @@ app.use('/auth', authRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/search', searchRouter);
+app.use('/api/like', likeRouter);
 
 // Start !
 const server = createServer(app);
