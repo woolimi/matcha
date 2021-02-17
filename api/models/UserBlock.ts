@@ -26,19 +26,25 @@ export class UserBlock extends Model {
 		return Model.init('user_blocks', UserBlock);
 	}
 
-	static async check(user: number, blocked: number): Promise<UserBlockInterface | null> {
-		const result: UserBlockInterface[] = await UserBlock.query(
-			`SELECT * FROM ${UserBlock.tname} WHERE user = ? AND blocked = ? LIMIT 1`,
-			[user, blocked]
-		);
+	static async status(user: number, blocked: number): Promise<number> {
+		const result: {
+			id: number;
+		}[] = await UserBlock.query(`SELECT id FROM ${UserBlock.tname} WHERE user = ? AND blocked = ? LIMIT 1`, [
+			user,
+			blocked,
+		]);
 		if (result && result.length == 1) {
-			return result[0];
+			return result[0].id;
 		}
-		return null;
+		return 0;
 	}
 
 	static add(user: number, blocked: number): Promise<ResultSetHeader> {
-		return UserBlock.query(`INSERT INTO ${UserBlock.tname} (user, block) VALUES (?, ?)`, [user, blocked]);
+		return UserBlock.query(`INSERT INTO ${UserBlock.tname} (user, blocked) VALUES (?, ?)`, [user, blocked]);
+	}
+
+	static remove(id: number): Promise<ResultSetHeader> {
+		return UserBlock.query(`DELETE FROM ${UserBlock.tname} WHERE id = ?`, [id]);
 	}
 }
 

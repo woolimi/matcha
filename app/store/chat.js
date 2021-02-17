@@ -89,13 +89,13 @@ export const mutations = {
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/users/chat/list`).then((response) => {
+		this.$axios.get(`http://localhost:5000/api/chat/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios.get(`http://localhost:5000/api/users/chat/${id}`).then((response) => {
+		this.$axios.get(`http://localhost:5000/api/chat/${id}`).then((response) => {
 			commit('setMessages', response.data);
 			if (response.data.notification) {
 				commit('notifications/setAsRead', response.data.notification, { root: true });
@@ -106,7 +106,7 @@ export const actions = {
 		if (state.completed) return;
 		commit('setLoadingMore', true);
 		const from = state.messages.length == 0 ? '' : state.messages[0].id;
-		this.$axios.get(`http://localhost:5000/api/users/chat/${state.chat.id}/${from}`).then((response) => {
+		this.$axios.get(`http://localhost:5000/api/chat/${state.chat.id}/${from}`).then((response) => {
 			commit('insertMessages', response.data);
 			commit('setLoadingMore', false);
 		});

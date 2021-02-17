@@ -1,5 +1,8 @@
 <template>
 	<v-container fluid>
+		<v-alert border="left" elevation="2" outlined text type="info" v-if="profile.id == $auth.user.id">
+			This is what you profile looks like to other users.
+		</v-alert>
 		<div v-if="$fetchState.pending" class="text-center">
 			<v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
 		</div>
@@ -76,7 +79,7 @@
 						</p>
 					</v-col>
 				</v-row>
-				<v-row>
+				<v-row v-if="profile.id != $auth.user.id">
 					<v-col cols="12" class="text-center">
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
 						<v-bottom-sheet inset>
@@ -117,7 +120,7 @@
 							<v-icon left>mdi-email</v-icon> Chat
 						</v-btn>
 						<v-btn class="ma-2" outlined color="orange" @click="blockEvent">
-							<v-icon left>mdi-cancel</v-icon> Block
+							<v-icon left>mdi-cancel</v-icon> {{ blocked }}
 						</v-btn>
 						<v-bottom-sheet inset>
 							<template v-slot:activator="{ on, attrs }">
@@ -179,6 +182,12 @@
 				}
 				return 'Like';
 			},
+			blocked() {
+				if (this.profile.blocked) {
+					return 'Unblock';
+				}
+				return 'Block';
+			},
 			noHistoryMessage() {
 				return `No History with ${this.profile?.firstName} ${this.profile?.lastName} yet.`;
 			},
@@ -189,14 +198,30 @@
 					if (response.status == 200) {
 						this.profile.like = response.data.like;
 					} else {
-						this.$store.dispatch('snackbar/SHOW', {
+						this.$store.commit('snackbar/SHOW', {
 							message: 'Could not update Like status.',
 							color: 'error',
 						});
 					}
 				});
 			},
-			blockEvent() {},
+			blockEvent() {
+				this.$axios.post(`/api/block/${this.id}`).then((response) => {
+					if (response.status == 200) {
+						this.profile.blocked = response.data.blocked;
+						this.$store.commit('snackbar/SHOW', {
+							message: this.profile.blocked ? 'User blocked' : 'User unblocked',
+							color: 'success',
+						});
+					} else {
+						this.$store.commit('snackbar/SHOW', {
+							message: 'Could not block User.',
+							color: 'error',
+						});
+					}
+				});
+			},
+			openChat() {},
 		},
 	};
 </script>
