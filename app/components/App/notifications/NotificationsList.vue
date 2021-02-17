@@ -3,7 +3,7 @@
 		<template v-if="rows.length == 0">
 			<div class="pa-2">
 				<v-alert border="left" elevation="2" outlined text type="info">
-					No notifications yet ! Start matching to interact with other peoples.
+					{{ emptyMessage }}
 				</v-alert>
 			</div>
 		</template>
@@ -14,11 +14,31 @@
 						<v-subheader :key="row.header">{{ row.header }}</v-subheader>
 						<v-divider :key="`div_${row.header}`"></v-divider>
 					</template>
-					<MessageReceived v-else-if="row.type == 'message:received'" manageable :row="row" :key="row.id" />
-					<ProfileVisited v-else-if="row.type == 'profile:visited'" manageable :row="row" :key="row.id" />
-					<LikeReceived v-else-if="row.type == 'like:received'" manageable :row="row" :key="row.id" />
-					<LikedBack v-else-if="row.type == 'like:match'" manageable :row="row" :key="row.id" />
-					<LikeRemoved v-else-if="row.type == 'like:removed'" manageable :row="row" :key="row.id" />
+					<MessageReceived
+						v-else-if="row.type == 'message:received'"
+						:manageable="manageable"
+						:row="row"
+						:key="row.id"
+					/>
+					<ProfileVisited
+						v-else-if="row.type == 'profile:visited'"
+						:manageable="manageable"
+						:row="row"
+						:key="row.id"
+					/>
+					<LikeReceived
+						v-else-if="row.type == 'like:received'"
+						:manageable="manageable"
+						:row="row"
+						:key="row.id"
+					/>
+					<LikedBack v-else-if="row.type == 'like:match'" :manageable="manageable" :row="row" :key="row.id" />
+					<LikeRemoved
+						v-else-if="row.type == 'like:removed'"
+						:manageable="manageable"
+						:row="row"
+						:key="row.id"
+					/>
 				</template>
 			</v-list>
 			<v-btn
@@ -38,6 +58,10 @@
 		props: {
 			manageable: {
 				type: Boolean,
+				required: true,
+			},
+			emptyMessage: {
+				type: String,
 				required: true,
 			},
 			list: {

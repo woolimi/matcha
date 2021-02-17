@@ -19,26 +19,23 @@ export interface UserInterface {
 	verified: number;
 	initialized: number;
 	gender: ('male' | 'female') | null;
-	preferences: ('male' | 'female' | 'all') | null;
+	preferences: ('heterosexual' | 'bisexual') | null;
 	biography: string | null;
+	location: { x: number; y: number } | null;
+	birthdate: string | null;
 }
 
-export interface UserPublicInterface {
-	id: number;
-	username: string;
-	lastName: string;
-	firstName: string;
-	gender: ('male' | 'female') | null;
-	preferences: ('male' | 'female' | 'all') | null;
-	biography: string | null;
-}
+export type UserInterfaceLocation = UserInterface | { location: { lat: number; lng: number } | null };
 
-export interface UserSimpleInterface {
-	id: number;
-	username: string;
+export type UserSimpleInterface = Pick<UserInterface, 'id' | 'firstName' | 'lastName'> & {
 	picture: string | null;
 	online: boolean | undefined;
-}
+};
+
+export type PublicProfileInterface = Pick<
+	UserInterface,
+	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate'
+>;
 
 class User extends Model {
 	static tname = 'users';
@@ -47,8 +44,8 @@ class User extends Model {
 			email VARCHAR(60) NOT NULL,
 			username VARCHAR(20) NOT NULL,
 			password VARCHAR(100) NOT NULL,
-			lastName VARCHAR(45) NOT NULL,
 			firstName VARCHAR(45) NOT NULL,
+			lastName VARCHAR(45) NOT NULL,
 			verified TINYINT DEFAULT '0',
 			initialized TINYINT DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
@@ -189,14 +186,14 @@ class User extends Model {
 		}
 	}
 
-	static async getAllSimple(ids: number[]): Promise<any> {
+	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
 		try {
 			if (ids.length === 0) return [];
 			const users: UserSimpleInterface[] = await User.query(
-				`SELECT u.id, u.username, p.path as picture \
-			FROM ${User.tname} as u \ 
-			LEFT JOIN user_pictures as p ON p.user = u.id \
-			WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
+				`SELECT u.id, u.firstName, u.lastName, p.path as picture \
+				FROM ${User.tname} as u \
+				LEFT JOIN user_pictures as p ON p.user = u.id \
+				WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
 				[...ids]
 			);
 			return users.map((user) => {
@@ -205,6 +202,22 @@ class User extends Model {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static async getPublicProfile(id: number): Promise<UserInterfaceLocation | null> {
+		const result: UserInterfaceLocation[] = await User.query(
+			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate \
+			FROM ${User.tname} \
+			WHERE id = ? LIMIT 1`,
+			[id]
+		);
+		if (result && result.length == 1) {
+			const profile = result[0]!;
+			const location = profile.location as { x: number; y: number };
+			profile.location = { lat: location.x, lng: location.y };
+			return profile;
+		}
+		return null;
 	}
 
 	static async updateLocation(ll: LocationLL) {

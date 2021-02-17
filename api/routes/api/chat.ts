@@ -37,6 +37,7 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	}
 	res.send(result);
 });
+
 chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	// Check if the Chat is for the User
 	const user = req.user.id as number;
@@ -59,6 +60,7 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	}
 	return res.json({ messages, completed });
 });
+
 chatRouter.get('/user/:id', authToken, async (req: any, res) => {
 	const user = req.user.id as number;
 
