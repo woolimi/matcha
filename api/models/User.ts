@@ -149,7 +149,7 @@ class User extends Model {
 
 	static async getSimple(id: number): Promise<UserSimpleInterface | null> {
 		const result: UserSimpleInterface[] = await User.query(
-			`SELECT u.id, u.username, p.path as picture
+			`SELECT u.id, u.firstName, u.lastName, p.path as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id
 			WHERE u.id = ?
@@ -214,10 +214,16 @@ class User extends Model {
 		if (result && result.length == 1) {
 			const profile = result[0]!;
 			const location = profile.location as { x: number; y: number };
-			profile.location = { lat: location.x, lng: location.y };
+			profile.location = { lat: location.y, lng: location.x };
 			return profile;
 		}
 		return null;
+	}
+
+	static async exists(id: number): Promise<boolean> {
+		const result: { id: number }[] = await User.query(`SELECT id FROM ${User.tname} WHERE id = ? LIMIT 1`, [id]);
+		if (result && result.length == 1) return true;
+		return false;
 	}
 
 	static async updateLocation(ll: LocationLL) {

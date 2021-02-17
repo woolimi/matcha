@@ -69,6 +69,13 @@
 						</v-chip>
 					</v-col>
 				</v-row>
+				<v-row v-if="profile.like == 2">
+					<v-col cols="12">
+						<p class="text-h3 text-center pink--text text--lighten-2 mt-2 mb-2">
+							<v-icon left color="pink"> mdi-heart-multiple </v-icon> Matched
+						</p>
+					</v-col>
+				</v-row>
 				<v-row>
 					<v-col cols="12" class="text-center">
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
@@ -87,7 +94,7 @@
 										fullscreenControl: false,
 									}"
 									:center="profile.location"
-									:zoom="10"
+									:zoom="8"
 									style="width: 100%; height: 65vh"
 								>
 									<gmap-custom-marker :marker="$auth.user.location" :data-user-id="$auth.user.id">
@@ -103,8 +110,15 @@
 								</gmap-map>
 							</v-card>
 						</v-bottom-sheet>
-						<v-btn class="ma-2" outlined color="pink"> <v-icon left>mdi-heart</v-icon> Like </v-btn>
-						<v-btn class="ma-2" outlined color="orange"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
+						<v-btn class="ma-2" outlined color="pink" @click="likeEvent">
+							<v-icon left>mdi-heart</v-icon> {{ like }}
+						</v-btn>
+						<v-btn class="ma-2" outlined color="primary" v-if="profile.like == 2" @click="openChat">
+							<v-icon left>mdi-email</v-icon> Chat
+						</v-btn>
+						<v-btn class="ma-2" outlined color="orange" @click="blockEvent">
+							<v-icon left>mdi-cancel</v-icon> Block
+						</v-btn>
 						<v-bottom-sheet inset>
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn class="ma-2" outlined color="blue-grey" v-bind="attrs" v-on="on">
@@ -153,9 +167,38 @@
 			preferencesColor() {
 				return this.profile?.preferences == 'heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5';
 			},
+			like() {
+				switch (this.profile.like) {
+					case 0:
+						return 'Like';
+					case 1:
+					case 2:
+						return 'Unlike';
+					case 3:
+						return 'Like back';
+				}
+				return 'Like';
+			},
 			noHistoryMessage() {
 				return `No History with ${this.profile?.firstName} ${this.profile?.lastName} yet.`;
 			},
 		},
+		methods: {
+			likeEvent() {
+				this.$axios.post(`/api/like/${this.id}`).then((response) => {
+					if (response.status == 200) {
+						this.profile.like = response.data.like;
+					} else {
+						this.$store.dispatch('snackbar/SHOW', {
+							message: 'Could not update Like status.',
+							color: 'error',
+						});
+					}
+				});
+			},
+			blockEvent() {},
+		},
 	};
 </script>
+
+<style scoped></style>

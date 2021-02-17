@@ -79,11 +79,13 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 		return socket.emit('chat/messageError', { error: 'Invalid payload' });
 	}
 	if (!payload.message) return socket.emit('chat/messageError', { error: 'Empty message' });
+
 	const user = app.users[socket.id];
 	if (!user) {
 		socket.emit('socket/loggedOut');
 		return socket.emit('chat/messageError', { error: 'Invalid user' });
 	}
+
 	const chat = await Chat.get(payload.chat);
 	if (!chat) return socket.emit('chat/messageError', { error: 'Invalid chat' });
 	if (chat.user1 != user && chat.user2 != user) {
