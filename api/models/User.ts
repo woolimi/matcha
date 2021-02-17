@@ -244,14 +244,24 @@ class User extends Model {
 				`SELECT users.id, username, lastName, firstName, gender,\
 					timestampdiff(YEAR, users.birthdate, CURDATE()) AS age, \
 					ST_Distance(users.location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-					COUNT(user_likes.liked) AS likes \
-					FROM users \
+					COUNT(user_likes.liked) AS likes, \
+					utags.tags, \
+					LENGTH(utags.tags) - LENGTH(REPLACE(utags.tags, ',', '')) + 1 AS number_of_common_tags\
+					FROM users\
 					LEFT JOIN user_likes \
 					ON users.id = user_likes.liked \
+					LEFT JOIN ( \
+							SELECT user, group_concat(IF(tag IN (${[1, 2, 3, 4, 5].join(',')}), tag, NULL)) as tags \
+							FROM user_tags \
+							GROUP BY user \
+						) AS utags \
+					ON users.id = utags.user \
 					GROUP BY users.id \
 					HAVING users.id != ? \
 						AND ${preferences_query} AND distance < ? \
-						AND age >= ? AND age <= ? AND likes <= ?`,
+						AND age >= ? AND age <= ? AND likes <= ? \ 
+						AND tags IS NOT NULL
+					ORDER BY number_of_common_tags DESC`,
 				[location.y, location.x, user_id, distance, age[0], age[1], likes]
 			);
 			console.log(rows);
