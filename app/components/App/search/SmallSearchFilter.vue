@@ -34,7 +34,7 @@
 					<div style="width: 60px">Age</div>
 				</template>
 			</v-range-slider>
-			<v-slider dense v-model="distance" min="0" max="100" track-color="grey">
+			<v-slider dense ticks step="5" v-model="distance" min="0" max="100" track-color="grey">
 				<template v-slot:label>
 					<div style="width: 60px">Distance</div>
 				</template>
@@ -52,6 +52,23 @@
 	import SearchFilterMixin from '~/mixins/SearchFilterMixin';
 	export default {
 		mixins: [SearchFilterMixin],
+		watch: {
+			age(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.smAndDown) return;
+				this.$store.dispatch('search/updateResult');
+			},
+			distance(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.smAndDown) return;
+				this.$store.dispatch('search/updateResult');
+			},
+			likes(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.smAndDown) return;
+				this.$store.dispatch('search/updateResult');
+			},
+		},
 	};
 </script>
 
