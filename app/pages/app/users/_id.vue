@@ -128,7 +128,7 @@
 									<v-icon left>mdi-clock-outline</v-icon> History
 								</v-btn>
 							</template>
-							<v-card tile>
+							<v-card tile class="notifications">
 								<NotificationsList
 									:manageable="false"
 									:list="profile.history"
@@ -205,6 +205,23 @@
 					}
 				});
 			},
+			openChat() {
+				if (this.profile.chat) {
+					this.$router.push({ path: `/app/chat/${this.profile.chat}` });
+				} else {
+					this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
+						if (response.status >= 200 && response.status <= 201) {
+							this.profile.chat = response.data.chat;
+							this.$router.push({ path: `/app/chat/${this.profile.chat}` });
+						} else {
+							this.$store.commit('snackbar/SHOW', {
+								message: 'Could not create a chat with User.',
+								color: 'error',
+							});
+						}
+					});
+				}
+			},
 			blockEvent() {
 				this.$axios.post(`/api/block/${this.id}`).then((response) => {
 					if (response.status == 200) {
@@ -221,9 +238,13 @@
 					}
 				});
 			},
-			openChat() {},
 		},
 	};
 </script>
 
-<style scoped></style>
+<style scoped>
+	.notifications {
+		max-height: 65vh;
+		overflow: auto;
+	}
+</style>

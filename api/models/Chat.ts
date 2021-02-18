@@ -60,13 +60,17 @@ class Chat extends Model {
 			RIGHT JOIN ${UserLike.tname} ul2
 				ON ul2.user = c.user2 AND ul2.liked = c.user1
 			WHERE ub.id IS NULL AND (c.user1 = ? OR c.user2 = ?)
-			ORDER BY c.last DESC`,
+			ORDER BY c.id, c.last DESC`,
 			[id, id]
 		);
 	}
 
 	static updateLastMessage(id: number): Promise<ResultSetHeader> {
 		return Chat.query(`UPDATE ${Chat.tname} SET last = NOW() WHERE id = ?`, [id]);
+	}
+
+	static create(user1: number, user2: number): Promise<ResultSetHeader> {
+		return Chat.query(`INSERT INTO ${Chat.tname} (user1, user2) VALUES (?, ?)`, [user1, user2]);
 	}
 }
 
