@@ -33,31 +33,23 @@
 </template>
 
 <script>
+	import SearchFilterMixin from '~/mixins/SearchFilterMixin';
+	import _ from 'lodash';
+
 	export default {
-		computed: {
-			age: {
-				get() {
-					return this.$store.state.search.age;
-				},
-				set(val) {
-					this.$store.commit('search/SET_AGE', val);
-				},
+		mixins: [SearchFilterMixin],
+		watch: {
+			age(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				this.$store.dispatch('search/updateResult');
 			},
-			distance: {
-				get() {
-					return this.$store.state.search.distance;
-				},
-				set(val) {
-					this.$store.commit('search/SET_DISTANCE', val);
-				},
+			distance(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				this.$store.dispatch('search/updateResult');
 			},
-			likes: {
-				get() {
-					return this.$store.state.search.likes;
-				},
-				set(val) {
-					this.$store.commit('search/SET_LIKES', val);
-				},
+			likes(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				this.$store.dispatch('search/updateResult');
 			},
 		},
 	};

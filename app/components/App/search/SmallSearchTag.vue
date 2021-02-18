@@ -28,11 +28,6 @@
 
 	export default {
 		mixins: [SearchTagMixin],
-
-		beforeMount() {
-			if (!this.$vuetify.breakpoint.smAndDown) return;
-			this.$store.dispatch('search/initTagItems');
-		},
 		watch: {
 			selected(newSelected, oldSelected) {
 				if (_.isEqual(newSelected, oldSelected)) return;
