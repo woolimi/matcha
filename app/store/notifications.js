@@ -32,18 +32,24 @@ export const mutations = {
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/notifications/list`).then((response) => {
+		return this.$axios.get(`/api/notifications/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	markAsRead({ commit }, id) {
-		this.$axios.post(`http://localhost:5000/api/notifications/read`, { id }).then(() => {
+		this.$axios.post(`/api/notifications/read`, { id }).then(() => {
 			commit('setAsRead', id);
 		});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.post(`http://localhost:5000/api/notifications/read/all`).then(() => {
+		this.$axios.post(`/api/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
+	},
+	receive({ dispatch, commit }, payload) {
+		commit('receive', payload);
+		if (payload.type == 'like:removed') {
+			dispatch('chat/unliked', payload.user.id, { root: true });
+		}
 	},
 };

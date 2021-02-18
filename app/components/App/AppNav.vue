@@ -73,9 +73,9 @@
 			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
 			this.selected = path ? path.id : 0;
 		},
-		beforeCreate() {
-			this.$store.dispatch('notifications/loadList');
-			this.$store.dispatch('chat/loadList');
+		async fetch() {
+			await this.$store.dispatch('notifications/loadList');
+			await this.$store.dispatch('chat/loadList');
 		},
 		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });

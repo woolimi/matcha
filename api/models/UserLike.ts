@@ -58,6 +58,13 @@ class UserLike extends Model {
 	static remove(user1: number, user2: number): Promise<ResultSetHeader> {
 		return UserLike.query(`DELETE FROM ${UserLike.tname} WHERE user = ? AND liked = ?`, [user1, user2]);
 	}
+
+	static removeAll(user1: number, user2: number): Promise<ResultSetHeader> {
+		return UserLike.query(
+			`DELETE FROM ${UserLike.tname} WHERE (user = ? AND liked = ?) OR (liked = ? AND user = ?)`,
+			[user1, user2, user1, user2]
+		);
+	}
 }
 
 export default UserLike;
