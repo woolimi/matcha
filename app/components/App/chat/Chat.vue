@@ -6,26 +6,30 @@
 					<v-icon class="hidden-md-and-up" @click="leaveChat">mdi-chevron-left</v-icon>
 				</NuxtLink>
 
-				<v-badge
-					:color="chat.user.online ? 'green' : 'pink'"
-					bordered
-					avatar
-					dot
-					bottom
-					offset-x="10"
-					offset-y="10"
-					class="mx-2"
-				>
-					<v-avatar size="50">
-						<v-img :src="chat.user.picture"></v-img>
-					</v-avatar>
-				</v-badge>
-				<v-toolbar-title>{{ chat.user.username }}</v-toolbar-title>
+				<NuxtLink :to="`/app/users/${chat.user.id}`">
+					<v-badge
+						:color="chat.user.online ? 'green' : 'pink'"
+						bordered
+						avatar
+						dot
+						bottom
+						offset-x="10"
+						offset-y="10"
+						class="mx-2"
+					>
+						<v-avatar size="50">
+							<v-img :src="chat.user.picture"></v-img>
+						</v-avatar>
+					</v-badge>
+					<v-toolbar-title>{{ chat.user.firstName }} {{ chat.user.lastName }}</v-toolbar-title>
+				</NuxtLink>
 
 				<v-spacer></v-spacer>
 
-				<v-btn text color="pink" @click="unlike"> <v-icon>mdi-heart</v-icon> Unlike </v-btn>
-				<v-btn text color="danger" @click="block"> <v-icon>mdi-cancel</v-icon> Block </v-btn>
+				<v-btn outlined color="pink" class="mr-2" @click="unlike">
+					<v-icon left>mdi-heart</v-icon> Unlike
+				</v-btn>
+				<v-btn outlined color="orange" @click="block"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
 			</v-toolbar>
 			<v-container
 				fluid
@@ -152,10 +156,41 @@
 				this.$store.commit('chat/leaveChat');
 			},
 			unlike() {
-				//
+				const id = this.chat.id;
+				this.$axios.post(`/api/like/${this.chat.user.id}`).then(async (response) => {
+					if (response.status == 200) {
+						this.$store.commit('chat/removeChat', this.chat.id);
+						this.$store.commit('chat/leaveChat');
+						this.$router.push({ path: `/app/chat` });
+						this.$store.commit('snackbar/SHOW', {
+							message: 'User unliked',
+							color: 'success',
+						});
+					} else {
+						this.$store.commit('snackbar/SHOW', {
+							message: 'Could not Unlike User.',
+							color: 'error',
+						});
+					}
+				});
 			},
 			block() {
-				//
+				this.$axios.post(`/api/block/${this.chat.user.id}`).then(async (response) => {
+					if (response.status == 200) {
+						this.$store.commit('chat/removeChat', state.chat.id);
+						this.$store.commit('chat/leaveChat');
+						this.$router.push({ path: `/app/chat` });
+						this.$store.commit('snackbar/SHOW', {
+							message: 'User blocked',
+							color: 'success',
+						});
+					} else {
+						this.$store.commit('snackbar/SHOW', {
+							message: 'Could not block User.',
+							color: 'error',
+						});
+					}
+				});
 			},
 			onScroll() {
 				if (

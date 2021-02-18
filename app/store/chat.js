@@ -39,6 +39,15 @@ export const mutations = {
 		state.loadedChat = false;
 		state.loadingMore = false;
 		state.completed = false;
+		state.lastEvent = 'none';
+	},
+	removeChat(state, id) {
+		const index = state.list.findIndex((c) => c.id == id);
+		if (index >= 0) state.list.splice(index, 1);
+	},
+	removeUserChat(state, id) {
+		const index = state.list.findIndex((c) => c.user.id == id);
+		if (index >= 0) state.list.splice(index, 1);
 	},
 	setMessages(state, payload) {
 		state.lastEvent = 'initialLoad';
@@ -89,13 +98,13 @@ export const mutations = {
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/chat/list`).then((response) => {
+		return this.$axios.get(`/api/chat/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios.get(`http://localhost:5000/api/chat/${id}`).then((response) => {
+		this.$axios.get(`/api/chat/${id}`).then((response) => {
 			commit('setMessages', response.data);
 			if (response.data.notification) {
 				commit('notifications/setAsRead', response.data.notification, { root: true });
@@ -106,10 +115,16 @@ export const actions = {
 		if (state.completed) return;
 		commit('setLoadingMore', true);
 		const from = state.messages.length == 0 ? '' : state.messages[0].id;
-		this.$axios.get(`http://localhost:5000/api/chat/${state.chat.id}/${from}`).then((response) => {
+		this.$axios.get(`/api/chat/${state.chat.id}/${from}`).then((response) => {
 			commit('insertMessages', response.data);
 			commit('setLoadingMore', false);
 		});
+	},
+	unliked({ state, commit }, id) {
+		if (state.chat && state.chat.user.id == id) {
+			commit('leaveChat');
+		}
+		commit('removeUserChat', id);
 	},
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });

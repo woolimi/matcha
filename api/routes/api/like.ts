@@ -38,25 +38,26 @@ likeRouter.post('/:id', authToken, async (req: any, res) => {
 		}
 		return res.send({ like: status == UserLikeStatus.NONE ? UserLikeStatus.ONEWAY : UserLikeStatus.TWOWAY });
 	}
-
 	// Remove like from self to id
-	await UserLike.remove(self, id);
+	else {
+		await UserLike.remove(self, id);
 
-	// Add notification
-	const notifInsert = await UserNotification.add(id, self, Notification.LikeRemoved);
-	if (!notifInsert) {
-		return res.status(500).send({ error: 'Could not insert a new notification.' });
-	}
+		// Add notification
+		const notifInsert = await UserNotification.add(id, self, Notification.LikeRemoved);
+		if (!notifInsert) {
+			return res.status(500).send({ error: 'Could not insert a new notification.' });
+		}
 
-	// Send notification if the User is logged in
-	const otherSocket = req.app.sockets[id];
-	if (otherSocket) {
-		const notification = await UserNotification.get(notifInsert.insertId);
-		const user = await User.getSimple(self);
-		console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
-		otherSocket.emit('notifications/receive', { ...notification, user });
+		// Send notification if the User is logged in
+		const otherSocket = req.app.sockets[id];
+		if (otherSocket) {
+			const notification = await UserNotification.get(notifInsert.insertId);
+			const user = await User.getSimple(self);
+			console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
+			otherSocket.emit('notifications/receive', { ...notification, user });
+		}
+		return res.send({ like: status == UserLikeStatus.TWOWAY ? UserLikeStatus.REVERSE : UserLikeStatus.NONE });
 	}
-	return res.send({ like: status == UserLikeStatus.TWOWAY ? UserLikeStatus.REVERSE : UserLikeStatus.NONE });
 });
 
 export default likeRouter;

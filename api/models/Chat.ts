@@ -2,6 +2,8 @@ import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import User from './User';
+import UserBlock from './UserBlock';
+import UserLike from './UserLike';
 
 export interface ChatInterface {
 	id: number;
@@ -48,7 +50,19 @@ class Chat extends Model {
 	}
 
 	static getAll(id: number): Promise<ChatInterface[]> {
-		return Chat.query(`SELECT * FROM ${Chat.tname} WHERE user1 = ? OR user2 = ? ORDER BY last DESC`, [id, id]);
+		return Chat.query(
+			`SELECT c.* FROM ${Chat.tname} c
+			LEFT JOIN ${UserBlock.tname} ub
+				ON (ub.user = c.user1 AND ub.blocked = c.user2)
+				OR (ub.user = c.user2 AND ub.blocked = c.user1)
+			RIGHT JOIN ${UserLike.tname} ul1
+				ON ul1.user = c.user1 AND ul1.liked = c.user2
+			RIGHT JOIN ${UserLike.tname} ul2
+				ON ul2.user = c.user2 AND ul2.liked = c.user1
+			WHERE ub.id IS NULL AND (c.user1 = ? OR c.user2 = ?)
+			ORDER BY c.last DESC`,
+			[id, id]
+		);
 	}
 
 	static updateLastMessage(id: number): Promise<ResultSetHeader> {

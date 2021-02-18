@@ -144,6 +144,7 @@ class User extends Model {
 	}
 
 	static mainPictureUrl(path: string | null): string {
+		if (path && path.match(/^https:\/\//)) return path;
 		return `${process.env.API}/${path}`;
 	}
 
