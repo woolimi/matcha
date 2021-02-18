@@ -92,7 +92,7 @@ export default {
 		// baseURL: 'http://176.169.89.89:5000',
 		baseURL: 'http://localhost:5000',
 		credentials: true,
-		debug: false,
+		debug: true,
 	},
 
 	// Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)

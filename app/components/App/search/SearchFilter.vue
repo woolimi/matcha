@@ -18,7 +18,7 @@
 					</span>
 					<span v-else><v-icon small>mdi-less-than</v-icon> {{ distance }} km</span>
 				</v-subheader>
-				<v-slider dense v-model.lazy="distance" min="0" max="100" track-color="grey"></v-slider>
+				<v-slider dense v-model.lazy="distance" ticks step="5" min="0" max="100" track-color="grey"></v-slider>
 
 				<v-subheader class="pa-0 h-init">
 					<span class="font-weight-bold"> Likes </span>
@@ -41,14 +41,17 @@
 		watch: {
 			age(newData, oldData) {
 				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');
 			},
 			distance(newData, oldData) {
 				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');
 			},
 			likes(newData, oldData) {
 				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');
 			},
 		},

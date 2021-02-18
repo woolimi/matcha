@@ -1,7 +1,7 @@
 <template>
 	<v-container>
 		<v-row>
-			<template v-if="$store.state.search.mode === 'image'">
+			<template v-if="mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
 						<v-card @click="navigate" role="link" elevation="10" style="border-radius: 15px">
@@ -40,11 +40,17 @@
 						custom
 						v-slot="{ navigate }"
 					>
-						<gmap-custom-marker :marker="user.location" :data-user-id="user.id" @click.native="navigate">
-							<v-avatar color="primary" size="50">
-								<v-img :src="user.image" class="marker-avatar" />
-							</v-avatar>
-						</gmap-custom-marker>
+						<div>
+							<gmap-custom-marker
+								:marker="user.location"
+								:data-user-id="user.id"
+								@click.native="navigate"
+							>
+								<v-avatar color="primary" size="50">
+									<v-img :src="user.image" class="marker-avatar" />
+								</v-avatar>
+							</gmap-custom-marker>
+						</div>
 					</NuxtLink>
 					<gmap-marker :position="center"> </gmap-marker>
 				</gmap-map>
@@ -68,10 +74,14 @@
 				if (bp.smAndUp) return 4;
 			},
 			users() {
+				console.log(this.$store.state.search.users);
 				return this.$store.state.search.users;
 			},
 			center() {
 				return this.$auth.user.location;
+			},
+			mode() {
+				return this.$store.state.search.mode;
 			},
 		},
 	};
