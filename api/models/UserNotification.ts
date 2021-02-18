@@ -93,6 +93,15 @@ class UserNotification extends Model {
 		return result;
 	}
 
+	static getAnyOf(user1: number, user2: number, type: Notification[]): Promise<{ id: number }[]> {
+		return UserNotification.query(
+			`SELECT id
+			FROM ${UserNotification.tname}
+			WHERE status = 0 AND user = ? AND sender = ? AND type IN (${new Array(type.length).fill('?').join(',')})`,
+			[user1, user2, ...type]
+		);
+	}
+
 	// Status update
 
 	private static setAs(id: number, status: boolean): Promise<ResultSetHeader> {
@@ -103,12 +112,21 @@ class UserNotification extends Model {
 		return this.setAs(id, true);
 	}
 
-	static setAsUnread(id: number): Promise<ResultSetHeader> {
-		return this.setAs(id, false);
+	static setListAsRead(ids: number[]): Promise<ResultSetHeader> {
+		return UserNotification.query(
+			`UPDATE ${UserNotification.tname}
+			SET status = 1
+			WHERE id IN (${new Array(ids.length).fill('?').join(',')})`,
+			[...ids]
+		);
 	}
 
 	static setAllAsRead(user: number): Promise<ResultSetHeader> {
 		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE user = ?`, [user]);
+	}
+
+	static setAsUnread(id: number): Promise<ResultSetHeader> {
+		return this.setAs(id, false);
 	}
 }
 

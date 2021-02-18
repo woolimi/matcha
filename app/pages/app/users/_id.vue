@@ -206,21 +206,17 @@
 				});
 			},
 			openChat() {
-				if (this.profile.chat) {
-					this.$router.push({ path: `/app/chat/${this.profile.chat}` });
-				} else {
-					this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
-						if (response.status >= 200 && response.status <= 201) {
-							this.profile.chat = response.data.chat;
-							this.$router.push({ path: `/app/chat/${this.profile.chat}` });
-						} else {
-							this.$store.commit('snackbar/SHOW', {
-								message: 'Could not create a chat with User.',
-								color: 'error',
-							});
-						}
-					});
-				}
+				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
+					if (response.status >= 200 && response.status <= 201) {
+						this.profile.chat = response.data.chat;
+						this.$router.push({ path: `/app/chat/${this.profile.chat}` });
+					} else {
+						this.$store.commit('snackbar/SHOW', {
+							message: 'Could not create a chat with User.',
+							color: 'error',
+						});
+					}
+				});
 			},
 			blockEvent() {
 				this.$axios.post(`/api/block/${this.id}`).then((response) => {

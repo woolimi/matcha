@@ -159,7 +159,7 @@
 				const id = this.chat.id;
 				this.$axios.post(`/api/like/${this.chat.user.id}`).then(async (response) => {
 					if (response.status == 200) {
-						this.$store.commit('chat/removeChat', this.chat.id);
+						this.$store.commit('chat/removeChat', id);
 						this.$store.commit('chat/leaveChat');
 						this.$router.push({ path: `/app/chat` });
 						this.$store.commit('snackbar/SHOW', {
@@ -177,7 +177,7 @@
 			block() {
 				this.$axios.post(`/api/block/${this.chat.user.id}`).then(async (response) => {
 					if (response.status == 200) {
-						this.$store.commit('chat/removeChat', state.chat.id);
+						this.$store.commit('chat/removeChat', this.chat.id);
 						this.$store.commit('chat/leaveChat');
 						this.$router.push({ path: `/app/chat` });
 						this.$store.commit('snackbar/SHOW', {

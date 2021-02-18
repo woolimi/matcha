@@ -28,6 +28,16 @@ export const mutations = {
 			notification.status = true;
 		}
 	},
+	setListAsRead(state, list) {
+		for (const id of list) {
+			for (const notification of state.list) {
+				if (notification.id == id) {
+					notification.status = true;
+					break;
+				}
+			}
+		}
+	},
 };
 
 export const actions = {
@@ -45,6 +55,9 @@ export const actions = {
 		this.$axios.post(`/api/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
+	},
+	setListAsRead({ commit }, payload) {
+		commit('setListAsRead', payload.list);
 	},
 	receive({ dispatch, commit }, payload) {
 		commit('receive', payload);

@@ -26,7 +26,7 @@ export const mutations = {
 		state.list.push(...list);
 		state.loadedList = true;
 	},
-	create(state, chat) {
+	addToList(state, chat) {
 		state.list.unshift(chat);
 	},
 	selectChat(state, id) {
@@ -123,12 +123,20 @@ export const actions = {
 			commit('setLoadingMore', false);
 		});
 	},
-	unliked({ state, commit }, id) {
-		if (state.chat && state.chat.user.id == id) {
+	unliked({ state, commit }, userId) {
+		if (state.chat && state.chat.user.id == userId) {
 			commit('leaveChat');
 		}
-		commit('removeUserChat', id);
+		commit('removeUserChat', userId);
 	},
+	blocked({ state, commit }, payload) {
+		const userId = payload.from;
+		if (state.chat && state.chat.user.id == userId) {
+			commit('leaveChat');
+		}
+		commit('removeUserChat', userId);
+	},
+	unblocked({ state }, payload) {},
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
 	},

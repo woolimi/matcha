@@ -38,7 +38,7 @@
 		},
 		methods: {
 			openChat(user) {
-				this.$axios.get(`/api/users/chat/user/${user}`).then((response) => {
+				this.$axios.get(`/api/chat/user/${user}`).then((response) => {
 					if (response.status === 200) {
 						this.$router.push(`/app/chat/${response.data.id}`);
 					} else console.error(response);

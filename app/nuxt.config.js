@@ -136,11 +136,17 @@ export default {
 				vuex: {
 					mutations: [
 						'chat/receiveMessage',
-						'chat/create',
+						'chat/addToList',
 						'userLogin --> chat/userLogin',
 						'userLogout --> chat/userLogout',
 					],
-					actions: ['chat/messageError', 'notifications/receive'],
+					actions: [
+						'chat/messageError',
+						'notifications/receive',
+						'blocked --> chat/blocked',
+						'unblocked --> chat/unblocked',
+						'notifications/setListAsRead',
+					],
 				},
 			},
 		],
