@@ -136,6 +136,7 @@ export default {
 				vuex: {
 					mutations: [
 						'chat/receiveMessage',
+						'chat/create',
 						'userLogin --> chat/userLogin',
 						'userLogout --> chat/userLogout',
 					],

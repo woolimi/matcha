@@ -26,6 +26,9 @@ export const mutations = {
 		state.list.push(...list);
 		state.loadedList = true;
 	},
+	create(state, chat) {
+		state.list.unshift(chat);
+	},
 	selectChat(state, id) {
 		state.chat = state.list.find((chat) => chat.id == id);
 		state.messages.length = 0;

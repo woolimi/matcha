@@ -1,9 +1,11 @@
 import express from 'express';
 import { Socket } from 'socket.io';
 import authToken from '../../middleware/authToken';
+import notSelf from '../../middleware/requireNotSelf';
 import Chat from '../../models/Chat';
 import ChatMessage from '../../models/ChatMessage';
 import User, { UserSimpleInterface } from '../../models/User';
+import UserLike, { UserLikeStatus } from '../../models/UserLike';
 import UserNotification, { Notification } from '../../models/UserNotification';
 
 const chatRouter = express.Router();
@@ -59,6 +61,41 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 		return res.json({ chat, notification: notification?.id, messages, completed });
 	}
 	return res.json({ messages, completed });
+});
+
+chatRouter.post('/create/:id', authToken, notSelf, async (req: any, res) => {
+	const id = req.params.id as number;
+	const self = req.user.id as number;
+
+	// Check permissions
+	const like = await UserLike.status(self, id);
+	if (like != UserLikeStatus.TWOWAY) {
+		return res.status(400).send({ error: 'Both Users need to like each other to create a Chat' });
+	}
+
+	// Check if the Chat is for the User
+	const chat = await Chat.getForUser(id, self);
+	if (chat) return res.status(200).send({ chat: chat.id });
+	const insert = await Chat.create(id, self);
+	if (!insert) {
+		return res.status(500).send({ error: 'Could not create a Chat.' });
+	}
+
+	// Send messages
+	const created = { id: insert.insertId, start: new Date(), last: null };
+	const socket = req.app.sockets[self];
+	if (socket) {
+		const user = await User.getSimple(id);
+		console.log('💨[socket]: send chat/create to ', socket.id);
+		socket.emit('chat/create', { ...created, user });
+	}
+	const otherSocket = req.app.sockets[id];
+	if (otherSocket) {
+		const user = await User.getSimple(self);
+		console.log('💨[socket]: send chat/create to ', otherSocket.id);
+		otherSocket.emit('chat/create', { ...created, user });
+	}
+	return res.status(201).json({ chat: insert.insertId });
 });
 
 chatRouter.get('/user/:id', authToken, async (req: any, res) => {

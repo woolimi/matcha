@@ -13,6 +13,7 @@ import UserTag from '../../models/UserTag';
 import UserLanguage from '../../models/UserLanguage';
 import UserBlock from '../../models/UserBlock';
 import UserLike from '../../models/UserLike';
+import Chat from '../../models/Chat';
 
 const profileRouter = express.Router();
 
@@ -102,8 +103,10 @@ profileRouter.post('/change-password', authToken, validator.userChangePassword, 
 profileRouter.get('/:id', authToken, async (req: any, res) => {
 	try {
 		const id = req.params.id;
+		const self = req.user.id;
+
 		// Check if the user is not blocked
-		const isBlocked = await UserBlock.status(id, req.user.id);
+		const isBlocked = await UserBlock.status(id, self);
 		if (isBlocked) return res.status(401).json({ error: 'The User has blocked you.' });
 
 		// Get the profile informations
@@ -111,19 +114,21 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 		if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
 		// Get all other informations
-		const likeStatus = await UserLike.status(req.user.id, id);
-		const blockStatus = await UserBlock.status(req.user.id, id);
+		const like = await UserLike.status(self, id);
+		const blocked = await UserBlock.status(self, id);
+		const chat = await Chat.getForUser(id, self);
 		const images = (await UserPicture.get_images(id)).filter((i) => i.path != '');
 		const tags = await UserTag.get_tags(id);
 		const languages = await UserLanguage.get_languages(id);
-		const history = await UserNotification.getHistory(req.user.id, id);
+		const history = await UserNotification.getHistory(self, id);
 		const userIds = Array.from(new Set(history.map((n) => n.sender)));
 		const otherUsers = await User.getAllSimple(userIds);
 
 		return res.json({
 			...profile,
-			like: likeStatus,
-			blocked: blockStatus,
+			like,
+			blocked,
+			chat: chat?.id,
 			images,
 			tags,
 			languages,
