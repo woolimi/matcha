@@ -25,11 +25,6 @@
 
 	export default {
 		mixins: [SearchTagMixin],
-		beforeMount() {
-			if (!this.$vuetify.breakpoint.mdAndUp) return;
-			console.log('big search tag mounted');
-			this.$store.dispatch('search/initTagItems');
-		},
 		watch: {
 			selected(newSelected, oldSelected) {
 				if (_.isEqual(newSelected, oldSelected)) return;

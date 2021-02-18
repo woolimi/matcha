@@ -55,6 +55,9 @@
 
 <script>
 	export default {
+		beforeCreate() {
+			this.$store.dispatch('search/initTagItems');
+		},
 		mounted() {
 			this.$store.dispatch('search/updateResult');
 		},
@@ -65,7 +68,6 @@
 				if (bp.smAndUp) return 4;
 			},
 			users() {
-				console.log('USERS', this.$store.state.search.users);
 				return this.$store.state.search.users;
 			},
 			center() {
