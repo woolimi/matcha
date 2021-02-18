@@ -38,6 +38,8 @@ async function create_seed_users() {
 		const unique_pairs: string[] = [];
 		for (let i = 0; i < genders.length; i++) {
 			let lastName, firstName, username;
+			const lng = faker.random.number({ min: 2.107361, max: 2.489544, precision: 0.0001 });
+			const lat = faker.random.number({ min: 48.785862, max: 48.947325, precision: 0.0001 });
 			do {
 				lastName = faker.name.lastName(genders[i]);
 				firstName = faker.name.firstName(genders[i]);
@@ -54,8 +56,8 @@ async function create_seed_users() {
 				preferences: Math.floor(Math.random() * 6) === 1 ? 'bisexual' : 'heterosexual',
 				biography: faker.hacker.phrase(),
 				birthdate: faker.date.between(new Date(String(current_year - 50)), new Date(String(current_year - 18))),
-				lng: faker.random.number({ min: -0.6, max: 4.3, precision: 0.001 }),
-				lat: faker.random.number({ min: 45.0, max: 50.0, precision: 0.001 }),
+				lng,
+				lat,
 			};
 			const { insertId } = await User.create_fake_user(user);
 			const randomTagId = Math.floor(Math.random() * tags.length);

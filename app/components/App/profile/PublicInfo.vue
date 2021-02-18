@@ -176,10 +176,7 @@
 				const { data } = await this.$axios.get('/api/tags');
 				this.interest.tags = data.tags;
 			} catch (error) {
-				this.$notifier.showMessage({
-					message: 'cannot get tag list from server',
-					color: 'error',
-				});
+				console.log(error);
 			}
 		},
 		watch: {

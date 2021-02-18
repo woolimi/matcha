@@ -1,12 +1,9 @@
-import qs from 'qs';
-
 export const state = () => ({
 	age: [18, 30],
-	distance: 100,
+	distance: 50,
 	likes: 5,
 	tags: {
 		selected: [],
-		search: '',
 		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
@@ -35,17 +32,30 @@ export const mutations = {
 	SET_USERS: (state, payload) => {
 		state.users = payload;
 	},
+	INIT_TAG_ITEMS: (state, payload) => {
+		state.tags.items = payload;
+	},
 };
 
 export const actions = {
-	async updateUsers({ commit }, params) {
+	async updateResult({ commit, state }) {
 		try {
+			const { age, distance, likes, tags } = state;
+			const params = { age, distance, likes, tags: tags.selected };
 			const { data } = await this.$axios.get('/api/search', {
 				params,
 			});
 			commit('SET_USERS', data.users);
 		} catch (error) {
-			console.log(error);
+			console.error(error);
+		}
+	},
+	async initTagItems({ commit }) {
+		try {
+			const { data } = await this.$axios.get('/api/tags');
+			commit('INIT_TAG_ITEMS', data.tags);
+		} catch (error) {
+			console.error(error);
 		}
 	},
 };
