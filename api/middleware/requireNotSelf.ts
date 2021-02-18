@@ -1,6 +1,6 @@
 import { NextFunction } from 'express';
 
-const notSelf = (req: any, res: any, next: NextFunction): any => {
+const requireNotSelf = (req: any, res: any, next: NextFunction): any => {
 	const id = parseInt(req.params?.id);
 	const self = parseInt(req.user?.id);
 	if (isNaN(id) || isNaN(self)) res.send(400).json({ error: 'Invalid or missing ID' });
@@ -8,4 +8,4 @@ const notSelf = (req: any, res: any, next: NextFunction): any => {
 	next();
 };
 
-export default notSelf;
+export default requireNotSelf;

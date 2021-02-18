@@ -1,13 +1,13 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
-import notSelf from '../../middleware/requireNotSelf';
+import requireNotSelf from '../../middleware/requireNotSelf';
 import User from '../../models/User';
 import UserLike, { UserLikeStatus } from '../../models/UserLike';
 import UserNotification, { Notification } from '../../models/UserNotification';
 
 const likeRouter = express.Router();
 
-likeRouter.post('/:id', authToken, notSelf, async (req: any, res) => {
+likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id existst
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);

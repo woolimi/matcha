@@ -1,6 +1,6 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
-import notSelf from '../../middleware/requireNotSelf';
+import requireNotSelf from '../../middleware/requireNotSelf';
 import User from '../../models/User';
 import UserBlock from '../../models/UserBlock';
 import UserLike, { UserLikeStatus } from '../../models/UserLike';
@@ -8,7 +8,7 @@ import UserNotification, { Notification } from '../../models/UserNotification';
 
 const blockRouter = express.Router();
 
-blockRouter.post('/:id', authToken, notSelf, async (req: any, res) => {
+blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id existst
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);
@@ -19,22 +19,27 @@ blockRouter.post('/:id', authToken, notSelf, async (req: any, res) => {
 	const userBlockId = await UserBlock.status(self, id);
 	let result;
 	// Unblock User
-	if (userBlockId) result = await UserBlock.remove(userBlockId);
+	if (userBlockId) {
+		result = await UserBlock.remove(userBlockId);
+
+		// Send notification
+		const otherSocket = req.app.sockets[id];
+		if (otherSocket) {
+			console.log('💨[socket]: send unblocked to ', otherSocket.id);
+			otherSocket.emit('unblocked', { from: self });
+		}
+	}
 	// Block User
 	else {
-		const likeStatus = await UserLike.status(id, self);
-		if (likeStatus == UserLikeStatus.ONEWAY || likeStatus == UserLikeStatus.TWOWAY) {
-			const notifInsert = await UserNotification.add(id, self, Notification.LikeRemoved);
-			const otherSocket = req.app.sockets[id];
-			if (otherSocket && notifInsert) {
-				const notification = await UserNotification.get(notifInsert.insertId);
-				const user = await User.getSimple(self);
-				console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
-				otherSocket.emit('notifications/receive', { ...notification, user });
-			}
-		}
 		await UserLike.removeAll(self, id);
 		result = await UserBlock.add(self, id);
+
+		// Send notification
+		const otherSocket = req.app.sockets[id];
+		if (otherSocket) {
+			console.log('💨[socket]: send blocked to ', otherSocket.id);
+			otherSocket.emit('blocked', { from: self });
+		}
 	}
 
 	if (!result) {
