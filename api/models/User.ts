@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { RegisterForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
 import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
-import { LocationLL } from '../init/Interfaces';
+import { LocationLL, LocationXY } from '../init/Interfaces';
 import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
@@ -226,7 +226,9 @@ class User extends Model {
 		}
 	}
 
-	static async searchedBy(user_id: number, age: number[], distance: number, likes: number) {
+	static async search(user_id: number, age: number[], distance: number, likes: number, tags: string[]) {
+		// 1. filter not verified and not fill public info.
+		// 2. limit number of tags
 		try {
 			const { preferences, location, gender } = await User.find(user_id);
 			let preferences_query = '';
@@ -237,38 +239,91 @@ class User extends Model {
 				preferences_query = `gender = '${gender === 'male' ? 'female' : 'male'}'`;
 			} else if (preferences === 'bisexual') {
 				if (gender === 'male')
-					preferences_query = `(gender = 'female' OR (gender = 'male' AND preference = 'bisexual'))`;
-				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preference = 'bisexual'))`;
+					preferences_query = `(gender = 'female' OR (gender = 'male' AND preferences = 'bisexual'))`;
+				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preferences = 'bisexual'))`;
 			}
-			const rows = await User.query(
-				`SELECT users.id, username, lastName, firstName, gender,\
-					timestampdiff(YEAR, users.birthdate, CURDATE()) AS age, \
-					ST_Distance(users.location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-					COUNT(user_likes.liked) AS likes, \
-					utags.tags, \
-					LENGTH(utags.tags) - LENGTH(REPLACE(utags.tags, ',', '')) + 1 AS number_of_common_tags\
-					FROM users\
-					LEFT JOIN user_likes \
-					ON users.id = user_likes.liked \
-					LEFT JOIN ( \
-							SELECT user, group_concat(IF(tag IN (${[1, 2, 3, 4, 5].join(',')}), tag, NULL)) as tags \
-							FROM user_tags \
-							GROUP BY user \
-						) AS utags \
-					ON users.id = utags.user \
-					GROUP BY users.id \
-					HAVING users.id != ? \
-						AND ${preferences_query} AND distance < ? \
-						AND age >= ? AND age <= ? AND likes <= ? \ 
-						AND tags IS NOT NULL
-					ORDER BY number_of_common_tags DESC`,
-				[location.y, location.x, user_id, distance, age[0], age[1], likes]
-			);
-			console.log(rows);
-			return rows;
+
+			if (tags.length)
+				return await User.search_with_tags(user_id, age, distance, location, likes, preferences_query, tags);
+			else return await User.search_without_tags(user_id, age, distance, location, likes, preferences_query);
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static async search_without_tags(
+		user_id: number,
+		age: number[],
+		distance: number,
+		location: LocationXY,
+		likes: number,
+		preferences_query: string
+	) {
+		return await User.query(
+			`SELECT users.id, username, lastName, firstName, gender, preferences, \
+					timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
+					ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
+					location, \
+					COUNT(user_likes.liked) AS likes, \
+					user_pictures.picture, \
+					user_pictures.path AS image \
+					FROM users\
+					LEFT JOIN user_likes \
+					ON users.id = user_likes.liked \
+					LEFT JOIN user_pictures \
+					ON users.id = user_pictures.user \
+					GROUP BY users.id, user_pictures.path, user_pictures.picture \
+					HAVING users.id != ? \
+						AND ${preferences_query} AND distance < ? \
+						AND age >= ? AND age <= ? AND likes <= ? \
+						AND user_pictures.picture = 0`,
+			[location.y, location.x, user_id, distance, age[0], age[1], likes]
+		);
+	}
+
+	static async search_with_tags(
+		user_id: number,
+		age: number[],
+		distance: number,
+		location: LocationXY,
+		likes: number,
+		preferences_query: string,
+		tags: string[]
+	) {
+		return await User.query(
+			`SELECT users.id, username, lastName, firstName, gender, preferences, \
+					timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
+					ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
+					location, \
+					COUNT(user_likes.liked) AS likes, \
+					user_pictures.picture, \
+					user_pictures.path AS image, \
+					utags.tag_list, \
+					LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
+					FROM users\
+					LEFT JOIN user_likes \
+					ON users.id = user_likes.liked \
+					LEFT JOIN user_pictures \
+					ON users.id = user_pictures.user \
+					LEFT JOIN ( \
+							SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
+								.fill('?')
+								.join(',')}), tags.name, NULL)) as tag_list \
+							FROM user_tags \
+							LEFT JOIN tags \
+							ON user_tags.tag = tags.id \
+							GROUP BY user \
+						) AS utags \
+					ON users.id = utags.user \
+					GROUP BY users.id, user_pictures.path, user_pictures.picture \
+					HAVING users.id != ? \
+						AND ${preferences_query} AND distance < ? \
+						AND age >= ? AND age <= ? AND likes <= ? \ 
+						AND user_pictures.picture = 0 \
+						AND tag_list IS NOT NULL \
+					ORDER BY number_of_common_tags DESC`,
+			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes]
+		);
 	}
 }
 
