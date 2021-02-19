@@ -292,36 +292,36 @@ class User extends Model {
 	) {
 		return await User.query(
 			`SELECT users.id, username, lastName, firstName, gender, preferences, \
-					timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
-					ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-					location, \
-					COUNT(user_likes.liked) AS likes, \
-					user_pictures.picture, \
-					user_pictures.path AS image, \
-					utags.tag_list, \
-					LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
-					FROM users\
-					LEFT JOIN user_likes \
-					ON users.id = user_likes.liked \
-					LEFT JOIN user_pictures \
-					ON users.id = user_pictures.user \
-					LEFT JOIN ( \
-							SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
-								.fill('?')
-								.join(',')}), tags.name, NULL)) as tag_list \
-							FROM user_tags \
-							LEFT JOIN tags \
-							ON user_tags.tag = tags.id \
-							GROUP BY user \
-						) AS utags \
-					ON users.id = utags.user \
-					GROUP BY users.id, user_pictures.path, user_pictures.picture \
-					HAVING users.id != ? \
-						AND ${preferences_query} AND distance < ? \
-						AND age >= ? AND age <= ? AND likes <= ? \ 
-						AND user_pictures.picture = 0 \
-						AND tag_list IS NOT NULL \
-					ORDER BY number_of_common_tags DESC`,
+				timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
+				ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
+				location, \
+				COUNT(user_likes.liked) AS likes, \
+				user_pictures.picture, \
+				user_pictures.path AS image, \
+				utags.tag_list, \
+				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
+				FROM users\
+				LEFT JOIN user_likes \
+				ON users.id = user_likes.liked \
+				LEFT JOIN user_pictures \
+				ON users.id = user_pictures.user \
+				LEFT JOIN ( \
+					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
+						.fill('?')
+						.join(',')}), tags.name, NULL)) as tag_list \
+					FROM user_tags \
+					LEFT JOIN tags \
+					ON user_tags.tag = tags.id \
+					GROUP BY user \
+				) AS utags \
+				ON users.id = utags.user \
+				GROUP BY users.id, user_pictures.path, user_pictures.picture \
+				HAVING users.id != ? \
+					AND ${preferences_query} AND distance < ? \
+					AND age >= ? AND age <= ? AND likes <= ? \ 
+					AND user_pictures.picture = 0 \
+					AND tag_list IS NOT NULL \
+				ORDER BY number_of_common_tags DESC`,
 			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes]
 		);
 	}
