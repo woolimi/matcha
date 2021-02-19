@@ -1,6 +1,6 @@
 <template>
 	<v-container>
-		<v-row>
+		<v-row class="images-scroll">
 			<template v-if="mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
@@ -99,5 +99,16 @@
 	.marker-avatar {
 		border: 3px solid grey;
 		cursor: pointer;
+	}
+
+	.images-scroll {
+		overflow-y: scroll;
+		height: calc(100vh - 210px);
+	}
+
+	@media screen and (max-width: 960px) {
+		.images-scroll {
+			height: calc(100vh - 300px);
+		}
 	}
 </style>
