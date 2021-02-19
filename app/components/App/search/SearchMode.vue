@@ -1,6 +1,5 @@
 <template>
 	<v-container class="d-flex justify-space-between align-center">
-		<span class="grey--text text--darken-2">Total 7 results</span>
 		<v-btn-toggle v-if="mode === 'image'" mandatory dense>
 			<v-btn value="distance" @click="sorting">
 				<v-icon>mdi-map-marker-distance</v-icon>

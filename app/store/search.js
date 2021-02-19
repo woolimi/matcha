@@ -47,11 +47,19 @@ export const mutations = {
 };
 
 export const actions = {
-	async updateResult({ commit, state }) {
+	async updateResult({ commit, state, rootState }) {
 		try {
 			let { age, distance, likes, tags, sort, sort_dir } = state;
 			if (tags.selected.length === 0 && sort === 'number_of_common_tags') return;
-			const params = { age, distance, likes, tags: tags.selected, sort, sort_dir };
+			const params = {
+				age,
+				distance,
+				likes,
+				tags: tags.selected,
+				sort,
+				sort_dir,
+				languages: rootState.auth.user.languages,
+			};
 			const { data } = await this.$axios.get('/api/search', {
 				params,
 			});

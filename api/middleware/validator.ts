@@ -89,7 +89,10 @@ function validate_birthdate(birthdate: string) {
 	return '';
 }
 
-function fieldsChecker(formData: RegisterForm | LoginForm | PublicInfoForm, expectedFields: Array<string>): boolean {
+function fieldsChecker(
+	formData: RegisterForm | LoginForm | PublicInfoForm | SearchQuery,
+	expectedFields: Array<string>
+): boolean {
 	const foundFields = [];
 
 	for (const field of Object.keys(formData)) {
@@ -120,7 +123,7 @@ export default {
 					'location',
 				])
 			)
-				return res.sendStatus(403);
+				return res.sendStatus(400);
 
 			const error: any = {};
 			let e_msg = '';
@@ -192,7 +195,7 @@ export default {
 				'birthdate',
 			])
 		)
-			return res.sendStatus(403);
+			return res.sendStatus(400);
 		const error: any = {};
 		let e_msg = '';
 		e_msg = validate_firstName(user.firstName);
@@ -235,14 +238,17 @@ export default {
 			likes: bef_query.likes.map((s) => parseInt(s)),
 			distance: parseInt(bef_query.distance),
 		};
+		if (!query.tags) query.tags = [];
+		if (!fieldsChecker(query, ['age', 'distance', 'likes', 'tags', 'sort', 'sort_dir', 'languages']))
+			return res.sendStatus(400);
 
 		if (!query) return res.sendStatus(400);
 		if (!query.age || query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
 		if (!query.distance || query.distance < 0) return res.sendStatus(400);
 		if (!query.likes || query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
-		if (!query.tags) query.tags = [];
 		if (query.tags.length > 10) return res.sendStatus(400);
 		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
+		if (query.languages.length === 0) return res.sendStatus(400);
 
 		if (query.age[1] >= 50) query.age[1] = Number.MAX_SAFE_INTEGER;
 		if (query.distance >= 100) query.distance = Number.MAX_SAFE_INTEGER;
