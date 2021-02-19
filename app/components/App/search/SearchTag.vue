@@ -2,10 +2,11 @@
 	<v-container>
 		<v-card elevation="4">
 			<v-card-text>
-				<v-subheader class="pa-0 h-init font-weight-bold">Tags</v-subheader>
+				<div class="pa-0 h-init font-weight-bold">Tags</div>
 				<v-autocomplete
 					v-model="selected"
 					chips
+					dense
 					multiple
 					hide-selected
 					auto-select-first

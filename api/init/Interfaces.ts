@@ -48,6 +48,7 @@ export interface BeforeParsedSearchQuery {
 	tags: string[];
 	sort: string;
 	sort_dir: string;
+	languages: string[];
 }
 
 export interface SearchQuery {
@@ -57,4 +58,5 @@ export interface SearchQuery {
 	tags: string[];
 	sort: string;
 	sort_dir: string;
+	languages: string[];
 }
