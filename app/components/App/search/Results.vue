@@ -74,7 +74,6 @@
 				if (bp.smAndUp) return 4;
 			},
 			users() {
-				console.log(this.$store.state.search.users);
 				return this.$store.state.search.users;
 			},
 			center() {
