@@ -7,6 +7,8 @@ export const state = () => ({
 		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
+	sort: 'distance' /* number_of_common_tags, distance, age, likes */,
+	sort_dir: 'ASC' /* ASC, DESC */,
 	users: [],
 });
 
@@ -29,6 +31,13 @@ export const mutations = {
 	SET_SEARCH_MODE: (state, payload) => {
 		state.mode = payload;
 	},
+	SET_SEARCH_SORT: (state, payload) => {
+		if (state.sort === payload) {
+			state.sort_dir = state.sort_dir === 'ASC' ? 'DESC' : 'ASC';
+		} else {
+			state.sort = payload;
+		}
+	},
 	SET_USERS: (state, payload) => {
 		state.users = payload;
 	},
@@ -40,8 +49,9 @@ export const mutations = {
 export const actions = {
 	async updateResult({ commit, state }) {
 		try {
-			const { age, distance, likes, tags } = state;
-			const params = { age, distance, likes, tags: tags.selected };
+			let { age, distance, likes, tags, sort, sort_dir } = state;
+			if (tags.selected.length === 0 && sort === 'number_of_common_tags') return;
+			const params = { age, distance, likes, tags: tags.selected, sort, sort_dir };
 			const { data } = await this.$axios.get('/api/search', {
 				params,
 			});

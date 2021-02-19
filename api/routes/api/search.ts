@@ -8,7 +8,14 @@ const searchRouter = express.Router();
 // TODO : validate filter
 searchRouter.get('/', authToken, async (req: any, res) => {
 	try {
-		const query: { age?: [string, string]; distance?: string; likes?: string; tags?: string[] } = req.query;
+		const query: {
+			age: [string, string];
+			distance: string;
+			likes: string;
+			tags: string[];
+			sort: string;
+			sort_dir: string;
+		} = req.query;
 		if (!query || !query.age || !query.distance || !query.likes) throw 'Invalid query';
 		if (!query.tags) query.tags = [];
 		const users = await User.search(
@@ -16,7 +23,9 @@ searchRouter.get('/', authToken, async (req: any, res) => {
 			query.age.map((s) => parseInt(s)),
 			parseInt(query.distance),
 			parseInt(query.likes),
-			query.tags
+			query.tags,
+			query.sort,
+			query.sort_dir
 		);
 		return res.json({ users: users.map((u: any) => ({ ...u, location: xy2ll(u.location) })) });
 	} catch (error) {
