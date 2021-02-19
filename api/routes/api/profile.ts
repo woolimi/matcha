@@ -106,11 +106,11 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 
 	// Check if the user is not blocked
 	const isBlocked = await UserBlock.status(id, self);
-	if (isBlocked) return res.status(401).json({ error: 'The User has blocked you.' });
+	if (isBlocked) return res.status(401).json({ error: "You can't view this Profile right now." });
 
 	// Get the profile informations
 	const profile = await User.getPublicProfile(id);
-	if (!profile) return res.status(404).json({ error: 'Profile not found' });
+	if (!profile) return res.status(404).json({ error: 'This Profile does not exists.' });
 
 	// Get all other informations
 	const like = await UserLike.status(self, id);

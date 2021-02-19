@@ -3,13 +3,8 @@
 		<v-alert border="left" elevation="2" outlined text type="info" v-if="profile.id == $auth.user.id">
 			This is what you profile looks like to other users.
 		</v-alert>
-		<div v-if="$fetchState.pending" class="text-center">
-			<v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
-		</div>
-		<div v-else-if="$fetchState.error" class="text-center">
-			<v-alert border="left" colored-border type="error" elevation="2">
-				{{ $fetchState.error.message }}
-			</v-alert>
+		<div v-if="profile.error" class="text-center">
+			<v-alert border="left" colored-border type="error" elevation="2"> {{ profile.error }} </v-alert>
 		</div>
 		<v-row v-else-if="profile.id">
 			<v-col cols="12" sm="6">
@@ -140,6 +135,9 @@
 				</v-row>
 			</v-col>
 		</v-row>
+		<div v-else class="text-center">
+			<v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
+		</div>
 	</v-container>
 </template>
 
@@ -149,20 +147,17 @@
 		validate({ params }) {
 			return /^\d+$/.test(params.id);
 		},
-		async fetch() {
-			const profile = await this.$axios.get(`/api/profile/${this.id}`);
-			if (profile.status == 200) {
-				this.profile = profile.data;
-			} else this.$fetchState;
-		},
-		data() {
-			return {
-				profile: {},
-			};
+		mounted() {
+			if (this.id) {
+				this.$store.dispatch('profile/load', this.id);
+			}
 		},
 		computed: {
 			id() {
 				return this.$route.params.id;
+			},
+			profile() {
+				return this.$store.getters['profile/current'];
 			},
 			genderColor() {
 				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
@@ -194,22 +189,12 @@
 		},
 		methods: {
 			likeEvent() {
-				this.$axios.post(`/api/like/${this.id}`).then((response) => {
-					if (response.status == 200) {
-						this.profile.like = response.data.like;
-					} else {
-						this.$store.commit('snackbar/SHOW', {
-							message: 'Could not update Like status.',
-							color: 'error',
-						});
-					}
-				});
+				this.$store.dispatch('profile/toggleLike');
 			},
 			openChat() {
 				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
 					if (response.status >= 200 && response.status <= 201) {
-						this.profile.chat = response.data.chat;
-						this.$router.push({ path: `/app/chat/${this.profile.chat}` });
+						this.$router.push({ path: `/app/chat/${response.data.chat}` });
 					} else {
 						this.$store.commit('snackbar/SHOW', {
 							message: 'Could not create a chat with User.',
@@ -219,20 +204,7 @@
 				});
 			},
 			blockEvent() {
-				this.$axios.post(`/api/block/${this.id}`).then((response) => {
-					if (response.status == 200) {
-						this.profile.blocked = response.data.blocked;
-						this.$store.commit('snackbar/SHOW', {
-							message: this.profile.blocked ? 'User blocked' : 'User unblocked',
-							color: 'success',
-						});
-					} else {
-						this.$store.commit('snackbar/SHOW', {
-							message: 'Could not block User.',
-							color: 'error',
-						});
-					}
-				});
+				this.$store.dispatch('profile/toggleBlock');
 			},
 		},
 	};
