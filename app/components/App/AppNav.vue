@@ -76,7 +76,6 @@
 		async fetch() {
 			await this.$store.dispatch('notifications/loadList');
 			await this.$store.dispatch('chat/loadList');
-			await this.$store.dispatch('blocked/loadList');
 		},
 		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });

@@ -42,6 +42,9 @@
 <script>
 	export default {
 		auth: true,
+		async fetch() {
+			await this.$store.dispatch('blocked/loadList');
+		},
 		computed: {
 			list() {
 				return this.$store.getters['blocked/list'];
