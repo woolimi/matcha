@@ -5,7 +5,7 @@
 			<v-toolbar></v-toolbar>
 			<v-list nav dense>
 				<v-list-item-group v-model="selected" active-class="primary--text text--accent-4">
-					<v-list-item v-for="list in navList" :key="list.title" :disabled="isDisabled(list.title)">
+					<v-list-item v-for="(list, i) in navList" :key="i" :disabled="isDisabled(list.title)">
 						<template v-if="list.title === 'Logout'">
 							<a @click="userLogout">
 								<v-list-item-icon>
@@ -76,6 +76,7 @@
 		async fetch() {
 			await this.$store.dispatch('notifications/loadList');
 			await this.$store.dispatch('chat/loadList');
+			await this.$store.dispatch('blocked/loadList');
 		},
 		mounted() {
 			this.socket = this.$nuxtSocket({ persist: 'socket' });
@@ -99,31 +100,31 @@
 			drawer: false,
 			navList: [
 				{
-					id: 0,
 					title: 'Search',
 					icon: 'mdi-magnify',
 					path: '/app/search',
 				},
 				{
-					id: 1,
 					title: 'Profile',
 					icon: 'mdi-account-circle',
 					path: '/app/profile',
 				},
 				{
-					id: 2,
 					title: 'Chat',
 					icon: 'mdi-forum',
 					path: '/app/chat',
 				},
 				{
-					id: 3,
 					title: 'Notifications',
 					icon: 'mdi-bell',
 					path: '/app/notifications',
 				},
 				{
-					id: 4,
+					title: 'Blocked',
+					icon: 'mdi-cancel',
+					path: '/app/blocked',
+				},
+				{
 					title: 'Logout',
 					icon: 'mdi-logout',
 				},

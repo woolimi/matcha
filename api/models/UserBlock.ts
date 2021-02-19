@@ -26,6 +26,10 @@ export class UserBlock extends Model {
 		return Model.init('user_blocks', UserBlock);
 	}
 
+	static getAll(id: number): Promise<UserBlockInterface[]> {
+		return UserBlock.query(`SELECT * FROM ${UserBlock.tname} WHERE user = ? ORDER BY id DESC`, [id]);
+	}
+
 	static async status(user: number, blocked: number): Promise<number> {
 		const result: {
 			id: number;
