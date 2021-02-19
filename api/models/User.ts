@@ -1,7 +1,7 @@
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import bcrypt from 'bcrypt';
-import { RegisterForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
+import { RegisterForm, PublicInfoForm, ChangePasswordForm, SearchQuery } from '../init/Interfaces';
 import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
 import { LocationLL, LocationXY } from '../init/Interfaces';
@@ -226,23 +226,12 @@ class User extends Model {
 		}
 	}
 
-	static async search(
-		user_id: number,
-		age: number[],
-		distance: number,
-		likes: number,
-		tags: string[],
-		sort: string,
-		sort_dir: string
-	) {
+	static async search(user_id: number, query: SearchQuery) {
 		// 1. filter not verified and not fill public info.
-		// 2. limit number of tags
 		try {
 			const { preferences, location, gender } = await User.find(user_id);
+
 			let preferences_query = '';
-			if (distance >= 100) distance = Number.MAX_SAFE_INTEGER;
-			if (likes >= 10) likes = Number.MAX_SAFE_INTEGER;
-			if (age[1] >= 50) age[1] = Number.MAX_SAFE_INTEGER;
 			if (preferences === 'heterosexual') {
 				preferences_query = `gender = '${gender === 'male' ? 'female' : 'male'}'`;
 			} else if (preferences === 'bisexual') {
@@ -251,29 +240,8 @@ class User extends Model {
 				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preferences = 'bisexual'))`;
 			}
 
-			if (tags.length)
-				return await User.search_with_tags(
-					user_id,
-					age,
-					distance,
-					location,
-					likes,
-					preferences_query,
-					tags,
-					sort,
-					sort_dir
-				);
-			else
-				return await User.search_without_tags(
-					user_id,
-					age,
-					distance,
-					location,
-					likes,
-					preferences_query,
-					sort,
-					sort_dir
-				);
+			if (query.tags.length) return await User.search_with_tags(user_id, location, preferences_query, query);
+			else return await User.search_without_tags(user_id, location, preferences_query, query);
 		} catch (error) {
 			throw error;
 		}
@@ -281,14 +249,11 @@ class User extends Model {
 
 	static async search_without_tags(
 		user_id: number,
-		age: number[],
-		distance: number,
 		location: LocationXY,
-		likes: number,
 		preferences_query: string,
-		sort: string,
-		sort_dir: string
+		query: SearchQuery
 	) {
+		const { distance, age, likes, sort, sort_dir } = query;
 		return await User.query(
 			`SELECT users.id, username, lastName, firstName, gender, preferences, \
 					timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
@@ -305,24 +270,21 @@ class User extends Model {
 					GROUP BY users.id, user_pictures.path, user_pictures.picture \
 					HAVING users.id != ? \
 						AND ${preferences_query} AND distance < ? \
-						AND age >= ? AND age <= ? AND likes <= ? \
-						AND user_pictures.picture = 0
+						AND age >= ? AND age <= ? \
+						AND likes <= ? AND likes <= ? \
+						AND user_pictures.picture = 0 \
 					ORDER BY ${sort} ${sort_dir}`,
-			[location.y, location.x, user_id, distance, age[0], age[1], likes]
+			[location.y, location.x, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
 
 	static async search_with_tags(
 		user_id: number,
-		age: number[],
-		distance: number,
 		location: LocationXY,
-		likes: number,
 		preferences_query: string,
-		tags: string[],
-		sort: string,
-		sort_dir: string
+		query: SearchQuery
 	) {
+		const { distance, age, likes, sort, sort_dir, tags } = query;
 		return await User.query(
 			`SELECT users.id, username, lastName, firstName, gender, preferences, \
 				timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
@@ -351,11 +313,12 @@ class User extends Model {
 				GROUP BY users.id, user_pictures.path, user_pictures.picture \
 				HAVING users.id != ? \
 					AND ${preferences_query} AND distance < ? \
-					AND age >= ? AND age <= ? AND likes <= ? \ 
+					AND age >= ? AND age <= ? \
+					AND likes >= ? AND likes <= ? \ 
 					AND user_pictures.picture = 0 \
 					AND tag_list IS NOT NULL \
 				ORDER BY ${sort} ${sort_dir}`,
-			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes]
+			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
 }

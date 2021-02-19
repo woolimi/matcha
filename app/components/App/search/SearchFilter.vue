@@ -23,10 +23,10 @@
 				<v-subheader class="pa-0 h-init">
 					<span class="font-weight-bold"> Likes </span>
 					<v-spacer></v-spacer>
-					<span v-if="likes >= 10"> <v-icon small>mdi-less-than</v-icon> <v-icon>mdi-infinity</v-icon> </span>
-					<span v-else><v-icon small>mdi-less-than</v-icon> {{ likes }}</span>
+					<span v-if="likes[1] < 10">{{ likes[0] }} ~ {{ likes[1] }}</span>
+					<span v-else>{{ likes[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-subheader>
-				<v-slider dense v-model.lazy="likes" min="0" max="10" track-color="grey"></v-slider>
+				<v-range-slider dense v-model.lazy="likes" min="0" max="10" track-color="grey"></v-range-slider>
 			</v-card-text>
 		</v-card>
 	</v-container>
