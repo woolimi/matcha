@@ -19,12 +19,8 @@
 				</v-col>
 				<v-col cols="3" class="text--secondary d-flex align-center">
 					<v-icon small>mdi-heart</v-icon>
-					<span v-if="likes < 10" class="d-flex align-center">
-						<v-icon small>mdi-less-than</v-icon> {{ likes }}
-					</span>
-					<span v-else class="d-flex align-center">
-						<v-icon small>mdi-less-than</v-icon> <v-icon>mdi-infinity</v-icon>
-					</span>
+					<span v-if="likes[1] < 10" class="d-flex align-center">{{ likes[0] }} ~ {{ likes[1] }}</span>
+					<span v-else class="d-flex align-center">{{ likes[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-col>
 			</v-row>
 		</v-expansion-panel-header>
@@ -39,11 +35,11 @@
 					<div style="width: 60px">Distance</div>
 				</template>
 			</v-slider>
-			<v-slider dense v-model="likes" min="0" max="10" track-color="grey">
+			<v-range-slider dense v-model="likes" min="0" max="10" track-color="grey">
 				<template v-slot:label>
 					<div style="width: 60px">Likes</div>
 				</template>
-			</v-slider>
+			</v-range-slider>
 		</v-expansion-panel-content>
 	</v-expansion-panel>
 </template>
