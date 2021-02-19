@@ -1,7 +1,7 @@
 export const state = () => ({
 	age: [18, 30],
 	distance: 50,
-	likes: 5,
+	likes: [0, 5],
 	tags: {
 		selected: [],
 		items: [],

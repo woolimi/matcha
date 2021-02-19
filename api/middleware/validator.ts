@@ -1,6 +1,13 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
-import { RegisterForm, LoginForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
+import {
+	RegisterForm,
+	LoginForm,
+	PublicInfoForm,
+	ChangePasswordForm,
+	BeforeParsedSearchQuery,
+	SearchQuery,
+} from '../init/Interfaces';
 import LanguageSet from '../init/languages';
 import User from '../models/User';
 import { AgeCalculator } from '@dipaktelangre/age-calculator';
@@ -218,6 +225,30 @@ export default {
 		if (e_msg) error.vpassword = e_msg;
 
 		if (!_.isEmpty(error)) return res.json({ error });
+		next();
+	},
+	searchQuery(req: any, res: any, next: NextFunction) {
+		const bef_query: BeforeParsedSearchQuery = req.query;
+		const query: SearchQuery = {
+			...bef_query,
+			age: bef_query.age.map((s) => parseInt(s)),
+			likes: bef_query.likes.map((s) => parseInt(s)),
+			distance: parseInt(bef_query.distance),
+		};
+
+		if (!query) return res.sendStatus(400);
+		if (!query.age || query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
+		if (!query.distance || query.distance < 0) return res.sendStatus(400);
+		if (!query.likes || query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
+		if (!query.tags) query.tags = [];
+		if (query.tags.length > 10) return res.sendStatus(400);
+		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
+
+		if (query.age[1] >= 50) query.age[1] = Number.MAX_SAFE_INTEGER;
+		if (query.distance >= 100) query.distance = Number.MAX_SAFE_INTEGER;
+		if (query.likes[1] >= 10) query.likes[1] = Number.MAX_SAFE_INTEGER;
+
+		req.query = query;
 		next();
 	},
 };
