@@ -122,20 +122,27 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 	}
 	if (!payload.message) return socket.emit('chat/messageError', { error: 'Empty message' });
 
-	const user = app.users[socket.id];
-	if (!user) {
+	const self = app.users[socket.id];
+	if (!self) {
 		socket.emit('socket/loggedOut');
-		return socket.emit('chat/messageError', { error: 'Invalid user' });
+		return socket.emit('chat/messageError', { error: 'Invalid user, refresh the page' });
 	}
 
 	const chat = await Chat.get(payload.chat);
 	if (!chat) return socket.emit('chat/messageError', { error: 'Invalid chat' });
-	if (chat.user1 != user && chat.user2 != user) {
+	if (chat.user1 != self && chat.user2 != self) {
 		return socket.emit('chat/messageError', { error: 'Unauthorized chat' });
 	}
 
+	// Check permissions
+	const otherUser = chat.user1 == self ? chat.user2 : chat.user1;
+	const like = await UserLike.status(self, otherUser);
+	if (like != UserLikeStatus.TWOWAY) {
+		return socket.emit('chat/messageError', { error: 'Both Users need to like each other to Chat' });
+	}
+
 	// Save the message
-	const queryResult = await ChatMessage.add(chat.id, user, payload.message);
+	const queryResult = await ChatMessage.add(chat.id, self, payload.message);
 	if (queryResult === false) {
 		return socket.emit('chat/messageError', { error: 'Could not save message' });
 	}
@@ -144,11 +151,16 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 	await Chat.updateLastMessage(chat.id);
 
 	// Send the message
-	const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
 	const otherSocket = app.sockets[otherUser];
 	if (otherSocket) {
 		console.log('💨[socket]: send chat/receiveMessage to ', otherSocket.id);
-		otherSocket.emit('chat/receiveMessage', chatMessage);
+		otherSocket.emit('chat/receiveMessage', {
+			id: queryResult.insertId,
+			chat: chat.id,
+			sender: self,
+			at: new Date(),
+			content: payload.message,
+		});
 	}
 
 	// Send the notification -- only if we're not already in chat or if the user is not logged in
@@ -158,22 +170,28 @@ export async function sendMessage(app: Express, socket: Socket, payload: { chat:
 		parseInt(app.currentPage[otherSocket.id]?.params?.id ?? '0') != chat.id;
 	if (addNotification) {
 		// Create a new one if the last one wasn't the exact same
-		const lastMessage = await UserNotification.getLastMessage(otherUser, user);
+		const lastMessage = await UserNotification.getLastMessage(otherUser, self);
 		if (!lastMessage || lastMessage.status) {
-			const lastNotification = await UserNotification.getLast(user);
+			const lastNotification = await UserNotification.getLast(self);
 			if (
 				!lastNotification ||
 				lastNotification.type != Notification.MessageReceived ||
-				lastNotification.sender != user ||
+				lastNotification.sender != self ||
 				lastNotification.status
 			) {
-				const notifResult = await UserNotification.add(otherUser, user, Notification.MessageReceived);
+				const notifResult = await UserNotification.add(otherUser, self, Notification.MessageReceived);
 				if (notifResult) {
-					const notification = await UserNotification.get(notifResult.insertId);
-					const currentUser = await User.getSimple(user);
+					const currentUser = await User.getSimple(self);
 					if (otherSocket) {
 						console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
-						otherSocket.emit('notifications/receive', { ...notification, user: currentUser });
+						otherSocket.emit('notifications/receive', {
+							id: notifResult.insertId,
+							type: Notification.MessageReceived,
+							at: new Date(),
+							sender: self,
+							status: 0,
+							user: currentUser,
+						});
 					}
 				}
 			}
