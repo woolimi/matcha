@@ -226,7 +226,15 @@ class User extends Model {
 		}
 	}
 
-	static async search(user_id: number, age: number[], distance: number, likes: number, tags: string[]) {
+	static async search(
+		user_id: number,
+		age: number[],
+		distance: number,
+		likes: number,
+		tags: string[],
+		sort: string,
+		sort_dir: string
+	) {
 		// 1. filter not verified and not fill public info.
 		// 2. limit number of tags
 		try {
@@ -244,8 +252,28 @@ class User extends Model {
 			}
 
 			if (tags.length)
-				return await User.search_with_tags(user_id, age, distance, location, likes, preferences_query, tags);
-			else return await User.search_without_tags(user_id, age, distance, location, likes, preferences_query);
+				return await User.search_with_tags(
+					user_id,
+					age,
+					distance,
+					location,
+					likes,
+					preferences_query,
+					tags,
+					sort,
+					sort_dir
+				);
+			else
+				return await User.search_without_tags(
+					user_id,
+					age,
+					distance,
+					location,
+					likes,
+					preferences_query,
+					sort,
+					sort_dir
+				);
 		} catch (error) {
 			throw error;
 		}
@@ -257,7 +285,9 @@ class User extends Model {
 		distance: number,
 		location: LocationXY,
 		likes: number,
-		preferences_query: string
+		preferences_query: string,
+		sort: string,
+		sort_dir: string
 	) {
 		return await User.query(
 			`SELECT users.id, username, lastName, firstName, gender, preferences, \
@@ -276,7 +306,8 @@ class User extends Model {
 					HAVING users.id != ? \
 						AND ${preferences_query} AND distance < ? \
 						AND age >= ? AND age <= ? AND likes <= ? \
-						AND user_pictures.picture = 0`,
+						AND user_pictures.picture = 0
+					ORDER BY ${sort} ${sort_dir}`,
 			[location.y, location.x, user_id, distance, age[0], age[1], likes]
 		);
 	}
@@ -288,7 +319,9 @@ class User extends Model {
 		location: LocationXY,
 		likes: number,
 		preferences_query: string,
-		tags: string[]
+		tags: string[],
+		sort: string,
+		sort_dir: string
 	) {
 		return await User.query(
 			`SELECT users.id, username, lastName, firstName, gender, preferences, \
@@ -321,7 +354,7 @@ class User extends Model {
 					AND age >= ? AND age <= ? AND likes <= ? \ 
 					AND user_pictures.picture = 0 \
 					AND tag_list IS NOT NULL \
-				ORDER BY number_of_common_tags DESC`,
+				ORDER BY ${sort} ${sort_dir}`,
 			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes]
 		);
 	}
