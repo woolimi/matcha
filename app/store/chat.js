@@ -130,13 +130,12 @@ export const actions = {
 		commit('removeUserChat', userId);
 	},
 	blocked({ state, commit }, payload) {
-		const userId = payload.from;
+		const userId = payload.user;
 		if (state.chat && state.chat.user.id == userId) {
 			commit('leaveChat');
 		}
 		commit('removeUserChat', userId);
 	},
-	unblocked({ state }, payload) {},
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });
 	},

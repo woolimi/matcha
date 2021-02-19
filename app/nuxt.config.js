@@ -146,7 +146,6 @@ export default {
 						'chat/messageError',
 						'notifications/receive',
 						'blockedBy --> chat/blocked',
-						'unblockedBy --> chat/unblocked',
 						'notifications/setListAsRead',
 					],
 				},

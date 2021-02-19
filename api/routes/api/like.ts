@@ -32,10 +32,16 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		// Send notification if the User is logged in
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
-			const notification = await UserNotification.get(notifInsert.insertId);
 			const user = await User.getSimple(self);
 			console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
-			otherSocket.emit('notifications/receive', { ...notification, user });
+			otherSocket.emit('notifications/receive', {
+				id: notifInsert.insertId,
+				type: notificationType,
+				at: new Date(),
+				sender: self,
+				status: 0,
+				user,
+			});
 		}
 		return res.send({ like: status == UserLikeStatus.NONE ? UserLikeStatus.ONEWAY : UserLikeStatus.TWOWAY });
 	}
@@ -52,10 +58,16 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		// Send notification if the User is logged in
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
-			const notification = await UserNotification.get(notifInsert.insertId);
 			const user = await User.getSimple(self);
 			console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
-			otherSocket.emit('notifications/receive', { ...notification, user });
+			otherSocket.emit('notifications/receive', {
+				id: notifInsert.insertId,
+				type: Notification.LikeRemoved,
+				at: new Date(),
+				sender: self,
+				status: 0,
+				user,
+			});
 		}
 		return res.send({ like: status == UserLikeStatus.TWOWAY ? UserLikeStatus.REVERSE : UserLikeStatus.NONE });
 	}
