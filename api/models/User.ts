@@ -247,34 +247,54 @@ class User extends Model {
 		}
 	}
 
+	static invalid_user_filter_query = `AND users.verified = 1 \
+		AND users.gender IS NOT NULL \
+		AND users.preferences IS NOT NULL \
+		AND users.birthdate IS NOT NULL \
+		AND users.biography IS NOT NULL`;
+
+	static common_select_query() {
+		return `users.id, username, lastName, firstName, gender, preferences, verified, birthdate, biography, location, \
+		timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
+		ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
+		COUNT(user_likes.liked) AS likes, \		
+		user_pictures.picture, \
+		user_pictures.path AS image`;
+	}
+
+	static common_join_query(languages: string[]) {
+		return `LEFT JOIN user_likes \
+		ON users.id = user_likes.liked \
+		LEFT JOIN user_pictures \
+		ON users.id = user_pictures.user \
+		INNER JOIN ( \
+			SELECT user_languages.user, user_languages.language \
+			FROM user_languages \
+			WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')}) \ 
+		) AS ulangs \
+		ON users.id = ulangs.user`;
+	}
+
 	static async search_without_tags(
 		user_id: number,
 		location: LocationXY,
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, likes, sort, sort_dir } = query;
+		const { distance, age, likes, sort, sort_dir, languages } = query;
 		return await User.query(
-			`SELECT users.id, username, lastName, firstName, gender, preferences, \
-					timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
-					ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-					location, \
-					COUNT(user_likes.liked) AS likes, \
-					user_pictures.picture, \
-					user_pictures.path AS image \
+			`SELECT ${User.common_select_query()} \
 					FROM users\
-					LEFT JOIN user_likes \
-					ON users.id = user_likes.liked \
-					LEFT JOIN user_pictures \
-					ON users.id = user_pictures.user \
+					${User.common_join_query(languages)} \
 					GROUP BY users.id, user_pictures.path, user_pictures.picture \
 					HAVING users.id != ? \
 						AND ${preferences_query} AND distance < ? \
 						AND age >= ? AND age <= ? \
-						AND likes <= ? AND likes <= ? \
+						AND likes >= ? AND likes <= ? \ 
 						AND user_pictures.picture = 0 \
+						${User.invalid_user_filter_query} \ 
 					ORDER BY ${sort} ${sort_dir}`,
-			[location.y, location.x, user_id, distance, age[0], age[1], likes[0], likes[1]]
+			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
 
@@ -284,22 +304,13 @@ class User extends Model {
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, likes, sort, sort_dir, tags } = query;
+		const { distance, age, likes, sort, sort_dir, tags, languages } = query;
 		return await User.query(
-			`SELECT users.id, username, lastName, firstName, gender, preferences, \
-				timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
-				ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-				location, \
-				COUNT(user_likes.liked) AS likes, \
-				user_pictures.picture, \
-				user_pictures.path AS image, \
+			`SELECT ${User.common_select_query()}, \
 				utags.tag_list, \
 				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
-				FROM users\
-				LEFT JOIN user_likes \
-				ON users.id = user_likes.liked \
-				LEFT JOIN user_pictures \
-				ON users.id = user_pictures.user \
+				FROM users \
+				${User.common_join_query(languages)} \
 				LEFT JOIN ( \
 					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
 						.fill('?')
@@ -317,8 +328,9 @@ class User extends Model {
 					AND likes >= ? AND likes <= ? \ 
 					AND user_pictures.picture = 0 \
 					AND tag_list IS NOT NULL \
+					${User.invalid_user_filter_query} \ 
 				ORDER BY ${sort} ${sort_dir}`,
-			[location.y, location.x, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
+			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
 }

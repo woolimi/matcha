@@ -10,6 +10,7 @@
 				<v-col class="d-none d-md-block" cols="4">
 					<SearchFilter />
 					<SearchTag />
+					<SearchLanguage />
 				</v-col>
 				<v-col cols="12" md="8">
 					<SearchMode />
