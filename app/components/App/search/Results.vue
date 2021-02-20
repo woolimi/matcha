@@ -1,6 +1,6 @@
 <template>
 	<v-container>
-		<v-row class="images-scroll">
+		<v-row class="images-scroll" v-scroll.self="scroll">
 			<template v-if="mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
@@ -81,6 +81,14 @@
 			},
 			mode() {
 				return this.$store.state.search.mode;
+			},
+		},
+		methods: {
+			scroll(e) {
+				// console.log()
+				// if (e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 50) {
+				// 	console.log('HERE');
+				// }
 			},
 		},
 	};
