@@ -122,16 +122,36 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 	const userIds = Array.from(new Set(history.map((n) => n.sender)));
 	const otherUsers = await User.getAllSimple(userIds);
 
-	// Mark notifications as read
-	// profile:visited, like:received and like:match
-	const types = [Notification.Visit, Notification.LikeReceived, Notification.LikeMatched];
-	const notifications = (await UserNotification.getAnyOf(self, id, types)).map((n) => n.id);
-	if (notifications.length > 0) {
-		await UserNotification.setListAsRead(notifications);
-		const socket = req.app.sockets[self];
-		if (socket) {
-			console.log('💨[socket]: send notifications/setListAsRead to ', socket.id);
-			socket.emit('notifications/setListAsRead', { list: notifications });
+	if (id != self) {
+		// Add notification
+		const notifInsert = await UserNotification.add(id, self, Notification.Visit);
+		if (notifInsert) {
+			const otherSocket = req.app.sockets[id];
+			if (otherSocket) {
+				const currentUser = await User.getSimple(self);
+				console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
+				otherSocket.emit('notifications/receive', {
+					id: notifInsert.insertId,
+					type: Notification.Visit,
+					at: new Date(),
+					sender: self,
+					status: 0,
+					user: currentUser,
+				});
+			}
+		}
+
+		// Mark notifications as read
+		// profile:visited, like:received and like:match
+		const types = [Notification.Visit, Notification.LikeReceived, Notification.LikeMatched];
+		const notifications = (await UserNotification.getAnyOf(self, id, types)).map((n) => n.id);
+		if (notifications.length > 0) {
+			await UserNotification.setListAsRead(notifications);
+			const socket = req.app.sockets[self];
+			if (socket) {
+				console.log('💨[socket]: send notifications/setListAsRead to ', socket.id);
+				socket.emit('notifications/setListAsRead', { list: notifications });
+			}
 		}
 	}
 
