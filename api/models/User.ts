@@ -254,10 +254,8 @@ class User extends Model {
 		AND users.biography IS NOT NULL`;
 
 	static common_select_query() {
-		return `users.id, username, lastName, firstName, gender, preferences, verified, birthdate, biography, location, \
-		uinfo.age, uinfo.distance, \
-		IFNULL(ulikes.likes, 0) AS likes, \		
-		upictures.path AS image`;
+		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location, \
+		uinfo.age, uinfo.distance, IFNULL(ulikes.likes, 0) AS likes, upictures.path AS image`;
 	}
 
 	static common_join_query(languages: string[]) {
