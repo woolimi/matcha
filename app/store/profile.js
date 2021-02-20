@@ -18,6 +18,12 @@ export const mutations = {
 	},
 	setBlock(state, status) {
 		state.current.blocked = status;
+		if (status) state.current.like = 0;
+	},
+	addNotification(state, notification) {
+		if (state.current.history) {
+			state.current.history.unshift(notification);
+		}
 	},
 };
 
@@ -33,9 +39,9 @@ export const actions = {
 				commit('setCurrent', { id, error: error.response.data.error });
 			});
 	},
-	toggleLike({ commit }) {
-		if (this.profile.id) {
-			this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
+	toggleLike({ state, commit }) {
+		if (state.current.id) {
+			this.$axios.post(`/api/like/${state.current.id}`).then((response) => {
 				if (response.status == 200) {
 					commit('setLike', response.data.like);
 				} else {
@@ -51,15 +57,15 @@ export const actions = {
 			});
 		}
 	},
-	toggleBlock({ commit }) {
-		if (this.profile.id) {
-			this.$axios.post(`/api/block/${this.profile.id}`).then((response) => {
+	toggleBlock({ state, commit }) {
+		if (state.current.id) {
+			this.$axios.post(`/api/block/${state.current.id}`).then((response) => {
 				if (response.status == 200) {
 					commit('setBlock', response.data.blocked);
 					commit(
 						'snackbar/SHOW',
 						{
-							message: this.profile.blocked ? 'User blocked' : 'User unblocked',
+							message: state.current.blocked ? 'User blocked' : 'User unblocked',
 							color: 'success',
 						},
 						{ root: true }
@@ -77,9 +83,26 @@ export const actions = {
 			});
 		}
 	},
-	liked({ state, commit }, payload) {},
-	unliked({ state, commit }, payload) {},
-	matched({ state, commit }, payload) {},
-	historyUpdated({ state, commit }, payload) {},
-	blocked({ state, commit }, payload) {},
+	blocked({ state, commit }, payload) {
+		if (state.current && state.current.id == payload.user) {
+			commit('setCurrent', { id: state.current.id, error: "You can't view this Profile right now." });
+		}
+	},
+	unblocked({ state, dispatch }, payload) {
+		if (state.current && state.current.id == payload.user) {
+			dispatch('load', state.current.id);
+		}
+	},
+	receiveNotification({ state, commit }, payload) {
+		if (state.current && state.current.id == payload.user.id && !state.current.error) {
+			if (payload.type == 'like:received') {
+				commit('setLike', 3);
+			} else if (payload.type == 'like:match') {
+				commit('setLike', 2);
+			} else if (payload.type == 'like:removed') {
+				commit('setLike', state.current.like == 3 ? 0 : 1);
+			}
+			commit('addNotification', payload);
+		}
+	},
 };

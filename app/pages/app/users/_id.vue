@@ -126,6 +126,7 @@
 							<v-card tile class="notifications">
 								<NotificationsList
 									:manageable="false"
+									:navigation="false"
 									:list="profile.history"
 									:emptyMessage="noHistoryMessage"
 								/>
