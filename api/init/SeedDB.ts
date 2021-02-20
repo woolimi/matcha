@@ -68,7 +68,7 @@ async function create_seed_users() {
 			await UserTag.add_tag(insertId, tags[(randomTagId + 1) % tags.length]);
 			// add languages
 			await UserLanguage.add(insertId, langs[Math.floor(Math.random() * langs.length)]);
-			console.log('Fake user craeted', user, insertId);
+			console.log('Fake user created', user, insertId);
 		}
 	} catch (error) {
 		throw error;

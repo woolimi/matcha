@@ -1,7 +1,7 @@
 import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
-import User from './User';
+import User, { UserSimpleInterface } from './User';
 
 export const enum Notification {
 	Visit = 'profile:visited',
@@ -19,6 +19,8 @@ export interface NotificationInterface {
 	sender: number;
 	status: boolean;
 }
+
+export type NotificationWithUserInterface = NotificationInterface | { user: UserSimpleInterface };
 
 class UserNotification extends Model {
 	static tname = 'user_notifications';
@@ -83,6 +85,23 @@ class UserNotification extends Model {
 		}
 	}
 
+	static async getHistory(user: number, sender: number): Promise<NotificationInterface[]> {
+		const result = await UserNotification.query(
+			`SELECT * FROM ${UserNotification.tname} WHERE user = ? AND sender = ? ORDER BY id DESC`,
+			[user, sender]
+		);
+		return result;
+	}
+
+	static getAnyOf(user1: number, user2: number, type: Notification[]): Promise<{ id: number }[]> {
+		return UserNotification.query(
+			`SELECT id
+			FROM ${UserNotification.tname}
+			WHERE status = 0 AND user = ? AND sender = ? AND type IN (${new Array(type.length).fill('?').join(',')})`,
+			[user1, user2, ...type]
+		);
+	}
+
 	// Status update
 
 	private static setAs(id: number, status: boolean): Promise<ResultSetHeader> {
@@ -93,12 +112,21 @@ class UserNotification extends Model {
 		return this.setAs(id, true);
 	}
 
-	static setAsUnread(id: number): Promise<ResultSetHeader> {
-		return this.setAs(id, false);
+	static setListAsRead(ids: number[]): Promise<ResultSetHeader> {
+		return UserNotification.query(
+			`UPDATE ${UserNotification.tname}
+			SET status = 1
+			WHERE id IN (${new Array(ids.length).fill('?').join(',')})`,
+			[...ids]
+		);
 	}
 
 	static setAllAsRead(user: number): Promise<ResultSetHeader> {
 		return UserNotification.query(`UPDATE ${UserNotification.tname} SET status = 1 WHERE user = ?`, [user]);
+	}
+
+	static setAsUnread(id: number): Promise<ResultSetHeader> {
+		return this.setAs(id, false);
 	}
 }
 

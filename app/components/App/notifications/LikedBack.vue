@@ -6,25 +6,29 @@
 
 		<v-list-item-content>
 			<v-list-item-title>
-				{{ row.user.username }} also liked your profile !
-				<v-tooltip bottom>
+				{{ row.user.firstName }} {{ row.user.lastName }} also liked your profile !
+				<v-tooltip bottom v-if="navigation">
 					<template v-slot:activator="{ on, attrs }">
-						<v-btn :to="`/app/user/${row.user.id}`" color="action" small icon v-bind="attrs" v-on="on">
+						<v-btn :to="`/app/users/${row.user.id}`" color="action" small icon v-bind="attrs" v-on="on">
 							<v-icon>mdi-arrow-right</v-icon>
 						</v-btn>
 					</template>
-					<span>Visit {{ row.user.username }}</span>
+					<span>Visit {{ row.user.firstName }} {{ row.user.lastName }}</span>
 				</v-tooltip>
 			</v-list-item-title>
 			<v-list-item-subtitle> {{ new Date(row.at).toLocaleString() }} </v-list-item-subtitle>
 		</v-list-item-content>
 
-		<MarkAsRead v-if="!row.status" :id="row.id" />
+		<MarkAsRead v-if="manageable && !row.status" :id="row.id" />
 	</v-list-item>
 </template>
 
 <script>
 	export default {
-		props: { row: { type: Object, required: true } },
+		props: {
+			row: { type: Object, required: true },
+			manageable: { type: Boolean, required: true },
+			navigation: { type: Boolean, required: true },
+		},
 	};
 </script>
