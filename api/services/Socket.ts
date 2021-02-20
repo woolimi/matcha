@@ -38,6 +38,18 @@ export function bindSocket(app: Express, io: Server) {
 
 					// Update login status to all liked users
 					sendStatusChange(Status.Login, app, user.id);
+					for (const socketId of Object.keys(app.currentPage)) {
+						if (
+							app.currentPage[socketId].name == 'app-users-id' &&
+							parseInt(app.currentPage[socketId].params?.id ?? '') == user.id
+						) {
+							const otherUser = app.users[socketId];
+							if (!otherUser) continue;
+							const otherSocket = app.sockets[otherUser];
+							if (!otherSocket) continue;
+							otherSocket.emit('userLogin', { user: user.id });
+						}
+					}
 				}
 			});
 		});
@@ -54,6 +66,18 @@ export function bindSocket(app: Express, io: Server) {
 
 			const userId = app.users[socket.id];
 			sendStatusChange(Status.Logout, app, userId);
+			for (const socketId of Object.keys(app.currentPage)) {
+				if (
+					app.currentPage[socketId].name == 'app-users-id' &&
+					parseInt(app.currentPage[socketId].params?.id ?? '') == userId
+				) {
+					const otherUser = app.users[socketId];
+					if (!otherUser) continue;
+					const otherSocket = app.sockets[otherUser];
+					if (!otherSocket) continue;
+					otherSocket.emit('userLogout', { user: userId });
+				}
+			}
 
 			delete app.sockets[userId];
 			delete app.users[socket.id];
