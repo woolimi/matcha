@@ -38,10 +38,12 @@ function dateParts(date: Date | string): DateParts {
 export default (_context: Context, inject: Inject) => {
 	inject('date', {
 		parts: dateParts,
+
 		simpleDate(date: Date | DateParts | string) {
 			const parts = typeof date !== 'object' || date instanceof Date ? dateParts(date) : date;
 			return `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}`;
 		},
+
 		simpleTime(date: Date | DateParts | string) {
 			if (typeof date === 'string') date = new Date(date);
 			if (date instanceof Date) {

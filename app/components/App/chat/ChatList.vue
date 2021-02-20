@@ -22,7 +22,7 @@
 							</v-list-item-avatar>
 							<v-list-item-content>
 								<v-list-item-title>
-									{{ chat.user.username }}
+									{{ chat.user.firstName }} {{ chat.user.lastName }}
 								</v-list-item-title>
 								<v-list-item-subtitle>{{
 									chat.last ? new Date(chat.last).toLocaleString() : 'No messages'
