@@ -23,16 +23,24 @@
 					<ProfileVisited
 						v-else-if="row.type == 'profile:visited'"
 						:manageable="manageable"
+						:navigation="navigation"
 						:row="row"
 						:key="row.id"
 					/>
 					<LikeReceived
 						v-else-if="row.type == 'like:received'"
 						:manageable="manageable"
+						:navigation="navigation"
 						:row="row"
 						:key="row.id"
 					/>
-					<LikedBack v-else-if="row.type == 'like:match'" :manageable="manageable" :row="row" :key="row.id" />
+					<LikedBack
+						v-else-if="row.type == 'like:match'"
+						:manageable="manageable"
+						:navigation="navigation"
+						:row="row"
+						:key="row.id"
+					/>
 					<LikeRemoved
 						v-else-if="row.type == 'like:removed'"
 						:manageable="manageable"
@@ -57,6 +65,10 @@
 	export default {
 		props: {
 			manageable: {
+				type: Boolean,
+				required: true,
+			},
+			navigation: {
 				type: Boolean,
 				required: true,
 			},

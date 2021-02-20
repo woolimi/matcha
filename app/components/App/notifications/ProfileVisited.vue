@@ -7,7 +7,7 @@
 		<v-list-item-content>
 			<v-list-item-title>
 				{{ row.user.firstName }} {{ row.user.lastName }} has visited your profile.
-				<v-tooltip bottom>
+				<v-tooltip bottom v-if="navigation">
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn :to="`/app/users/${row.user.id}`" color="action" small icon v-bind="attrs" v-on="on">
 							<v-icon>mdi-arrow-right</v-icon>
@@ -28,6 +28,7 @@
 		props: {
 			row: { type: Object, required: true },
 			manageable: { type: Boolean, required: true },
+			navigation: { type: Boolean, required: true },
 		},
 	};
 </script>

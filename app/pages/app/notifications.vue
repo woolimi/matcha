@@ -1,5 +1,5 @@
 <template>
-	<NotificationsList :manageable="true" :list="list" :emptyMessage="emptyMessage" />
+	<NotificationsList :manageable="true" :navigation="true" :list="list" :emptyMessage="emptyMessage" />
 </template>
 
 <script>

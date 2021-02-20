@@ -64,5 +64,13 @@ export const actions = {
 		if (payload.type == 'like:removed') {
 			dispatch('chat/unliked', payload.user.id, { root: true });
 		}
+		dispatch('profile/receiveNotification', payload, { root: true });
+	},
+	blockedBy({ dispatch }, payload) {
+		dispatch('chat/blocked', payload, { root: true });
+		dispatch('profile/blocked', payload, { root: true });
+	},
+	unblockedBy({ dispatch }, payload) {
+		dispatch('profile/unblocked', payload, { root: true });
 	},
 };
