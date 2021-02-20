@@ -9,7 +9,7 @@ import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
 
-export interface UserInterface {
+export interface UserInterfaceBase {
 	id: number;
 	email: string;
 	username: string;
@@ -21,19 +21,19 @@ export interface UserInterface {
 	gender: ('male' | 'female') | null;
 	preferences: ('heterosexual' | 'bisexual') | null;
 	biography: string | null;
-	location: { x: number; y: number } | null;
 	birthdate: string | null;
 }
 
-export type UserInterfaceLocation = UserInterface | { location: { lat: number; lng: number } | null };
+export type UserInterfaceXY = UserInterfaceBase & { location: { x: number; y: number } | null };
+export type UserInterfaceLL = UserInterfaceBase & { location: { lat: number; lng: number } | null };
 
-export type UserSimpleInterface = Pick<UserInterface, 'id' | 'firstName' | 'lastName'> & {
+export type UserSimpleInterface = Pick<UserInterfaceBase, 'id' | 'firstName' | 'lastName'> & {
 	picture: string | null;
 	online: boolean | undefined;
 };
 
 export type PublicProfileInterface = Pick<
-	UserInterface,
+	UserInterfaceLL,
 	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate'
 >;
 
@@ -205,8 +205,8 @@ class User extends Model {
 		}
 	}
 
-	static async getPublicProfile(id: number): Promise<UserInterfaceLocation | null> {
-		const result: UserInterfaceLocation[] = await User.query(
+	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
+		const result: UserInterfaceXY[] = await User.query(
 			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate \
 			FROM ${User.tname} \
 			WHERE id = ? LIMIT 1`,
@@ -214,9 +214,7 @@ class User extends Model {
 		);
 		if (result && result.length == 1) {
 			const profile = result[0]!;
-			const location = profile.location as { x: number; y: number };
-			profile.location = { lat: location.y, lng: location.x };
-			return profile;
+			return { ...profile, location: xy2ll(profile.location!) };
 		}
 		return null;
 	}
