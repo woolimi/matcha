@@ -9,6 +9,7 @@ import UserPicture from '../models/UserPicture';
 import UserTag from '../models/UserTag';
 import UserVisit from '../models/UserVisit';
 import UserLanguage from '../models/UserLanguage';
+import UserReport from '../models/UserReport';
 
 class Database {
 	static async init() {
@@ -24,6 +25,7 @@ class Database {
 		await Chat.init();
 		await ChatMessage.init();
 		await UserLanguage.init();
+		await UserReport.init();
 	}
 }
 
