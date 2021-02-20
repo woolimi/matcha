@@ -31,7 +31,7 @@ async function create_seed_tags() {
 
 async function create_seed_users() {
 	try {
-		const password = await bcrypt.hash('asdf', 10);
+		const password = await bcrypt.hash('asdfasdf', 10);
 		const current_year = new Date().getFullYear();
 		const tags = await Tag.get_tag_ids();
 		const langs = ['English', 'English', 'English', 'English', 'French', 'French', 'French', 'Korean'];
