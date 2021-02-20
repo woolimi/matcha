@@ -38,6 +38,9 @@ export const mutations = {
 			}
 		}
 	},
+	removeFromUser(state, id) {
+		state.list = state.list.filter((n) => n.user.id != id);
+	},
 };
 
 export const actions = {
@@ -66,7 +69,8 @@ export const actions = {
 		}
 		dispatch('profile/receiveNotification', payload, { root: true });
 	},
-	blockedBy({ dispatch }, payload) {
+	blockedBy({ commit, dispatch }, payload) {
+		commit('removeFromUser', payload.user);
 		dispatch('chat/blocked', payload, { root: true });
 		dispatch('profile/blocked', payload, { root: true });
 	},

@@ -72,6 +72,10 @@ class Chat extends Model {
 	static create(user1: number, user2: number): Promise<ResultSetHeader> {
 		return Chat.query(`INSERT INTO ${Chat.tname} (user1, user2) VALUES (?, ?)`, [user1, user2]);
 	}
+
+	static delete(id: number): Promise<ResultSetHeader> {
+		return Chat.query(`DELETE FROM ${Chat.tname} WHERE id = ?`, [id]);
+	}
 }
 
 export default Chat;

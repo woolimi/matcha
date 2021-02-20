@@ -43,13 +43,6 @@
 -   `tag`: See [#Tags](#Tags)
 -   `added`
 
-#### UserVisit
-
--   `id`
--   `visited`: User, to get _self_ history, select \* where visited = self
--   `visitor`: User
--   `at`: Date
-
 #### UserLike
 
 -   `id`

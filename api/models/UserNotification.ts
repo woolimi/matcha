@@ -102,6 +102,14 @@ class UserNotification extends Model {
 		);
 	}
 
+	static removeAllForUser(user1: number, user2: number): Promise<ResultSetHeader> {
+		return UserNotification.query(
+			`DELETE FROM ${UserNotification.tname}
+			WHERE user = ? AND sender = ?`,
+			[user1, user2]
+		);
+	}
+
 	// Status update
 
 	private static setAs(id: number, status: boolean): Promise<ResultSetHeader> {
