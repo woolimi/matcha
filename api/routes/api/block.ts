@@ -3,7 +3,7 @@ import authToken from '../../middleware/authToken';
 import requireNotSelf from '../../middleware/requireNotSelf';
 import User from '../../models/User';
 import UserBlock from '../../models/UserBlock';
-import UserLike from '../../models/UserLike';
+import UserLike, { UserLikeStatus } from '../../models/UserLike';
 
 const blockRouter = express.Router();
 
@@ -37,42 +37,48 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	if (userBlockId) {
 		result = await UserBlock.remove(userBlockId);
 
-		// Send notification
-		const socket = req.app.sockets[self];
-		if (socket) {
-			console.log('💨[socket]: send unblocked to ', socket.id);
-			socket.emit('unblocked', userBlockId);
-		}
+		// Send unblocked if the other is currently looking at our profile
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
-			console.log('💨[socket]: send unblockedBy to ', otherSocket.id);
-			otherSocket.emit('unblockedBy', { user: self });
+			const otherUserPage = req.app.currentPage[otherSocket.id];
+			if (otherUserPage && otherUserPage.name == 'app-users-id' && otherUserPage?.params?.id == self) {
+				console.log('💨[socket]: send unblockedBy to ', otherSocket.id);
+				otherSocket.emit('unblockedBy', { user: self });
+			}
 		}
+
+		if (!result) {
+			return res.status(500).send({ error: 'Could not change User block state.' });
+		}
+		return res.json({ id: userBlockId, status: false });
 	}
 	// Block User
 	else {
-		await UserLike.removeAll(self, id);
+		const likeStatus = await UserLike.status(self, id);
+		if (likeStatus != UserLikeStatus.NONE) {
+			await UserLike.removeAll(self, id);
+		}
 		result = await UserBlock.add(self, id);
 
-		// Send notification
-		const socket = req.app.sockets[self];
-		if (socket) {
-			const user = await User.getSimple(id);
-			console.log('💨[socket]: send blocked to ', socket.id);
-			socket.emit('blocked', { id: result.insertId, at: new Date(), user });
-		}
-		// Send blocked if the other
+		// Send blocked if the other is currently looking at our profile
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
-			console.log('💨[socket]: send blockedBy to ', otherSocket.id);
-			otherSocket.emit('blockedBy', { user: self });
+			const otherUserPage = req.app.currentPage[otherSocket.id];
+			if (
+				(otherUserPage && otherUserPage.name == 'app-users-id' && otherUserPage.params?.id == self) ||
+				likeStatus != UserLikeStatus.NONE
+			) {
+				console.log('💨[socket]: send blockedBy to ', otherSocket.id);
+				otherSocket.emit('blockedBy', { user: self });
+			}
 		}
-	}
 
-	if (!result) {
-		return res.status(500).send({ error: 'Could not change User block state.' });
+		if (!result) {
+			return res.status(500).send({ error: 'Could not change User block state.' });
+		}
+		const user = await User.getSimple(id);
+		return res.send({ id: result.insertId, at: new Date(), status: true, user });
 	}
-	return res.send({ blocked: !userBlockId });
 });
 
 export default blockRouter;

@@ -67,30 +67,10 @@ export const actions = {
 			});
 		}
 	},
-	toggleBlock({ state, commit }) {
+	async toggleBlock({ state, commit, dispatch }) {
 		if (state.current.id) {
-			this.$axios.post(`/api/block/${state.current.id}`).then((response) => {
-				if (response.status == 200) {
-					commit('setBlock', response.data.blocked);
-					commit(
-						'snackbar/SHOW',
-						{
-							message: state.current.blocked ? 'User blocked' : 'User unblocked',
-							color: 'success',
-						},
-						{ root: true }
-					);
-				} else {
-					commit(
-						'snackbar/SHOW',
-						{
-							message: 'Could not block User.',
-							color: 'error',
-						},
-						{ root: true }
-					);
-				}
-			});
+			const result = await dispatch('blocked/toggle', state.current.id, { root: true });
+			commit('setBlock', result);
 		}
 	},
 	blocked({ state, commit }, payload) {

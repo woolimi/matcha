@@ -66,7 +66,7 @@
 		},
 		methods: {
 			unblock(row) {
-				this.$store.dispatch('blocked/unblock', { user: row.user.id, id: row.id });
+				this.$store.dispatch('blocked/toggle', row.user.id);
 			},
 		},
 	};
