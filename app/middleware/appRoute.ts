@@ -1,6 +1,7 @@
 function is_verified_user(user: any): boolean {
-	const { verified, languages, tags, preferences, gender, images } = user;
-	if (!verified || !languages.length || !tags.length || !preferences || !gender || !images[0].url) return false;
+	const { verified, languages, tags, preferences, gender, images, birthdate } = user;
+	if (!verified || !languages.length || !tags.length || !preferences || !gender || !images[0].url || !birthdate)
+		return false;
 	return true;
 }
 

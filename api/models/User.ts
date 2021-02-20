@@ -1,10 +1,10 @@
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import bcrypt from 'bcrypt';
-import { RegisterForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
+import { RegisterForm, PublicInfoForm, ChangePasswordForm, SearchQuery } from '../init/Interfaces';
 import _ from 'lodash';
 import { ll2xy, xy2ll } from '../services/Location';
-import { LocationLL } from '../init/Interfaces';
+import { LocationLL, LocationXY } from '../init/Interfaces';
 import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
@@ -242,6 +242,120 @@ class User extends Model {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static async search(user_id: number, query: SearchQuery) {
+		// 1. filter not verified and not fill public info.
+		try {
+			const { preferences, location, gender } = await User.find(user_id);
+
+			let preferences_query = '';
+			if (preferences === 'heterosexual') {
+				preferences_query = `gender = '${gender === 'male' ? 'female' : 'male'}'`;
+			} else if (preferences === 'bisexual') {
+				if (gender === 'male')
+					preferences_query = `(gender = 'female' OR (gender = 'male' AND preferences = 'bisexual'))`;
+				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preferences = 'bisexual'))`;
+			}
+
+			if (query.tags.length) return await User.search_with_tags(user_id, location, preferences_query, query);
+			else return await User.search_without_tags(user_id, location, preferences_query, query);
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	static invalid_user_filter_query = `AND users.verified = 1 \
+		AND users.gender IS NOT NULL \
+		AND users.preferences IS NOT NULL \
+		AND users.birthdate IS NOT NULL \
+		AND users.biography IS NOT NULL`;
+
+	static common_select_query() {
+		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location, \
+		uinfo.age, uinfo.distance, IFNULL(ulikes.likes, 0) AS likes, upictures.path AS image`;
+	}
+
+	static common_join_query(languages: string[]) {
+		return `\
+			LEFT JOIN ( \
+				SELECT liked, COUNT(user_likes.liked) AS likes \
+				FROM user_likes \
+				GROUP BY liked \
+			) AS ulikes \
+			ON users.id = ulikes.liked \
+			INNER JOIN ( \
+				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age \
+				FROM users \
+			) AS uinfo \
+			ON users.id = uinfo.user \
+			INNER JOIN ( \
+				SELECT user_pictures.user, user_pictures.path \
+				FROM user_pictures \
+				WHERE user_pictures.picture = 0 \
+			) AS upictures \
+			ON users.id = upictures.user \
+			INNER JOIN ( \
+				SELECT user_languages.user, user_languages.language \
+				FROM user_languages \
+				WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')}) \
+			) AS ulangs \
+			ON users.id = ulangs.user`;
+	}
+
+	static async search_without_tags(
+		user_id: number,
+		location: LocationXY,
+		preferences_query: string,
+		query: SearchQuery
+	) {
+		const { distance, age, likes, sort, sort_dir, languages } = query;
+		return await User.query(
+			`SELECT ${User.common_select_query()} \
+					FROM users\
+					${User.common_join_query(languages)} \
+					WHERE users.id != ? \
+						AND ${preferences_query} AND distance < ? \
+						AND age >= ? AND age <= ? \
+						${User.invalid_user_filter_query} \ 
+					HAVING likes >= ? AND likes <= ? \
+					ORDER BY ${sort} ${sort_dir} `,
+			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
+		);
+	}
+
+	static async search_with_tags(
+		user_id: number,
+		location: LocationXY,
+		preferences_query: string,
+		query: SearchQuery
+	) {
+		const { distance, age, likes, sort, sort_dir, tags, languages } = query;
+		return await User.query(
+			`SELECT ${User.common_select_query()}, \
+				utags.tag_list, \
+				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
+				FROM users \
+				${User.common_join_query(languages)} \
+				LEFT JOIN ( \
+					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
+						.fill('?')
+						.join(',')}), tags.name, NULL)) as tag_list \
+					FROM user_tags \
+					LEFT JOIN tags \
+					ON user_tags.tag = tags.id \
+					GROUP BY user \
+				) AS utags \
+				ON users.id = utags.user \
+				WHERE users.id != ? \
+					AND ${preferences_query} AND distance < ? \
+					AND age >= ? AND age <= ? \
+					AND tag_list IS NOT NULL \
+					${User.invalid_user_filter_query} \ 
+				HAVING likes >= ? AND likes <= ? \ 
+				ORDER BY ${sort} ${sort_dir}`,
+			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
+		);
 	}
 }
 

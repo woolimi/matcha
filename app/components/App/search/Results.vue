@@ -1,11 +1,11 @@
 <template>
 	<v-container>
-		<v-row>
-			<template v-if="$store.state.search.mode === 'image'">
+		<v-row class="images-scroll" v-scroll.self="scroll">
+			<template v-if="mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
 						<v-card @click="navigate" role="link" elevation="10" style="border-radius: 15px">
-							<v-img :src="user.url" width="100%" height="100%" aspect-ratio="0.75">
+							<v-img :src="user.image" width="100%" height="100%" aspect-ratio="0.75">
 								<v-container class="d-flex align-start flex-column" style="height: 100%">
 									<v-spacer></v-spacer>
 									<div class="font-weight-black white--text text-shadow">
@@ -40,12 +40,19 @@
 						custom
 						v-slot="{ navigate }"
 					>
-						<gmap-custom-marker :marker="user.location" :data-user-id="user.id" @click.native="navigate">
-							<v-avatar color="primary" size="50">
-								<v-img :src="user.url" class="marker-avatar" />
-							</v-avatar>
-						</gmap-custom-marker>
+						<div>
+							<gmap-custom-marker
+								:marker="user.location"
+								:data-user-id="user.id"
+								@click.native="navigate"
+							>
+								<v-avatar color="primary" size="50">
+									<v-img :src="user.image" class="marker-avatar" />
+								</v-avatar>
+							</gmap-custom-marker>
+						</div>
 					</NuxtLink>
+					<gmap-marker :position="center"> </gmap-marker>
 				</gmap-map>
 			</template>
 		</v-row>
@@ -54,13 +61,11 @@
 
 <script>
 	export default {
-		data() {
-			return {
-				center: this.$auth.user.location,
-			};
+		beforeCreate() {
+			this.$store.dispatch('search/initTags', this.$auth.user.tags);
 		},
 		mounted() {
-			this.$store.dispatch('search/updateUsers', {});
+			this.$store.dispatch('search/updateResult');
 		},
 		computed: {
 			imageCols() {
@@ -70,6 +75,20 @@
 			},
 			users() {
 				return this.$store.state.search.users;
+			},
+			center() {
+				return this.$auth.user.location;
+			},
+			mode() {
+				return this.$store.state.search.mode;
+			},
+		},
+		methods: {
+			scroll(e) {
+				// console.log()
+				// if (e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 50) {
+				// 	console.log('HERE');
+				// }
 			},
 		},
 	};
@@ -87,5 +106,16 @@
 	.marker-avatar {
 		border: 3px solid grey;
 		cursor: pointer;
+	}
+
+	.images-scroll {
+		overflow-y: scroll;
+		height: calc(100vh - 210px);
+	}
+
+	@media screen and (max-width: 960px) {
+		.images-scroll {
+			height: calc(100vh - 300px);
+		}
 	}
 </style>

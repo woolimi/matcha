@@ -2,10 +2,11 @@
 	<v-container>
 		<v-card elevation="4">
 			<v-card-text>
-				<v-subheader class="pa-0 h-init font-weight-bold">Tags</v-subheader>
+				<div class="pa-0 h-init font-weight-bold">Tags</div>
 				<v-autocomplete
 					v-model="selected"
 					chips
+					dense
 					multiple
 					hide-selected
 					auto-select-first
@@ -20,26 +21,16 @@
 </template>
 
 <script>
+	import SearchTagMixin from '~/mixins/SearchTagMixin';
+	import _ from 'lodash';
+
 	export default {
-		computed: {
-			selected: {
-				get() {
-					return this.$store.state.search.tags.selected;
-				},
-				set(val) {
-					this.$store.commit('search/SET_TAGS_SELECTED', val);
-				},
-			},
-			items() {
-				return this.$store.state.search.tags.items;
-			},
-			search: {
-				get() {
-					return this.$store.state.search.tags.search;
-				},
-				set(val) {
-					this.$store.commit('search/SET_TAGS_SEARCH', val);
-				},
+		mixins: [SearchTagMixin],
+		watch: {
+			selected(newSelected, oldSelected) {
+				if (_.isEqual(newSelected, oldSelected)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
+				this.$store.dispatch('search/updateResult');
 			},
 		},
 	};

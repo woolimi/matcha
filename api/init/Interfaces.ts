@@ -1,3 +1,5 @@
+import { internet } from 'faker';
+
 export interface RegisterForm {
 	email: string;
 	username: string;
@@ -37,4 +39,24 @@ export interface LocationLL {
 export interface LocationXY {
 	x: number;
 	y: number;
+}
+
+export interface BeforeParsedSearchQuery {
+	age: string[];
+	distance: string;
+	likes: string[];
+	tags: string[];
+	sort: string;
+	sort_dir: string;
+	languages: string[];
+}
+
+export interface SearchQuery {
+	age: number[];
+	distance: number;
+	likes: number[];
+	tags: string[];
+	sort: string;
+	sort_dir: string;
+	languages: string[];
 }

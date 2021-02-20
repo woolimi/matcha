@@ -18,46 +18,41 @@
 					</span>
 					<span v-else><v-icon small>mdi-less-than</v-icon> {{ distance }} km</span>
 				</v-subheader>
-				<v-slider dense v-model.lazy="distance" min="0" max="100" track-color="grey"></v-slider>
+				<v-slider dense v-model.lazy="distance" ticks step="5" min="0" max="100" track-color="grey"></v-slider>
 
 				<v-subheader class="pa-0 h-init">
 					<span class="font-weight-bold"> Likes </span>
 					<v-spacer></v-spacer>
-					<span v-if="likes >= 10"> <v-icon small>mdi-less-than</v-icon> <v-icon>mdi-infinity</v-icon> </span>
-					<span v-else><v-icon small>mdi-less-than</v-icon> {{ likes }}</span>
+					<span v-if="likes[1] < 10">{{ likes[0] }} ~ {{ likes[1] }}</span>
+					<span v-else>{{ likes[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-subheader>
-				<v-slider dense v-model.lazy="likes" min="0" max="10" track-color="grey"></v-slider>
+				<v-range-slider dense v-model.lazy="likes" min="0" max="10" track-color="grey"></v-range-slider>
 			</v-card-text>
 		</v-card>
 	</v-container>
 </template>
 
 <script>
+	import SearchFilterMixin from '~/mixins/SearchFilterMixin';
+	import _ from 'lodash';
+
 	export default {
-		computed: {
-			age: {
-				get() {
-					return this.$store.state.search.age;
-				},
-				set(val) {
-					this.$store.commit('search/SET_AGE', val);
-				},
+		mixins: [SearchFilterMixin],
+		watch: {
+			age(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
+				this.$store.dispatch('search/updateResult');
 			},
-			distance: {
-				get() {
-					return this.$store.state.search.distance;
-				},
-				set(val) {
-					this.$store.commit('search/SET_DISTANCE', val);
-				},
+			distance(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
+				this.$store.dispatch('search/updateResult');
 			},
-			likes: {
-				get() {
-					return this.$store.state.search.likes;
-				},
-				set(val) {
-					this.$store.commit('search/SET_LIKES', val);
-				},
+			likes(newData, oldData) {
+				if (_.isEqual(newData, oldData)) return;
+				if (!this.$vuetify.breakpoint.mdAndUp) return;
+				this.$store.dispatch('search/updateResult');
 			},
 		},
 	};

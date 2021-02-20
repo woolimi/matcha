@@ -88,6 +88,7 @@ function validate_vpassword(password: string, vpassword: string): string {
 
 function validate_languages(languages: Array<string>) {
 	if (!languages.length) return 'languages are required';
+	if (languages.length > 3) return 'languages are at most 3';
 	return '';
 }
 
@@ -104,6 +105,7 @@ function validate_preferences(preferences: string) {
 
 function validate_tags(tags: Array<string>) {
 	if (!tags.length) return 'interest tags are required';
+	if (tags.length > 5) return 'interest tags are at most 5';
 	return '';
 }
 
