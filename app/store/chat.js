@@ -26,8 +26,11 @@ export const mutations = {
 		state.list.push(...list);
 		state.loadedList = true;
 	},
-	addToList(state, chat) {
-		state.list.unshift(chat);
+	addToList(state, payload) {
+		for (const chat of state.list) {
+			if (chat.id == payload.id) return;
+		}
+		state.list.unshift(payload);
 	},
 	selectChat(state, id) {
 		state.chat = state.list.find((chat) => chat.id == id);
@@ -126,6 +129,7 @@ export const actions = {
 	unliked({ state, commit }, userId) {
 		if (state.chat && state.chat.user.id == userId) {
 			commit('leaveChat');
+			this.$router.push({ path: '/app/chat' });
 		}
 		commit('removeUserChat', userId);
 	},
@@ -133,6 +137,7 @@ export const actions = {
 		const userId = payload.user;
 		if (state.chat && state.chat.user.id == userId) {
 			commit('leaveChat');
+			this.$router.push({ path: '/app/chat' });
 		}
 		commit('removeUserChat', userId);
 	},

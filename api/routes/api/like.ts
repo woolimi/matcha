@@ -1,7 +1,8 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
 import requireNotSelf from '../../middleware/requireNotSelf';
-import User from '../../models/User';
+import Chat from '../../models/Chat';
+import User, { UserSimpleInterface } from '../../models/User';
 import UserLike, { UserLikeStatus } from '../../models/UserLike';
 import UserNotification, { Notification } from '../../models/UserNotification';
 
@@ -29,9 +30,18 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			return res.status(500).send({ error: 'Could not insert a new notification.' });
 		}
 
-		// Send notification if the User is logged in
+		// Send messages to the other User
+		const chat = await Chat.getForUser(self, id);
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
+			// Send Chat and enable it directly if it already exists
+			if (chat) {
+				const user = (await User.getSimple(self)) as UserSimpleInterface;
+				user.online = req.app.sockets[self] != undefined;
+				console.log('💨[socket]: send chat/addToList to ', otherSocket.id);
+				otherSocket.emit('chat/addToList', { ...chat, user });
+			}
+			// Send notification
 			const user = await User.getSimple(self);
 			console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
 			otherSocket.emit('notifications/receive', {
@@ -43,6 +53,16 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 				user,
 			});
 		}
+
+		// Send chat to ourself directly if it already exists
+		const socket = req.app.sockets[self];
+		if (socket && chat) {
+			const user = (await User.getSimple(id)) as UserSimpleInterface;
+			user.online = req.app.sockets[id] != undefined;
+			console.log('💨[socket]: send chat/addToList to ', socket.id);
+			socket.emit('chat/addToList', { ...chat, user });
+		}
+
 		return res.send({ like: status == UserLikeStatus.NONE ? UserLikeStatus.ONEWAY : UserLikeStatus.TWOWAY });
 	}
 	// Remove like from self to id
