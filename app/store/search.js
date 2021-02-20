@@ -1,13 +1,14 @@
 export const state = () => ({
 	age: [18, 30],
-	distance: 10,
-	likes: 5,
+	distance: 50,
+	likes: [0, 5],
 	tags: {
 		selected: [],
-		search: '',
 		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
+	sort: 'distance' /* number_of_common_tags, distance, age, likes */,
+	sort_dir: 'ASC' /* ASC, DESC */,
 	users: [],
 });
 
@@ -30,18 +31,50 @@ export const mutations = {
 	SET_SEARCH_MODE: (state, payload) => {
 		state.mode = payload;
 	},
+	SET_SEARCH_SORT: (state, payload) => {
+		if (state.sort === payload) {
+			state.sort_dir = state.sort_dir === 'ASC' ? 'DESC' : 'ASC';
+		} else {
+			state.sort = payload;
+		}
+	},
 	SET_USERS: (state, payload) => {
 		state.users = payload;
+	},
+	INIT_TAGS: (state, payload) => {
+		state.tags.items = payload.items;
+		state.tags.selected = payload.selected;
 	},
 };
 
 export const actions = {
-	async updateUsers({ commit }, params) {
+	async updateResult({ commit, state, rootState }) {
 		try {
-			const { data } = await this.$axios.get('/api/search', { params });
+			let { age, distance, likes, tags, sort, sort_dir } = state;
+			if (tags.selected.length === 0 && sort === 'number_of_common_tags') return;
+			const params = {
+				age,
+				distance,
+				likes,
+				tags: tags.selected,
+				sort,
+				sort_dir,
+				languages: rootState.auth.user.languages,
+			};
+			const { data } = await this.$axios.get('/api/search', {
+				params,
+			});
 			commit('SET_USERS', data.users);
 		} catch (error) {
-			console.log(error);
+			console.error(error);
+		}
+	},
+	async initTags({ commit }, payload) {
+		try {
+			const { data } = await this.$axios.get('/api/tags');
+			commit('INIT_TAGS', { items: data.tags, selected: payload });
+		} catch (error) {
+			console.error(error);
 		}
 	},
 };

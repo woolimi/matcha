@@ -1,6 +1,13 @@
 import { NextFunction } from 'express';
 import _ from 'lodash';
-import { RegisterForm, LoginForm, PublicInfoForm, ChangePasswordForm } from '../init/Interfaces';
+import {
+	RegisterForm,
+	LoginForm,
+	PublicInfoForm,
+	ChangePasswordForm,
+	BeforeParsedSearchQuery,
+	SearchQuery,
+} from '../init/Interfaces';
 import LanguageSet from '../init/languages';
 import User from '../models/User';
 import { AgeCalculator } from '@dipaktelangre/age-calculator';
@@ -48,6 +55,7 @@ function validate_vpassword(password: string, vpassword: string): string {
 
 function validate_languages(languages: Array<string>) {
 	if (!languages.length) return 'languages are required';
+	if (languages.length > 3) return 'languages are at most 3';
 	for (const lang of languages) {
 		if (!LanguageSet.has(lang)) return `Invalid language '${lang}'`;
 	}
@@ -67,6 +75,7 @@ function validate_preferences(preferences: string) {
 
 function validate_tags(tags: Array<string>) {
 	if (!tags.length) return 'interest tags are required';
+	if (tags.length > 5) return 'interest tags are at most 5';
 	return '';
 }
 
@@ -82,7 +91,10 @@ function validate_birthdate(birthdate: string) {
 	return '';
 }
 
-function fieldsChecker(formData: RegisterForm | LoginForm | PublicInfoForm, expectedFields: Array<string>): boolean {
+function fieldsChecker(
+	formData: RegisterForm | LoginForm | PublicInfoForm | SearchQuery,
+	expectedFields: Array<string>
+): boolean {
 	const foundFields = [];
 
 	for (const field of Object.keys(formData)) {
@@ -113,7 +125,7 @@ export default {
 					'location',
 				])
 			)
-				return res.sendStatus(403);
+				return res.sendStatus(400);
 
 			const error: any = {};
 			let e_msg = '';
@@ -185,7 +197,7 @@ export default {
 				'birthdate',
 			])
 		)
-			return res.sendStatus(403);
+			return res.sendStatus(400);
 		const error: any = {};
 		let e_msg = '';
 		e_msg = validate_firstName(user.firstName);
@@ -218,6 +230,33 @@ export default {
 		if (e_msg) error.vpassword = e_msg;
 
 		if (!_.isEmpty(error)) return res.json({ error });
+		next();
+	},
+	searchQuery(req: any, res: any, next: NextFunction) {
+		const bef_query: BeforeParsedSearchQuery = req.query;
+		const query: SearchQuery = {
+			...bef_query,
+			age: bef_query.age.map((s) => parseInt(s)),
+			likes: bef_query.likes.map((s) => parseInt(s)),
+			distance: parseInt(bef_query.distance),
+		};
+		if (!query.tags) query.tags = [];
+		if (!fieldsChecker(query, ['age', 'distance', 'likes', 'tags', 'sort', 'sort_dir', 'languages']))
+			return res.sendStatus(400);
+
+		if (!query) return res.sendStatus(400);
+		if (query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
+		if (query.distance < 0) return res.sendStatus(400);
+		if (query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
+		if (query.tags.length > 10) return res.sendStatus(400);
+		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
+		if (query.languages.length === 0) return res.sendStatus(400);
+
+		if (query.age[1] >= 50) query.age[1] = Number.MAX_SAFE_INTEGER;
+		if (query.distance >= 100) query.distance = Number.MAX_SAFE_INTEGER;
+		if (query.likes[1] >= 10) query.likes[1] = Number.MAX_SAFE_INTEGER;
+
+		req.query = query;
 		next();
 	},
 };

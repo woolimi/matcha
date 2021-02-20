@@ -176,10 +176,7 @@
 				const { data } = await this.$axios.get('/api/tags');
 				this.interest.tags = data.tags;
 			} catch (error) {
-				this.$notifier.showMessage({
-					message: 'cannot get tag list from server',
-					color: 'error',
-				});
+				console.log(error);
 			}
 		},
 		watch: {
@@ -196,6 +193,10 @@
 					const { data } = await this.$axios.post('/api/profile/public-info', this.user);
 					if (data.error) throw { error: data.error };
 
+					this.$auth.setUser({
+						...this.$auth.user,
+						...this.user,
+					});
 					this.$notifier.showMessage({
 						message: 'updated',
 						color: 'success',
