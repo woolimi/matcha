@@ -255,24 +255,36 @@ class User extends Model {
 
 	static common_select_query() {
 		return `users.id, username, lastName, firstName, gender, preferences, verified, birthdate, biography, location, \
-		timestampdiff(YEAR, birthdate, CURDATE()) AS age, \
-		ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, \
-		COUNT(user_likes.liked) AS likes, \		
-		user_pictures.picture, \
-		user_pictures.path AS image`;
+		uinfo.age, uinfo.distance, \
+		IFNULL(ulikes.likes, 0) AS likes, \		
+		upictures.path AS image`;
 	}
 
 	static common_join_query(languages: string[]) {
-		return `LEFT JOIN user_likes \
-		ON users.id = user_likes.liked \
-		LEFT JOIN user_pictures \
-		ON users.id = user_pictures.user \
-		INNER JOIN ( \
-			SELECT user_languages.user, user_languages.language \
-			FROM user_languages \
-			WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')}) \ 
-		) AS ulangs \
-		ON users.id = ulangs.user`;
+		return `\
+			LEFT JOIN ( \
+				SELECT liked, COUNT(user_likes.liked) AS likes \
+				FROM user_likes \
+				GROUP BY liked \
+			) AS ulikes \
+			ON users.id = ulikes.liked \
+			INNER JOIN ( \
+				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age \
+				FROM users \
+			) AS uinfo \
+			ON users.id = uinfo.user \
+			INNER JOIN ( \
+				SELECT user_pictures.user, user_pictures.path \
+				FROM user_pictures \
+				WHERE user_pictures.picture = 0 \
+			) AS upictures \
+			ON users.id = upictures.user \
+			INNER JOIN ( \
+				SELECT user_languages.user, user_languages.language \
+				FROM user_languages \
+				WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')}) \
+			) AS ulangs \
+			ON users.id = ulangs.user`;
 	}
 
 	static async search_without_tags(
@@ -286,14 +298,12 @@ class User extends Model {
 			`SELECT ${User.common_select_query()} \
 					FROM users\
 					${User.common_join_query(languages)} \
-					GROUP BY users.id, user_pictures.path, user_pictures.picture \
-					HAVING users.id != ? \
+					WHERE users.id != ? \
 						AND ${preferences_query} AND distance < ? \
 						AND age >= ? AND age <= ? \
-						AND likes >= ? AND likes <= ? \ 
-						AND user_pictures.picture = 0 \
 						${User.invalid_user_filter_query} \ 
-					ORDER BY ${sort} ${sort_dir}`,
+					HAVING likes >= ? AND likes <= ? \
+					ORDER BY ${sort} ${sort_dir} `,
 			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
@@ -321,14 +331,12 @@ class User extends Model {
 					GROUP BY user \
 				) AS utags \
 				ON users.id = utags.user \
-				GROUP BY users.id, user_pictures.path, user_pictures.picture \
-				HAVING users.id != ? \
+				WHERE users.id != ? \
 					AND ${preferences_query} AND distance < ? \
 					AND age >= ? AND age <= ? \
-					AND likes >= ? AND likes <= ? \ 
-					AND user_pictures.picture = 0 \
 					AND tag_list IS NOT NULL \
 					${User.invalid_user_filter_query} \ 
+				HAVING likes >= ? AND likes <= ? \ 
 				ORDER BY ${sort} ${sort_dir}`,
 			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
