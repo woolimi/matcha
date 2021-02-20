@@ -43,7 +43,7 @@ function validate_lastName(lastName: string): string {
 
 function validate_password(password: string): string {
 	if (password.length === 0) return 'password required';
-	if (password.length < 4) return 'Password must be at least 4 characters long';
+	if (password.length < 8) return 'Password must be at least 8 characters long';
 	if (password.length > 100) return 'Password must be at most 100 characters long';
 	return '';
 }
