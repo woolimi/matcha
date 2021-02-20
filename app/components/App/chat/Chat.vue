@@ -174,23 +174,12 @@
 					}
 				});
 			},
-			block() {
-				this.$axios.post(`/api/block/${this.chat.user.id}`).then(async (response) => {
-					if (response.status == 200) {
-						this.$store.commit('chat/removeChat', this.chat.id);
-						this.$store.commit('chat/leaveChat');
-						this.$router.push({ path: `/app/chat` });
-						this.$store.commit('snackbar/SHOW', {
-							message: 'User blocked',
-							color: 'success',
-						});
-					} else {
-						this.$store.commit('snackbar/SHOW', {
-							message: 'Could not block User.',
-							color: 'error',
-						});
-					}
-				});
+			async block() {
+				const status = await this.$store.dispatch('blocked/toggle', this.chat.user.id);
+				if (status) {
+					this.$store.commit('chat/leaveChat');
+					this.$router.push({ path: `/app/chat` });
+				}
 			},
 			onScroll() {
 				if (

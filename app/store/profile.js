@@ -49,30 +49,6 @@ export const actions = {
 				commit('setCurrent', { id, error: error.response.data.error });
 			});
 	},
-	toggleLike({ state, commit }) {
-		if (state.current.id) {
-			this.$axios.post(`/api/like/${state.current.id}`).then((response) => {
-				if (response.status == 200) {
-					commit('setLike', response.data.like);
-				} else {
-					commit(
-						'snackbar/SHOW',
-						{
-							message: 'Could not update Like status.',
-							color: 'error',
-						},
-						{ root: true }
-					);
-				}
-			});
-		}
-	},
-	async toggleBlock({ state, commit, dispatch }) {
-		if (state.current.id) {
-			const result = await dispatch('blocked/toggle', state.current.id, { root: true });
-			commit('setBlock', result);
-		}
-	},
 	blocked({ state, commit }, payload) {
 		if (state.current && state.current.id == payload.user) {
 			commit('setCurrent', { id: state.current.id, error: "You can't view this Profile right now." });

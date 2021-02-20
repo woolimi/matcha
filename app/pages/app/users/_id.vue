@@ -85,7 +85,7 @@
 				<v-row v-if="profile.id != $auth.user.id">
 					<v-col cols="12" class="text-center">
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
-						<v-bottom-sheet inset>
+						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn class="ma-2" outlined color="success" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-map-marker</v-icon> Location
@@ -116,16 +116,22 @@
 								</gmap-map>
 							</v-card>
 						</v-bottom-sheet>
-						<v-btn class="ma-2" outlined color="pink" @click="likeEvent">
+						<v-btn class="ma-2" outlined color="pink" @click="likeEvent" v-if="!profile.blocked">
 							<v-icon left>mdi-heart</v-icon> {{ like }}
 						</v-btn>
-						<v-btn class="ma-2" outlined color="primary" v-if="profile.like == 2" @click="openChat">
+						<v-btn
+							class="ma-2"
+							outlined
+							color="primary"
+							@click="openChat"
+							v-if="profile.like == 2 && !profile.blocked"
+						>
 							<v-icon left>mdi-email</v-icon> Chat
 						</v-btn>
 						<v-btn class="ma-2" outlined color="orange" @click="blockEvent">
 							<v-icon left>mdi-cancel</v-icon> {{ blocked }}
 						</v-btn>
-						<v-bottom-sheet inset>
+						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn class="ma-2" outlined color="blue-grey" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-clock-outline</v-icon> History
@@ -201,7 +207,18 @@
 		},
 		methods: {
 			likeEvent() {
-				this.$store.dispatch('profile/toggleLike');
+				if (this.profile.id) {
+					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
+						if (response.status == 200) {
+							this.$store.commit('profile/setLike', response.data.like);
+						} else {
+							this.$store.commit('snackbar/SHOW', {
+								message: 'Could not update Like status.',
+								color: 'error',
+							});
+						}
+					});
+				}
 			},
 			openChat() {
 				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
@@ -215,8 +232,11 @@
 					}
 				});
 			},
-			blockEvent() {
-				this.$store.dispatch('profile/toggleBlock');
+			async blockEvent() {
+				if (this.profile.id) {
+					const status = await this.$store.dispatch('blocked/toggle', this.profile.id);
+					this.$store.commit('profile/setBlock', status);
+				}
 			},
 		},
 	};
