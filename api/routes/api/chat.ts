@@ -93,11 +93,19 @@ chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => 
 // Get a chat ID from an User ID
 // Used to redirect from a notification where there is no Chat ID
 chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
+	const self = req.user.id as number;
+	const id = req.params.id as number;
+
 	// Check if the Chat is for the User
-	const user = req.user.id as number;
-	const chat = await Chat.get(req.params.id);
+	const chat = await Chat.get(id);
 	if (!chat) return res.status(404).json({ error: 'Chat not found' });
-	if (chat.user1 != user && chat.user2 != user) return res.status(401).json({ error: 'Unauthorized Chat' });
+	if (chat.user1 != self && chat.user2 != self) return res.status(401).json({ error: 'Unauthorized Chat' });
+
+	// Check permissions
+	const like = await UserLike.status(self, id);
+	if (like != UserLikeStatus.TWOWAY) {
+		return res.status(401).send({ error: 'Both Users need to like each other to Chat' });
+	}
 
 	// Get all messages -- 20 per page and from "from" if it's present
 	const from = req.params.from ? parseInt(req.params.from) : undefined;
@@ -105,8 +113,8 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	const completed = messages.length < 20;
 	if (!from) {
 		// Mark last notification as read -- only on the first page
-		const otherUser = chat.user1 == user ? chat.user2 : chat.user1;
-		const notification = await UserNotification.getLastMessage(user, otherUser);
+		const otherUser = chat.user1 == self ? chat.user2 : chat.user1;
+		const notification = await UserNotification.getLastMessage(self, otherUser);
 		if (notification && !notification.status) {
 			await UserNotification.setAsRead(notification.id);
 		}
