@@ -191,9 +191,9 @@ class User extends Model {
 		try {
 			if (ids.length === 0) return [];
 			const users: UserSimpleInterface[] = await User.query(
-				`SELECT u.id, u.firstName, u.lastName, p.path as picture \
-				FROM ${User.tname} as u \
-				LEFT JOIN user_pictures as p ON p.user = u.id \
+				`SELECT u.id, u.firstName, u.lastName, p.path as picture
+				FROM ${User.tname} as u
+				LEFT JOIN user_pictures as p ON p.user = u.id
 				WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
 				[...ids]
 			);
@@ -207,8 +207,8 @@ class User extends Model {
 
 	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
 		const result: UserInterfaceXY[] = await User.query(
-			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate \
-			FROM ${User.tname} \
+			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate
+			FROM ${User.tname}
 			WHERE id = ? LIMIT 1`,
 			[id]
 		);
@@ -265,41 +265,41 @@ class User extends Model {
 		}
 	}
 
-	static invalid_user_filter_query = `AND users.verified = 1 \
-		AND users.gender IS NOT NULL \
-		AND users.preferences IS NOT NULL \
-		AND users.birthdate IS NOT NULL \
+	static invalid_user_filter_query = `AND users.verified = 1
+		AND users.gender IS NOT NULL
+		AND users.preferences IS NOT NULL
+		AND users.birthdate IS NOT NULL
 		AND users.biography IS NOT NULL`;
 
 	static common_select_query() {
-		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location, \
+		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location,
 		uinfo.age, uinfo.distance, IFNULL(ulikes.likes, 0) AS likes, upictures.path AS image`;
 	}
 
 	static common_join_query(languages: string[]) {
-		return `\
-			LEFT JOIN ( \
-				SELECT liked, COUNT(user_likes.liked) AS likes \
-				FROM user_likes \
-				GROUP BY liked \
-			) AS ulikes \
-			ON users.id = ulikes.liked \
-			INNER JOIN ( \
-				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age \
-				FROM users \
-			) AS uinfo \
-			ON users.id = uinfo.user \
-			INNER JOIN ( \
-				SELECT user_pictures.user, user_pictures.path \
-				FROM user_pictures \
-				WHERE user_pictures.picture = 0 \
-			) AS upictures \
-			ON users.id = upictures.user \
-			INNER JOIN ( \
-				SELECT user_languages.user, user_languages.language \
-				FROM user_languages \
-				WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')}) \
-			) AS ulangs \
+		return `
+			LEFT JOIN (
+				SELECT liked, COUNT(user_likes.liked) AS likes
+				FROM user_likes
+				GROUP BY liked
+			) AS ulikes
+			ON users.id = ulikes.liked
+			INNER JOIN (
+				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age
+				FROM users
+			) AS uinfo
+			ON users.id = uinfo.user
+			INNER JOIN (
+				SELECT user_pictures.user, user_pictures.path
+				FROM user_pictures
+				WHERE user_pictures.picture = 0
+			) AS upictures
+			ON users.id = upictures.user
+			INNER JOIN (
+				SELECT user_languages.user, user_languages.language
+				FROM user_languages
+				WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')})
+			) AS ulangs
 			ON users.id = ulangs.user`;
 	}
 
@@ -311,14 +311,14 @@ class User extends Model {
 	) {
 		const { distance, age, likes, sort, sort_dir, languages } = query;
 		return await User.query(
-			`SELECT ${User.common_select_query()} \
-					FROM users\
-					${User.common_join_query(languages)} \
-					WHERE users.id != ? \
-						AND ${preferences_query} AND distance < ? \
-						AND age >= ? AND age <= ? \
-						${User.invalid_user_filter_query} \ 
-					HAVING likes >= ? AND likes <= ? \
+			`SELECT ${User.common_select_query()}
+					FROM users
+					${User.common_join_query(languages)}
+					WHERE users.id != ?
+						AND ${preferences_query} AND distance < ?
+						AND age >= ? AND age <= ?
+						${User.invalid_user_filter_query}
+					HAVING likes >= ? AND likes <= ?
 					ORDER BY ${sort} ${sort_dir} `,
 			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
@@ -332,27 +332,25 @@ class User extends Model {
 	) {
 		const { distance, age, likes, sort, sort_dir, tags, languages } = query;
 		return await User.query(
-			`SELECT ${User.common_select_query()}, \
-				utags.tag_list, \
-				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags\
-				FROM users \
-				${User.common_join_query(languages)} \
-				LEFT JOIN ( \
-					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length)
-						.fill('?')
-						.join(',')}), tags.name, NULL)) as tag_list \
-					FROM user_tags \
-					LEFT JOIN tags \
-					ON user_tags.tag = tags.id \
-					GROUP BY user \
-				) AS utags \
-				ON users.id = utags.user \
-				WHERE users.id != ? \
-					AND ${preferences_query} AND distance < ? \
-					AND age >= ? AND age <= ? \
-					AND tag_list IS NOT NULL \
-					${User.invalid_user_filter_query} \ 
-				HAVING likes >= ? AND likes <= ? \ 
+			`SELECT ${User.common_select_query()},
+				utags.tag_list,
+				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags
+				FROM users
+				${User.common_join_query(languages)}
+				LEFT JOIN (
+					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length).fill('?').join(',')}), tags.name, NULL)) as tag_list
+					FROM user_tags
+					LEFT JOIN tags
+					ON user_tags.tag = tags.id
+					GROUP BY user
+				) AS utags
+				ON users.id = utags.user
+				WHERE users.id != ?
+					AND ${preferences_query} AND distance < ?
+					AND age >= ? AND age <= ?
+					AND tag_list IS NOT NULL
+					${User.invalid_user_filter_query}
+				HAVING likes >= ? AND likes <= ?
 				ORDER BY ${sort} ${sort_dir}`,
 			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
