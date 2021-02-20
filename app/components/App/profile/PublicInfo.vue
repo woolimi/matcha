@@ -193,6 +193,10 @@
 					const { data } = await this.$axios.post('/api/profile/public-info', this.user);
 					if (data.error) throw { error: data.error };
 
+					this.$auth.setUser({
+						...this.$auth.user,
+						...this.user,
+					});
 					this.$notifier.showMessage({
 						message: 'updated',
 						color: 'success',
