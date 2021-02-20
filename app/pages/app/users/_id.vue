@@ -24,7 +24,15 @@
 				<v-row class="text-center">
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-card-account-details </v-icon> Name</v-subheader>
-						{{ profile.firstName }} {{ profile.lastName }}
+						<v-tooltip bottom>
+							<template v-slot:activator="{ on, attrs }">
+								<span v-bind="attrs" v-on="on">
+									{{ profile.firstName }} {{ profile.lastName }}
+									<v-badge dot inline :color="profile.online ? 'success' : 'error'"> </v-badge>
+								</span>
+							</template>
+							{{ online }}
+						</v-tooltip>
 					</v-col>
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-calendar </v-icon> Birthday</v-subheader>
@@ -159,6 +167,9 @@
 			},
 			profile() {
 				return this.$store.getters['profile/current'];
+			},
+			online() {
+				return this.profile.online ? 'Online' : 'Offline';
 			},
 			genderColor() {
 				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';

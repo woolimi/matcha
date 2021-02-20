@@ -52,12 +52,14 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 
 	// Check if the Chat is for the User
 	let chat = await Chat.getForUser(id, self);
+	let created = false;
 	if (!chat) {
 		const insert = await Chat.create(self, id);
 		if (!insert) {
 			return res.status(500).send({ error: 'Could not create a Chat.' });
 		}
 		chat = { id: insert.insertId, user1: self, user2: id, start: new Date().toISOString(), last: null };
+		created = true;
 	}
 
 	// Send messages
@@ -75,7 +77,7 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 		console.log('💨[socket]: send chat/addToList to ', otherSocket.id);
 		otherSocket.emit('chat/addToList', { ...chat, user });
 	}
-	return res.status(201).json({ chat: chat.id });
+	return res.status(created ? 201 : 200).json({ chat: chat.id });
 });
 
 chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => {
@@ -102,7 +104,8 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	if (chat.user1 != self && chat.user2 != self) return res.status(401).json({ error: 'Unauthorized Chat' });
 
 	// Check permissions
-	const like = await UserLike.status(self, id);
+	const userId = chat.user1 == self ? chat.user2 : chat.user1;
+	const like = await UserLike.status(self, userId);
 	if (like != UserLikeStatus.TWOWAY) {
 		return res.status(401).send({ error: 'Both Users need to like each other to Chat' });
 	}
@@ -113,8 +116,7 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	const completed = messages.length < 20;
 	if (!from) {
 		// Mark last notification as read -- only on the first page
-		const otherUser = chat.user1 == self ? chat.user2 : chat.user1;
-		const notification = await UserNotification.getLastMessage(self, otherUser);
+		const notification = await UserNotification.getLastMessage(self, userId);
 		if (notification && !notification.status) {
 			await UserNotification.setAsRead(notification.id);
 		}

@@ -73,4 +73,12 @@ export const actions = {
 	unblockedBy({ dispatch }, payload) {
 		dispatch('profile/unblocked', payload, { root: true });
 	},
+	userLogin({ commit }, payload) {
+		commit('chat/userLogin', payload.user, { root: true });
+		commit('profile/userLogin', payload.user, { root: true });
+	},
+	userLogout({ commit }, payload) {
+		commit('chat/userLogout', payload.user, { root: true });
+		commit('profile/userLogout', payload.user, { root: true });
+	},
 };
