@@ -110,12 +110,17 @@ export const actions = {
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios.get(`/api/chat/${id}`).then((response) => {
-			commit('setMessages', response.data);
-			if (response.data.notification) {
-				commit('notifications/setAsRead', response.data.notification, { root: true });
-			}
-		});
+		this.$axios
+			.get(`/api/chat/${id}`)
+			.then((response) => {
+				commit('setMessages', response.data);
+				if (response.data.notification) {
+					commit('notifications/setAsRead', response.data.notification, { root: true });
+				}
+			})
+			.catch(() => {
+				this.$router.push({ path: '/app/chat' });
+			});
 	},
 	loadMore({ state, commit }) {
 		if (state.completed) return;
