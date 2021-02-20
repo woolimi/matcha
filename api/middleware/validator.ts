@@ -243,9 +243,9 @@ export default {
 			return res.sendStatus(400);
 
 		if (!query) return res.sendStatus(400);
-		if (!query.age || query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
-		if (!query.distance || query.distance < 0) return res.sendStatus(400);
-		if (!query.likes || query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
+		if (query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
+		if (query.distance < 0) return res.sendStatus(400);
+		if (query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
 		if (query.tags.length > 10) return res.sendStatus(400);
 		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
 		if (query.languages.length === 0) return res.sendStatus(400);
