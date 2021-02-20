@@ -26,6 +26,12 @@ export const mutations = {
 		state.list.push(...list);
 		state.loadedList = true;
 	},
+	addToList(state, payload) {
+		for (const chat of state.list) {
+			if (chat.id == payload.id) return;
+		}
+		state.list.unshift(payload);
+	},
 	selectChat(state, id) {
 		state.chat = state.list.find((chat) => chat.id == id);
 		state.messages.length = 0;
@@ -39,6 +45,15 @@ export const mutations = {
 		state.loadedChat = false;
 		state.loadingMore = false;
 		state.completed = false;
+		state.lastEvent = 'none';
+	},
+	removeChat(state, id) {
+		const index = state.list.findIndex((c) => c.id == id);
+		if (index >= 0) state.list.splice(index, 1);
+	},
+	removeUserChat(state, id) {
+		const index = state.list.findIndex((c) => c.user.id == id);
+		if (index >= 0) state.list.splice(index, 1);
 	},
 	setMessages(state, payload) {
 		state.lastEvent = 'initialLoad';
@@ -66,17 +81,17 @@ export const mutations = {
 			}
 		}
 	},
-	userLogin(state, payload) {
+	userLogin(state, id) {
 		for (const chat of state.list) {
-			if (chat.user.id == payload.user) {
+			if (chat.user.id == id) {
 				chat.user.online = true;
 				break;
 			}
 		}
 	},
-	userLogout(state, payload) {
+	userLogout(state, id) {
 		for (const chat of state.list) {
-			if (chat.user.id == payload.user) {
+			if (chat.user.id == id) {
 				chat.user.online = false;
 				break;
 			}
@@ -89,27 +104,49 @@ export const mutations = {
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/users/chat/list`).then((response) => {
+		return this.$axios.get(`/api/chat/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios.get(`http://localhost:5000/api/users/chat/${id}`).then((response) => {
-			commit('setMessages', response.data);
-			if (response.data.notification) {
-				commit('notifications/setAsRead', response.data.notification, { root: true });
-			}
-		});
+		this.$axios
+			.get(`/api/chat/${id}`)
+			.then((response) => {
+				commit('setMessages', response.data);
+				if (response.data.notification) {
+					commit('notifications/setAsRead', response.data.notification, { root: true });
+				}
+			})
+			.catch(() => {
+				commit('leaveChat');
+				this.$router.push({ path: '/app/chat' });
+				commit('snackbar/SHOW', { message: 'Could not load Chat', color: 'error' }, { root: true });
+			});
 	},
 	loadMore({ state, commit }) {
 		if (state.completed) return;
 		commit('setLoadingMore', true);
 		const from = state.messages.length == 0 ? '' : state.messages[0].id;
-		this.$axios.get(`http://localhost:5000/api/users/chat/${state.chat.id}/${from}`).then((response) => {
+		this.$axios.get(`/api/chat/${state.chat.id}/${from}`).then((response) => {
 			commit('insertMessages', response.data);
 			commit('setLoadingMore', false);
 		});
+	},
+	unliked({ state, commit }, userId) {
+		if (state.chat && state.chat.user.id == userId) {
+			commit('leaveChat');
+			this.$router.push({ path: '/app/chat' });
+		}
+		commit('removeUserChat', userId);
+	},
+	blocked({ state, commit }, payload) {
+		const userId = payload.user;
+		if (state.chat && state.chat.user.id == userId) {
+			commit('leaveChat');
+			this.$router.push({ path: '/app/chat' });
+		}
+		commit('removeUserChat', userId);
 	},
 	messageError({ commit }, payload) {
 		commit('snackbar/SHOW', { message: payload.error, color: 'error' }, { root: true });

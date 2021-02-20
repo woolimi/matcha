@@ -6,7 +6,7 @@
 
 		<v-list-item-content>
 			<v-list-item-title>
-				{{ row.user.username }} has sent you a message.
+				{{ row.user.firstName }} {{ row.user.lastName }} has sent you a message.
 				<v-tooltip bottom>
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn
@@ -26,16 +26,19 @@
 			<v-list-item-subtitle> {{ new Date(row.at).toLocaleString() }} </v-list-item-subtitle>
 		</v-list-item-content>
 
-		<MarkAsRead v-if="!row.status" :id="row.id" />
+		<MarkAsRead v-if="manageable && !row.status" :id="row.id" />
 	</v-list-item>
 </template>
 
 <script>
 	export default {
-		props: { row: { type: Object, required: true } },
+		props: {
+			row: { type: Object, required: true },
+			manageable: { type: Boolean, required: true },
+		},
 		methods: {
 			openChat(user) {
-				this.$axios.get(`/api/users/chat/user/${user}`).then((response) => {
+				this.$axios.get(`/api/chat/user/${user}`).then((response) => {
 					if (response.status === 200) {
 						this.$router.push(`/app/chat/${response.data.id}`);
 					} else console.error(response);

@@ -8,6 +8,12 @@ import User from '../../models/User';
 import { send_verification_email } from '../../services/Mailing';
 import validator from '../../middleware/validator';
 import UserPicture from '../../models/UserPicture';
+import UserNotification, { Notification, NotificationWithUserInterface } from '../../models/UserNotification';
+import UserTag from '../../models/UserTag';
+import UserLanguage from '../../models/UserLanguage';
+import UserBlock from '../../models/UserBlock';
+import UserLike from '../../models/UserLike';
+import Chat from '../../models/Chat';
 
 const profileRouter = express.Router();
 
@@ -92,6 +98,79 @@ profileRouter.post('/change-password', authToken, validator.userChangePassword, 
 		console.error(error);
 		return res.sendStatus(500);
 	}
+});
+
+profileRouter.get('/:id', authToken, async (req: any, res) => {
+	const id = req.params.id;
+	const self = req.user.id;
+
+	// Check if the user is not blocked
+	const isBlocked = await UserBlock.status(id, self);
+	if (isBlocked) return res.status(401).json({ error: "You can't view this Profile right now." });
+
+	// Get the profile informations
+	const profile = await User.getPublicProfile(id);
+	if (!profile) return res.status(404).json({ error: 'This Profile does not exists.' });
+
+	// Get all other informations
+	const like = await UserLike.status(self, id);
+	const blocked = await UserBlock.status(self, id);
+	const images = (await UserPicture.get_images(id)).filter((i) => i.path != '');
+	const tags = await UserTag.get_tags(id);
+	const languages = await UserLanguage.get_languages(id);
+	const history = await UserNotification.getHistory(self, id);
+	const userIds = Array.from(new Set(history.map((n) => n.sender)));
+	const otherUsers = await User.getAllSimple(userIds);
+
+	if (id != self) {
+		// Add notification
+		const notifInsert = await UserNotification.add(id, self, Notification.Visit);
+		if (notifInsert) {
+			const otherSocket = req.app.sockets[id];
+			if (otherSocket) {
+				const currentUser = await User.getSimple(self);
+				console.log('💨[socket]: send notifications/receive to ', otherSocket.id);
+				otherSocket.emit('notifications/receive', {
+					id: notifInsert.insertId,
+					type: Notification.Visit,
+					at: new Date(),
+					sender: self,
+					status: 0,
+					user: currentUser,
+				});
+			}
+		}
+
+		// Mark notifications as read
+		// profile:visited, like:received and like:match
+		const types = [Notification.Visit, Notification.LikeReceived, Notification.LikeMatched];
+		const notifications = (await UserNotification.getAnyOf(self, id, types)).map((n) => n.id);
+		if (notifications.length > 0) {
+			await UserNotification.setListAsRead(notifications);
+			const socket = req.app.sockets[self];
+			if (socket) {
+				console.log('💨[socket]: send notifications/setListAsRead to ', socket.id);
+				socket.emit('notifications/setListAsRead', { list: notifications });
+			}
+		}
+	}
+
+	return res.json({
+		...profile,
+		online: req.app.sockets[id] !== undefined,
+		like,
+		blocked,
+		images,
+		tags,
+		languages,
+		history: history
+			.map((n): NotificationWithUserInterface | undefined => {
+				const otherUser = otherUsers.find((user) => user.id == n.sender);
+				if (otherUser) return { ...n, user: otherUser };
+				return undefined;
+			})
+			.filter((n) => n !== undefined),
+	});
 });
 
 export default profileRouter;

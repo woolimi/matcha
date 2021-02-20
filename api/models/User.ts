@@ -9,7 +9,7 @@ import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
 
-export interface UserInterface {
+export interface UserInterfaceBase {
 	id: number;
 	email: string;
 	username: string;
@@ -19,26 +19,23 @@ export interface UserInterface {
 	verified: number;
 	initialized: number;
 	gender: ('male' | 'female') | null;
-	preferences: ('male' | 'female' | 'all') | null;
+	preferences: ('heterosexual' | 'bisexual') | null;
 	biography: string | null;
+	birthdate: string | null;
 }
 
-export interface UserPublicInterface {
-	id: number;
-	username: string;
-	lastName: string;
-	firstName: string;
-	gender: ('male' | 'female') | null;
-	preferences: ('male' | 'female' | 'all') | null;
-	biography: string | null;
-}
+export type UserInterfaceXY = UserInterfaceBase & { location: { x: number; y: number } | null };
+export type UserInterfaceLL = UserInterfaceBase & { location: { lat: number; lng: number } | null };
 
-export interface UserSimpleInterface {
-	id: number;
-	username: string;
+export type UserSimpleInterface = Pick<UserInterfaceBase, 'id' | 'firstName' | 'lastName'> & {
 	picture: string | null;
 	online: boolean | undefined;
-}
+};
+
+export type PublicProfileInterface = Pick<
+	UserInterfaceLL,
+	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate'
+>;
 
 class User extends Model {
 	static tname = 'users';
@@ -47,8 +44,8 @@ class User extends Model {
 			email VARCHAR(60) NOT NULL,
 			username VARCHAR(20) NOT NULL,
 			password VARCHAR(100) NOT NULL,
-			lastName VARCHAR(45) NOT NULL,
 			firstName VARCHAR(45) NOT NULL,
+			lastName VARCHAR(45) NOT NULL,
 			verified TINYINT DEFAULT '0',
 			initialized TINYINT DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
@@ -147,12 +144,13 @@ class User extends Model {
 	}
 
 	static mainPictureUrl(path: string | null): string {
+		if (path && path.match(/^https:\/\//)) return path;
 		return `${process.env.API}/${path}`;
 	}
 
 	static async getSimple(id: number): Promise<UserSimpleInterface | null> {
 		const result: UserSimpleInterface[] = await User.query(
-			`SELECT u.id, u.username, p.path as picture
+			`SELECT u.id, u.firstName, u.lastName, p.path as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id
 			WHERE u.id = ?
@@ -189,14 +187,14 @@ class User extends Model {
 		}
 	}
 
-	static async getAllSimple(ids: number[]): Promise<any> {
+	static async getAllSimple(ids: number[]): Promise<UserSimpleInterface[]> {
 		try {
 			if (ids.length === 0) return [];
 			const users: UserSimpleInterface[] = await User.query(
-				`SELECT u.id, u.username, p.path as picture \
-			FROM ${User.tname} as u \ 
-			LEFT JOIN user_pictures as p ON p.user = u.id \
-			WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
+				`SELECT u.id, u.firstName, u.lastName, p.path as picture \
+				FROM ${User.tname} as u \
+				LEFT JOIN user_pictures as p ON p.user = u.id \
+				WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
 				[...ids]
 			);
 			return users.map((user) => {
@@ -205,6 +203,26 @@ class User extends Model {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
+		const result: UserInterfaceXY[] = await User.query(
+			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate \
+			FROM ${User.tname} \
+			WHERE id = ? LIMIT 1`,
+			[id]
+		);
+		if (result && result.length == 1) {
+			const profile = result[0]!;
+			return { ...profile, location: xy2ll(profile.location!) };
+		}
+		return null;
+	}
+
+	static async exists(id: number): Promise<boolean> {
+		const result: { id: number }[] = await User.query(`SELECT id FROM ${User.tname} WHERE id = ? LIMIT 1`, [id]);
+		if (result && result.length == 1) return true;
+		return false;
 	}
 
 	static async updateLocation(ll: LocationLL) {
