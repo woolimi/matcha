@@ -20,6 +20,16 @@ export const mutations = {
 		state.current.blocked = status;
 		if (status) state.current.like = 0;
 	},
+	userLogin(state, id) {
+		if (state.current.id === id) {
+			state.current.online = true;
+		}
+	},
+	userLogout(state, id) {
+		if (state.current.id === id) {
+			state.current.online = false;
+		}
+	},
 	addNotification(state, notification) {
 		if (state.current.history) {
 			state.current.history.unshift(notification);

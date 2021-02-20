@@ -81,17 +81,17 @@ export const mutations = {
 			}
 		}
 	},
-	userLogin(state, payload) {
+	userLogin(state, id) {
 		for (const chat of state.list) {
-			if (chat.user.id == payload.user) {
+			if (chat.user.id == id) {
 				chat.user.online = true;
 				break;
 			}
 		}
 	},
-	userLogout(state, payload) {
+	userLogout(state, id) {
 		for (const chat of state.list) {
-			if (chat.user.id == payload.user) {
+			if (chat.user.id == id) {
 				chat.user.online = false;
 				break;
 			}
@@ -119,7 +119,9 @@ export const actions = {
 				}
 			})
 			.catch(() => {
+				commit('leaveChat');
 				this.$router.push({ path: '/app/chat' });
+				commit('snackbar/SHOW', { message: 'Could not load Chat', color: 'error' }, { root: true });
 			});
 	},
 	loadMore({ state, commit }) {

@@ -137,8 +137,6 @@ export default {
 					mutations: [
 						'chat/receiveMessage',
 						'chat/addToList',
-						'userLogin --> chat/userLogin',
-						'userLogout --> chat/userLogout',
 						'blocked --> blocked/add',
 						'unblocked --> blocked/remove',
 					],
@@ -148,6 +146,8 @@ export default {
 						'notifications/setListAsRead',
 						'blockedBy --> notifications/blockedBy',
 						'unblockedBy --> notifications/unblockedBy',
+						'userLogin --> notifications/userLogin',
+						'userLogout --> notifications/userLogout',
 					],
 				},
 			},
