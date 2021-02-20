@@ -41,8 +41,9 @@ export const mutations = {
 	SET_USERS: (state, payload) => {
 		state.users = payload;
 	},
-	INIT_TAG_ITEMS: (state, payload) => {
-		state.tags.items = payload;
+	INIT_TAGS: (state, payload) => {
+		state.tags.items = payload.items;
+		state.tags.selected = payload.selected;
 	},
 };
 
@@ -68,10 +69,10 @@ export const actions = {
 			console.error(error);
 		}
 	},
-	async initTagItems({ commit }) {
+	async initTags({ commit }, payload) {
 		try {
 			const { data } = await this.$axios.get('/api/tags');
-			commit('INIT_TAG_ITEMS', data.tags);
+			commit('INIT_TAGS', { items: data.tags, selected: payload });
 		} catch (error) {
 			console.error(error);
 		}
