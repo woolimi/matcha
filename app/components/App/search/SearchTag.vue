@@ -28,6 +28,7 @@
 		mixins: [SearchTagMixin],
 		watch: {
 			selected(newSelected, oldSelected) {
+				console.log(newSelected, oldSelected);
 				if (_.isEqual(newSelected, oldSelected)) return;
 				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');
