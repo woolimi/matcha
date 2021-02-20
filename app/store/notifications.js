@@ -28,22 +28,57 @@ export const mutations = {
 			notification.status = true;
 		}
 	},
+	setListAsRead(state, list) {
+		for (const id of list) {
+			for (const notification of state.list) {
+				if (notification.id == id) {
+					notification.status = true;
+					break;
+				}
+			}
+		}
+	},
 };
 
 export const actions = {
 	loadList({ commit }) {
-		this.$axios.get(`http://localhost:5000/api/users/notifications/list`).then((response) => {
+		return this.$axios.get(`/api/notifications/list`).then((response) => {
 			commit('setList', response.data);
 		});
 	},
 	markAsRead({ commit }, id) {
-		this.$axios.post(`http://localhost:5000/api/users/notifications/read`, { id }).then(() => {
+		this.$axios.post(`/api/notifications/read`, { id }).then(() => {
 			commit('setAsRead', id);
 		});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.post(`http://localhost:5000/api/users/notifications/read/all`).then(() => {
+		this.$axios.post(`/api/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
+	},
+	setListAsRead({ commit }, payload) {
+		commit('setListAsRead', payload.list);
+	},
+	receive({ dispatch, commit }, payload) {
+		commit('receive', payload);
+		if (payload.type == 'like:removed') {
+			dispatch('chat/unliked', payload.user.id, { root: true });
+		}
+		dispatch('profile/receiveNotification', payload, { root: true });
+	},
+	blockedBy({ dispatch }, payload) {
+		dispatch('chat/blocked', payload, { root: true });
+		dispatch('profile/blocked', payload, { root: true });
+	},
+	unblockedBy({ dispatch }, payload) {
+		dispatch('profile/unblocked', payload, { root: true });
+	},
+	userLogin({ commit }, payload) {
+		commit('chat/userLogin', payload.user, { root: true });
+		commit('profile/userLogin', payload.user, { root: true });
+	},
+	userLogout({ commit }, payload) {
+		commit('chat/userLogout', payload.user, { root: true });
+		commit('profile/userLogout', payload.user, { root: true });
 	},
 };

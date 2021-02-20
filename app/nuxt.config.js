@@ -25,7 +25,7 @@ export default {
 		'~/plugins/notifier.client',
 		'~/plugins/validator.client.ts',
 		{ src: '~/plugins/vuejs-google-maps.js', mode: 'client' },
-		'~/plugins/date.client.ts',
+		'~/plugins/date.ts',
 		{ src: '~/plugins/google-maps-marker.js', mode: 'client' },
 	],
 
@@ -134,14 +134,16 @@ export default {
 				default: true,
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
-					mutations: [
-						'chat/receiveMessage',
-						'userLogin --> chat/userLogin',
-						'userLogout --> chat/userLogout',
+					mutations: ['chat/receiveMessage', 'chat/addToList'],
+					actions: [
+						'chat/messageError',
 						'notifications/receive',
-						'notifications/setAsRead',
+						'notifications/setListAsRead',
+						'blockedBy --> notifications/blockedBy',
+						'unblockedBy --> notifications/unblockedBy',
+						'userLogin --> notifications/userLogin',
+						'userLogout --> notifications/userLogout',
 					],
-					actions: ['chat/messageError'],
 				},
 			},
 		],
