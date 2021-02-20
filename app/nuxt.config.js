@@ -134,12 +134,7 @@ export default {
 				default: true,
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
-					mutations: [
-						'chat/receiveMessage',
-						'chat/addToList',
-						'blocked --> blocked/add',
-						'unblocked --> blocked/remove',
-					],
+					mutations: ['chat/receiveMessage', 'chat/addToList'],
 					actions: [
 						'chat/messageError',
 						'notifications/receive',

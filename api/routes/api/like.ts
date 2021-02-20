@@ -35,7 +35,7 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
 			// Send Chat and enable it directly if it already exists
-			if (chat) {
+			if (chat && status == UserLikeStatus.REVERSE) {
 				const user = (await User.getSimple(self)) as UserSimpleInterface;
 				user.online = req.app.sockets[self] != undefined;
 				console.log('💨[socket]: send chat/addToList to ', otherSocket.id);
