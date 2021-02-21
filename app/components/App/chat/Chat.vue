@@ -7,20 +7,25 @@
 				</NuxtLink>
 
 				<NuxtLink :to="`/app/users/${chat.user.id}`">
-					<v-badge
-						:color="chat.user.online ? 'green' : 'pink'"
-						bordered
-						avatar
-						dot
-						bottom
-						offset-x="10"
-						offset-y="10"
-						class="mx-2"
-					>
-						<v-avatar size="50">
-							<v-img :src="chat.user.picture"></v-img>
-						</v-avatar>
-					</v-badge>
+					<v-tooltip bottom>
+						<template v-slot:activator="{ on, attrs }">
+							<v-badge
+								:color="chat.user.online === true ? 'green' : 'pink'"
+								bordered
+								avatar
+								dot
+								bottom
+								offset-x="10"
+								offset-y="10"
+								class="mx-2"
+							>
+								<v-avatar size="50" v-bind="attrs" v-on="on">
+									<v-img :src="chat.user.picture"></v-img>
+								</v-avatar>
+							</v-badge>
+						</template>
+						{{ online }}
+					</v-tooltip>
 					<v-toolbar-title>{{ chat.user.firstName }} {{ chat.user.lastName }}</v-toolbar-title>
 				</NuxtLink>
 
@@ -131,6 +136,13 @@
 					}
 				} else rows.push({ header: 'No messages yet !' });
 				return rows;
+			},
+			online() {
+				return this.chat.user.online === true
+					? 'Online'
+					: typeof this.chat.user.online === 'string'
+					? this.$date.simpleDate(this.chat.user.online)
+					: 'Offline';
 			},
 			classes() {
 				return this.$store.getters['chat/chat'] == undefined ? 'hidden-sm-and-down' : 'd-flex';

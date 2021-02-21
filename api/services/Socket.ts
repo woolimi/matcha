@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { sendMessage } from '../routes/api/chat';
 import jwt from 'jsonwebtoken';
 import Chat from '../models/Chat';
+import User from '../models/User';
 
 const enum Status {
 	'Logout',
@@ -37,6 +38,7 @@ export function bindSocket(app: Express, io: Server) {
 					callback({ success: true });
 
 					// Update login status to all liked users
+					await User.updateLastLogin(user.id);
 					sendStatusChange(Status.Login, app, user.id);
 					for (const socketId of Object.keys(app.currentPage)) {
 						if (
@@ -65,6 +67,8 @@ export function bindSocket(app: Express, io: Server) {
 			console.log('💨[socket]: disconnected', socket.id);
 
 			const userId = app.users[socket.id];
+			const lastLogin = new Date();
+			await User.updateLastLogin(userId);
 			sendStatusChange(Status.Logout, app, userId);
 			for (const socketId of Object.keys(app.currentPage)) {
 				if (

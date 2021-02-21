@@ -28,7 +28,8 @@
 							<template v-slot:activator="{ on, attrs }">
 								<span v-bind="attrs" v-on="on">
 									{{ profile.firstName }} {{ profile.lastName }}
-									<v-badge dot inline :color="profile.online ? 'success' : 'error'"> </v-badge>
+									<v-badge dot inline :color="profile.online === true ? 'success' : 'error'">
+									</v-badge>
 								</span>
 							</template>
 							{{ online }}
@@ -175,7 +176,11 @@
 				return this.$store.getters['profile/current'];
 			},
 			online() {
-				return this.profile.online ? 'Online' : 'Offline';
+				return this.profile.online === true
+					? 'Online'
+					: typeof this.profile.online === 'string'
+					? this.$date.simpleDate(this.profile.online)
+					: 'Offline';
 			},
 			genderColor() {
 				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
