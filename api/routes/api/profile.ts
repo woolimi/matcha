@@ -157,7 +157,7 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 
 	return res.json({
 		...profile,
-		online: req.app.sockets[id] !== undefined,
+		online: req.app.sockets[id] != undefined ? true : profile.login ?? false,
 		like,
 		blocked,
 		images,

@@ -7,7 +7,6 @@ import UserLike from '../models/UserLike';
 import UserNotification from '../models/UserNotification';
 import UserPicture from '../models/UserPicture';
 import UserTag from '../models/UserTag';
-import UserVisit from '../models/UserVisit';
 import UserLanguage from '../models/UserLanguage';
 import UserReport from '../models/UserReport';
 
@@ -18,7 +17,6 @@ class Database {
 		await User.init();
 		await UserTag.init();
 		await UserPicture.init();
-		await UserVisit.init();
 		await UserLike.init();
 		await UserBlock.init();
 		await UserNotification.init();

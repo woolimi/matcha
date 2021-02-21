@@ -27,7 +27,7 @@ export const mutations = {
 	},
 	userLogout(state, id) {
 		if (state.current.id === id) {
-			state.current.online = false;
+			state.current.online = new Date().toISOString();
 		}
 	},
 	addNotification(state, notification) {

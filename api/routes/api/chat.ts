@@ -23,7 +23,8 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	const simpleUsers = await User.getAllSimple(userIds);
 	const users: { [key: number]: UserSimpleInterface } = {};
 	for (const user of simpleUsers) {
-		users[user.id] = { ...user, online: req.app.sockets[user.id] != undefined };
+		const online = req.app.sockets[user.id] != undefined ? true : user.login ?? false;
+		users[user.id] = { ...user, online };
 	}
 
 	// Construct result object
@@ -66,14 +67,14 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 	const socket = req.app.sockets[self];
 	if (socket) {
 		const user = (await User.getSimple(id)) as UserSimpleInterface;
-		user.online = req.app.sockets[id] != undefined;
+		user.online = req.app.sockets[id] != undefined ? true : user.login ?? false;
 		console.log('💨[socket]: send chat/addToList to ', socket.id);
 		socket.emit('chat/addToList', { ...chat, user });
 	}
 	const otherSocket = req.app.sockets[id];
 	if (otherSocket) {
 		const user = (await User.getSimple(self)) as UserSimpleInterface;
-		user.online = req.app.sockets[self] != undefined;
+		user.online = req.app.sockets[self] != undefined ? true : user.login ?? false;
 		console.log('💨[socket]: send chat/addToList to ', otherSocket.id);
 		otherSocket.emit('chat/addToList', { ...chat, user });
 	}
@@ -111,7 +112,8 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	}
 
 	// Get all messages -- 20 per page and from "from" if it's present
-	const from = req.params.from ? parseInt(req.params.from) : undefined;
+	let from = req.params.from ? parseInt(req.params.from) : undefined;
+	if (!from || isNaN(from)) from = 0;
 	const messages = await ChatMessage.getAllPage(chat.id, from);
 	const completed = messages.length < 20;
 	if (!from) {

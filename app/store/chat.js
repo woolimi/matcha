@@ -92,7 +92,7 @@ export const mutations = {
 	userLogout(state, id) {
 		for (const chat of state.list) {
 			if (chat.user.id == id) {
-				chat.user.online = false;
+				chat.user.online = new Date().toISOString();
 				break;
 			}
 		}
