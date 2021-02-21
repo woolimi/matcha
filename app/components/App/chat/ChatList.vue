@@ -7,7 +7,7 @@
 						<NuxtLink :to="`/app/chat/${chat.id}`">
 							<v-list-item-avatar>
 								<v-badge
-									:color="chat.user.online ? 'green' : 'pink'"
+									:color="chat.user.online === true ? 'green' : 'pink'"
 									bordered
 									avatar
 									dot
@@ -35,7 +35,7 @@
 		</template>
 		<template v-else>
 			<div class="pa-2">
-				<v-alert border="left" elevation="2" outlined text type="info">
+				<v-alert border="left" elevation="2" colored-border light type="info">
 					Start matching to chat with other peoples !
 				</v-alert>
 			</div>
