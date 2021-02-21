@@ -25,7 +25,7 @@ async function validate_email(email: string, option: any = false): Promise<strin
 
 function validate_username(username: string): string {
 	if (username.length === 0) return 'username is required';
-	else if (username.length < 4 || username.length > 20) return 'username must be between 4 to 20 letters.';
+	else if (username.length < 4 || username.length > 30) return 'username must be between 4 to 30 letters.';
 	return '';
 }
 
