@@ -6,20 +6,12 @@
 			<v-list nav dense>
 				<v-list-item-group v-model="selected" active-class="primary--text text--accent-4">
 					<v-list-item v-for="(list, i) in navList" :key="i" :disabled="isDisabled(list.title)">
-						<template v-if="list.title === 'Logout'">
-							<a @click="userLogout">
-								<v-list-item-icon>
-									<v-icon>{{ list.icon }}</v-icon>
-								</v-list-item-icon>
-								<v-list-item-title class="black--text">{{ list.title }}</v-list-item-title>
-							</a>
-						</template>
-						<template v-else-if="list.title === 'Notifications'">
+						<template v-if="list.title === 'Notifications'">
 							<NuxtLink :to="{ path: list.path }">
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title :class="isDisabled(list.title) ? 'grey--text' : 'black--text'">
+								<v-list-item-title>
 									{{ list.title }}
 								</v-list-item-title>
 								<v-list-item-action v-if="unreadNotifications.length > 0">
@@ -32,11 +24,17 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title :class="isDisabled(list.title) ? 'grey--text' : 'black--text'">{{
-									list.title
-								}}</v-list-item-title>
+								<v-list-item-title>{{ list.title }}</v-list-item-title>
 							</NuxtLink>
 						</template>
+					</v-list-item>
+					<v-list-item>
+						<a @click="userLogout">
+							<v-list-item-icon>
+								<v-icon>mdi-logout</v-icon>
+							</v-list-item-icon>
+							<v-list-item-title> Logout</v-list-item-title>
+						</a>
 					</v-list-item>
 				</v-list-item-group>
 			</v-list>
@@ -69,30 +67,6 @@
 
 <script>
 	export default {
-		created() {
-			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
-			this.selected = path ? path.id : 0;
-		},
-		async fetch() {
-			await this.$store.dispatch('notifications/loadList');
-			await this.$store.dispatch('chat/loadList');
-		},
-		mounted() {
-			this.socket = this.$nuxtSocket({ persist: 'socket' });
-			this.socket.on('socket/loggedOut', () => {
-				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
-			});
-			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() }, (response) => {
-				if (!response.success) {
-					this.$store.commit('snack/SHOW', {
-						message: 'Could not link user to WebSocket.',
-						color: 'error',
-					});
-				} else {
-					this.socket.emit('user/changePage', { name: this.$route.name, params: this.$route.params });
-				}
-			});
-		},
 		props: ['app'],
 		data: () => ({
 			selected: null,
@@ -123,14 +97,31 @@
 					icon: 'mdi-cancel',
 					path: '/app/blocked',
 				},
-				{
-					title: 'Logout',
-					icon: 'mdi-logout',
-				},
 			],
 		}),
-		unmounted() {
-			this.socket.disconnect();
+		created() {
+			const path = this.navList.find((list) => list.path === this.$nuxt.$route.path);
+			this.selected = path ? path.id : 0;
+		},
+		async fetch() {
+			await this.$store.dispatch('notifications/loadList');
+			await this.$store.dispatch('chat/loadList');
+		},
+		mounted() {
+			this.socket = this.$nuxtSocket({ persist: 'socket' });
+			this.socket.on('socket/loggedOut', () => {
+				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
+			});
+			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() }, (response) => {
+				if (!response.success) {
+					this.$store.commit('snack/SHOW', {
+						message: 'Could not link user to WebSocket.',
+						color: 'error',
+					});
+				} else {
+					this.socket.emit('user/changePage', { name: this.$route.name, params: this.$route.params });
+				}
+			});
 		},
 		methods: {
 			userLogout() {
@@ -155,5 +146,20 @@
 				this.socket.emit('user/changePage', { name: to.name, params: to.params });
 			},
 		},
+		unmounted() {
+			this.socket.disconnect();
+		},
 	};
 </script>
+
+<style scoped>
+	.theme--light .v-list a {
+		color: black;
+	}
+	.theme--dark .v-list a {
+		color: white;
+	}
+	.theme--dark .v-list .v-list-item--active a {
+		color: #ffcdd2;
+	}
+</style>

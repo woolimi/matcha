@@ -7,34 +7,37 @@
 				</NuxtLink>
 
 				<NuxtLink :to="`/app/users/${chat.user.id}`">
-					<v-badge
-						:color="chat.user.online ? 'green' : 'pink'"
-						bordered
-						avatar
-						dot
-						bottom
-						offset-x="10"
-						offset-y="10"
-						class="mx-2"
-					>
-						<v-avatar size="50">
-							<v-img :src="chat.user.picture"></v-img>
-						</v-avatar>
-					</v-badge>
+					<v-tooltip bottom>
+						<template v-slot:activator="{ on, attrs }">
+							<v-badge
+								:color="chat.user.online === true ? 'green' : 'pink'"
+								bordered
+								avatar
+								dot
+								bottom
+								offset-x="10"
+								offset-y="10"
+								class="mx-2"
+							>
+								<v-avatar size="50" v-bind="attrs" v-on="on">
+									<v-img :src="chat.user.picture"></v-img>
+								</v-avatar>
+							</v-badge>
+						</template>
+						{{ online }}
+					</v-tooltip>
 					<v-toolbar-title>{{ chat.user.firstName }} {{ chat.user.lastName }}</v-toolbar-title>
 				</NuxtLink>
 
 				<v-spacer></v-spacer>
 
-				<v-btn outlined color="pink" class="mr-2" @click="unlike">
-					<v-icon left>mdi-heart</v-icon> Unlike
-				</v-btn>
-				<v-btn outlined color="orange" @click="block"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
+				<v-btn dark color="pink" class="mr-2" @click="unlike"> <v-icon left>mdi-heart</v-icon> Unlike </v-btn>
+				<v-btn dark color="orange" @click="block"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
 			</v-toolbar>
 			<v-container
 				fluid
 				ref="messages"
-				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
+				class="messages d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill mb-0"
 				@scroll.passive="onScroll"
 			>
 				<div class="loading" v-show="!loadedChat || loadingMore">
@@ -76,7 +79,7 @@
 		</template>
 		<template v-else>
 			<div class="pa-2 d-flex justify-center align-center">
-				<v-alert border="left" elevation="2" outlined text type="info" icon="mdi-chevron-left">
+				<v-alert border="left" elevation="2" colored-border light type="info" icon="mdi-chevron-left">
 					Select an User you want to talk to on the left.
 				</v-alert>
 			</div>
@@ -132,6 +135,13 @@
 				} else rows.push({ header: 'No messages yet !' });
 				return rows;
 			},
+			online() {
+				return this.chat.user.online === true
+					? 'Online'
+					: typeof this.chat.user.online === 'string'
+					? this.$date.simpleDate(this.chat.user.online)
+					: 'Offline';
+			},
 			classes() {
 				return this.$store.getters['chat/chat'] == undefined ? 'hidden-sm-and-down' : 'd-flex';
 			},
@@ -174,23 +184,12 @@
 					}
 				});
 			},
-			block() {
-				this.$axios.post(`/api/block/${this.chat.user.id}`).then(async (response) => {
-					if (response.status == 200) {
-						this.$store.commit('chat/removeChat', this.chat.id);
-						this.$store.commit('chat/leaveChat');
-						this.$router.push({ path: `/app/chat` });
-						this.$store.commit('snackbar/SHOW', {
-							message: 'User blocked',
-							color: 'success',
-						});
-					} else {
-						this.$store.commit('snackbar/SHOW', {
-							message: 'Could not block User.',
-							color: 'error',
-						});
-					}
-				});
+			async block() {
+				const status = await this.$store.dispatch('blocked/toggle', this.chat.user.id);
+				if (status) {
+					this.$store.commit('chat/leaveChat');
+					this.$router.push({ path: `/app/chat` });
+				}
 			},
 			onScroll() {
 				if (

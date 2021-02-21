@@ -125,13 +125,13 @@
 	}
 
 	.images-scroll {
-		overflow-y: scroll;
-		height: calc(100vh - 210px);
+		overflow-y: auto;
+		height: calc(100vh - 220px);
 	}
 
 	@media screen and (max-width: 960px) {
 		.images-scroll {
-			height: calc(100vh - 300px);
+			height: calc(100vh - 320px);
 		}
 	}
 </style>

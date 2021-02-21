@@ -1,9 +1,11 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
 import requireNotSelf from '../../middleware/requireNotSelf';
+import Chat from '../../models/Chat';
 import User from '../../models/User';
 import UserBlock from '../../models/UserBlock';
 import UserLike, { UserLikeStatus } from '../../models/UserLike';
+import UserNotification from '../../models/UserNotification';
 
 const blockRouter = express.Router();
 
@@ -27,7 +29,7 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id existst
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);
-	if (!(await User.exists(req.params.id))) {
+	if (isNaN(id) || id < 1 || !(await User.exists(id))) {
 		return res.status(404).json({ error: 'Profile not found' });
 	}
 
@@ -36,6 +38,9 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Unblock User
 	if (userBlockId) {
 		result = await UserBlock.remove(userBlockId);
+		if (!result) {
+			return res.status(500).send({ error: 'Could not change User block state.' });
+		}
 
 		// Send unblocked if the other is currently looking at our profile
 		const otherSocket = req.app.sockets[id];
@@ -47,9 +52,6 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			}
 		}
 
-		if (!result) {
-			return res.status(500).send({ error: 'Could not change User block state.' });
-		}
 		return res.json({ id: userBlockId, status: false });
 	}
 	// Block User
@@ -59,6 +61,16 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			await UserLike.removeAll(self, id);
 		}
 		result = await UserBlock.add(self, id);
+		if (!result) {
+			return res.status(500).send({ error: 'Could not change User block state.' });
+		}
+
+		// Delete Chat
+		const chat = await Chat.getForUser(self, id);
+		if (chat) await Chat.delete(chat.id);
+		// Remove all notifications
+		await UserNotification.removeAllForUser(self, id);
+		await UserNotification.removeAllForUser(id, self);
 
 		// Send blocked if the other is currently looking at our profile
 		const otherSocket = req.app.sockets[id];
@@ -73,9 +85,6 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			}
 		}
 
-		if (!result) {
-			return res.status(500).send({ error: 'Could not change User block state.' });
-		}
 		const user = await User.getSimple(id);
 		return res.send({ id: result.insertId, at: new Date(), status: true, user });
 	}

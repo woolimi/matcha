@@ -23,7 +23,8 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 	const simpleUsers = await User.getAllSimple(userIds);
 	const users: { [key: number]: UserSimpleInterface } = {};
 	for (const user of simpleUsers) {
-		users[user.id] = { ...user, online: req.app.sockets[user.id] != undefined };
+		const online = req.app.sockets[user.id] != undefined ? true : user.login ?? false;
+		users[user.id] = { ...user, online };
 	}
 
 	// Construct result object
@@ -43,6 +44,15 @@ chatRouter.get('/list', authToken, async (req: any, res) => {
 chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) => {
 	const id = req.params.id as number;
 	const self = req.user.id as number;
+
+	// Check User
+	if (isNaN(id) || id < 1) {
+		return res.status(404).send({ error: 'User not found' });
+	}
+	const otherUser = await User.getSimple(id);
+	if (!otherUser) {
+		return res.status(404).send({ error: 'User not found' });
+	}
 
 	// Check permissions
 	const like = await UserLike.status(self, id);
@@ -65,15 +75,14 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 	// Send messages
 	const socket = req.app.sockets[self];
 	if (socket) {
-		const user = (await User.getSimple(id)) as UserSimpleInterface;
-		user.online = req.app.sockets[id] != undefined;
+		otherUser.online = req.app.sockets[id] != undefined ? true : otherUser.login ?? false;
 		console.log('💨[socket]: send chat/addToList to ', socket.id);
-		socket.emit('chat/addToList', { ...chat, user });
+		socket.emit('chat/addToList', { ...chat, otherUser });
 	}
 	const otherSocket = req.app.sockets[id];
 	if (otherSocket) {
 		const user = (await User.getSimple(self)) as UserSimpleInterface;
-		user.online = req.app.sockets[self] != undefined;
+		user.online = req.app.sockets[self] != undefined ? true : user.login ?? false;
 		console.log('💨[socket]: send chat/addToList to ', otherSocket.id);
 		otherSocket.emit('chat/addToList', { ...chat, user });
 	}
@@ -81,10 +90,15 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 });
 
 chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => {
-	const user = req.user.id as number;
+	const id = parseInt(req.user.id);
+
+	// Check User
+	if (isNaN(id) || id < 1) {
+		return res.status(404).send({ error: 'User not found' });
+	}
 
 	// Check if the Chat is for the User
-	const chat = await Chat.getForUser(user, req.params.id);
+	const chat = await Chat.getForUser(id, req.params.id);
 	if (!chat) {
 		return res.status(404).send({ error: 'No Chat found with this user' });
 	}
@@ -95,8 +109,13 @@ chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => 
 // Get a chat ID from an User ID
 // Used to redirect from a notification where there is no Chat ID
 chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
-	const self = req.user.id as number;
-	const id = req.params.id as number;
+	const self = parseInt(req.user.id);
+	const id = parseInt(req.params.id);
+
+	// Check if the Chat exists
+	if (isNaN(id) || id < 1) {
+		return res.status(404).send({ error: 'Chat not found' });
+	}
 
 	// Check if the Chat is for the User
 	const chat = await Chat.get(id);
@@ -111,7 +130,8 @@ chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	}
 
 	// Get all messages -- 20 per page and from "from" if it's present
-	const from = req.params.from ? parseInt(req.params.from) : undefined;
+	let from = req.params.from ? parseInt(req.params.from) : undefined;
+	if (!from || isNaN(from)) from = 0;
 	const messages = await ChatMessage.getAllPage(chat.id, from);
 	const completed = messages.length < 20;
 	if (!from) {
