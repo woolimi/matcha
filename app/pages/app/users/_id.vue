@@ -1,10 +1,10 @@
 <template>
 	<v-container fluid>
-		<v-alert border="left" elevation="2" outlined text type="info" v-if="profile.id == $auth.user.id">
+		<v-alert border="left" elevation="2" colored-border light type="info" v-if="profile.id == $auth.user.id">
 			This is what you profile looks like to other users.
 		</v-alert>
 		<div v-if="profile.error" class="text-center">
-			<v-alert border="left" colored-border type="error" elevation="2"> {{ profile.error }} </v-alert>
+			<v-alert border="left" colored-border light type="error" elevation="2"> {{ profile.error }} </v-alert>
 		</div>
 		<v-row v-else-if="profile.id">
 			<v-col cols="12" sm="6">
@@ -28,7 +28,8 @@
 							<template v-slot:activator="{ on, attrs }">
 								<span v-bind="attrs" v-on="on">
 									{{ profile.firstName }} {{ profile.lastName }}
-									<v-badge dot inline :color="profile.online ? 'success' : 'error'"> </v-badge>
+									<v-badge dot inline :color="profile.online === true ? 'success' : 'error'">
+									</v-badge>
 								</span>
 							</template>
 							{{ online }}
@@ -42,19 +43,19 @@
 				<v-row class="text-center">
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-human-male-female </v-icon> Gender</v-subheader>
-						<v-chip :color="genderColor">
+						<v-chip class="black--text" :color="genderColor">
 							{{ profile.gender }}
 						</v-chip>
 					</v-col>
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-head-heart </v-icon> Sexual Preferences</v-subheader>
-						<v-chip :color="preferencesColor">
+						<v-chip class="black--text" :color="preferencesColor">
 							{{ profile.preferences }}
 						</v-chip>
 					</v-col>
 				</v-row>
 				<v-subheader><v-icon left> mdi-notebook </v-icon> Biography</v-subheader>
-				<v-card elevation="4" class="pa-2 mb-2">
+				<v-card elevation="4" light class="pa-2 mb-2">
 					<v-row>
 						<v-col cols="12">
 							{{ profile.biography }}
@@ -85,9 +86,9 @@
 				<v-row v-if="profile.id != $auth.user.id">
 					<v-col cols="12" class="text-center">
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
-						<v-bottom-sheet inset>
+						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
-								<v-btn class="ma-2" outlined color="success" v-bind="attrs" v-on="on">
+								<v-btn class="ma-2" color="success" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-map-marker</v-icon> Location
 								</v-btn>
 							</template>
@@ -116,18 +117,24 @@
 								</gmap-map>
 							</v-card>
 						</v-bottom-sheet>
-						<v-btn class="ma-2" outlined color="pink" @click="likeEvent">
+						<v-btn dark class="ma-2" color="pink" @click="likeEvent" v-if="!profile.blocked">
 							<v-icon left>mdi-heart</v-icon> {{ like }}
 						</v-btn>
-						<v-btn class="ma-2" outlined color="primary" v-if="profile.like == 2" @click="openChat">
+						<v-btn
+							dark
+							class="ma-2"
+							color="primary"
+							@click="openChat"
+							v-if="profile.like == 2 && !profile.blocked"
+						>
 							<v-icon left>mdi-email</v-icon> Chat
 						</v-btn>
-						<v-btn class="ma-2" outlined color="orange" @click="blockEvent">
+						<v-btn dark class="ma-2" color="orange" @click="blockEvent">
 							<v-icon left>mdi-cancel</v-icon> {{ blocked }}
 						</v-btn>
-						<v-bottom-sheet inset>
+						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
-								<v-btn class="ma-2" outlined color="blue-grey" v-bind="attrs" v-on="on">
+								<v-btn dark class="ma-2" color="blue-grey" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-clock-outline</v-icon> History
 								</v-btn>
 							</template>
@@ -169,7 +176,11 @@
 				return this.$store.getters['profile/current'];
 			},
 			online() {
-				return this.profile.online ? 'Online' : 'Offline';
+				return this.profile.online === true
+					? 'Online'
+					: typeof this.profile.online === 'string'
+					? this.$date.simpleDate(this.profile.online)
+					: 'Offline';
 			},
 			genderColor() {
 				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
@@ -201,7 +212,18 @@
 		},
 		methods: {
 			likeEvent() {
-				this.$store.dispatch('profile/toggleLike');
+				if (this.profile.id) {
+					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
+						if (response.status == 200) {
+							this.$store.commit('profile/setLike', response.data.like);
+						} else {
+							this.$store.commit('snackbar/SHOW', {
+								message: 'Could not update Like status.',
+								color: 'error',
+							});
+						}
+					});
+				}
 			},
 			openChat() {
 				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
@@ -215,8 +237,11 @@
 					}
 				});
 			},
-			blockEvent() {
-				this.$store.dispatch('profile/toggleBlock');
+			async blockEvent() {
+				if (this.profile.id) {
+					const status = await this.$store.dispatch('blocked/toggle', this.profile.id);
+					this.$store.commit('profile/setBlock', status);
+				}
 			},
 		},
 	};

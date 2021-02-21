@@ -13,7 +13,6 @@ import UserTag from '../../models/UserTag';
 import UserLanguage from '../../models/UserLanguage';
 import UserBlock from '../../models/UserBlock';
 import UserLike from '../../models/UserLike';
-import Chat from '../../models/Chat';
 
 const profileRouter = express.Router();
 
@@ -44,10 +43,10 @@ profileRouter.put(
 profileRouter.post('/images/:user_id/:image_id', authToken, validator.userPictures, async (req: any, res) => {
 	try {
 		await UserPicture.delete_image(req.params.user_id, req.params.image_id, req.body.path);
-		res.sendStatus(200);
+		return res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
-		res.sendStatus(500);
+		return res.sendStatus(500);
 	}
 });
 
@@ -101,8 +100,13 @@ profileRouter.post('/change-password', authToken, validator.userChangePassword, 
 });
 
 profileRouter.get('/:id', authToken, async (req: any, res) => {
-	const id = req.params.id;
-	const self = req.user.id;
+	const self = parseInt(req.user.id);
+	const id = parseInt(req.params.id);
+
+	// Check if the ID is valid
+	if (isNaN(id) || id < 1) {
+		return res.status(404).json({ error: 'Profile not found.' });
+	}
 
 	// Check if the user is not blocked
 	const isBlocked = await UserBlock.status(id, self);
@@ -157,7 +161,7 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 
 	return res.json({
 		...profile,
-		online: req.app.sockets[id] !== undefined,
+		online: req.app.sockets[id] != undefined ? true : profile.login ?? false,
 		like,
 		blocked,
 		images,

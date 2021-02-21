@@ -22,19 +22,20 @@ export interface UserInterfaceBase {
 	preferences: ('heterosexual' | 'bisexual') | null;
 	biography: string | null;
 	birthdate: string | null;
+	login: string | null;
 }
 
 export type UserInterfaceXY = UserInterfaceBase & { location: { x: number; y: number } | null };
 export type UserInterfaceLL = UserInterfaceBase & { location: { lat: number; lng: number } | null };
 
-export type UserSimpleInterface = Pick<UserInterfaceBase, 'id' | 'firstName' | 'lastName'> & {
+export type UserSimpleInterface = Pick<UserInterfaceBase, 'id' | 'firstName' | 'lastName' | 'login'> & {
 	picture: string | null;
-	online: boolean | undefined;
+	online: string | boolean;
 };
 
 export type PublicProfileInterface = Pick<
 	UserInterfaceLL,
-	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate'
+	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate' | 'login'
 >;
 
 class User extends Model {
@@ -53,6 +54,7 @@ class User extends Model {
 			biography TEXT DEFAULT NULL,
 			location POINT SRID 4326 NOT NULL,
 			birthdate DATETIME DEFAULT NULL,
+			login DATETIME DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
@@ -150,7 +152,7 @@ class User extends Model {
 
 	static async getSimple(id: number): Promise<UserSimpleInterface | null> {
 		const result: UserSimpleInterface[] = await User.query(
-			`SELECT u.id, u.firstName, u.lastName, p.path as picture
+			`SELECT u.id, u.firstName, u.lastName, u.login, p.path as picture
 			FROM ${User.tname} as u
 			LEFT JOIN user_pictures as p ON p.user = u.id
 			WHERE u.id = ?
@@ -191,7 +193,7 @@ class User extends Model {
 		try {
 			if (ids.length === 0) return [];
 			const users: UserSimpleInterface[] = await User.query(
-				`SELECT u.id, u.firstName, u.lastName, p.path as picture
+				`SELECT u.id, u.firstName, u.lastName, u.login, p.path as picture
 				FROM ${User.tname} as u
 				LEFT JOIN user_pictures as p ON p.user = u.id
 				WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
@@ -207,7 +209,7 @@ class User extends Model {
 
 	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
 		const result: UserInterfaceXY[] = await User.query(
-			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate
+			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate, login
 			FROM ${User.tname}
 			WHERE id = ? LIMIT 1`,
 			[id]
@@ -242,6 +244,10 @@ class User extends Model {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	static updateLastLogin(id: number) {
+		return User.query('UPDATE users SET login = NOW() WHERE id = ?', [id]);
 	}
 
 	static async search(user_id: number, query: SearchQuery) {

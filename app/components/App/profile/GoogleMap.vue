@@ -80,9 +80,15 @@
 </script>
 
 <style scoped>
-	.text-field {
+	.theme--light .text-field {
 		border: 2px solid black;
-		border-radius: 10px;
+		border-radius: 5px;
 		padding: 5px;
+	}
+	.theme--dark .text-field {
+		border: 2px solid white;
+		border-radius: 5px;
+		padding: 5px;
+		color: white;
 	}
 </style>

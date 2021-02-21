@@ -32,6 +32,8 @@ export const actions = {
 				const status = response.data.status;
 				if (status) {
 					commit('add', response.data);
+					commit('chat/removeUserChat', id, { root: true });
+					commit('notifications/removeFromUser', id, { root: true });
 				} else commit('remove', response.data.id);
 				commit(
 					'snackbar/SHOW',

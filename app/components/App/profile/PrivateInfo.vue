@@ -30,20 +30,21 @@
 			</v-text-field>
 			<div class="text-right">
 				<v-btn v-if="sentEmail" outlined small text :ripple="false" color="info" class="no-cursor">
-					sent
+					Sent
 				</v-btn>
 				<v-btn
 					:loading="loading.email"
 					v-else-if="!user.verified || $auth.user.email !== user.email"
-					outlined
+					text
 					small
 					color="error"
 					@click="emailVerification"
-					>send verification</v-btn
 				>
-				<v-btn v-if="user.verified" small text outlined :ripple="false" class="no-cursor" color="success"
-					>verified</v-btn
-				>
+					Send verification
+				</v-btn>
+				<v-btn v-if="user.verified" small text outlined :ripple="false" class="no-cursor" color="success">
+					Verified
+				</v-btn>
 			</div>
 
 			<v-text-field
@@ -61,7 +62,7 @@
 				prepend-icon="mdi-lock"
 			/>
 			<div class="text-right">
-				<v-btn small text outlined color="warning" @click="changePassword">change password</v-btn>
+				<v-btn small color="warning" @click="changePassword">Change Password</v-btn>
 			</div>
 
 			<div class="text-right">
