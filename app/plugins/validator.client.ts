@@ -52,7 +52,7 @@ function validate_email(email: string) {
 async function validate_username(username: string, $axios: NuxtAxiosInstance): Promise<string> {
 	try {
 		if (username.length === 0) return 'username is required';
-		else if (username.length < 4 || username.length > 20) return 'username must be between 4 to 20 letters.';
+		else if (username.length < 4 || username.length > 30) return 'username must be between 4 to 30 letters.';
 		const { data } = await $axios.post('/check/username', { username });
 		if (data.error) return data.error;
 		return '';
