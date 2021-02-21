@@ -7,8 +7,10 @@ export const state = () => ({
 		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
-	sort: 'distance' /* number_of_common_tags, distance, age, likes */,
+	sort: 'distance_cursor' /* distance_cursor, age_cursor, likes_cursor, tag_cursor */,
 	sort_dir: 'ASC' /* ASC, DESC */,
+	cursor: '',
+	no_more_data: false,
 	users: [],
 });
 
@@ -38,8 +40,14 @@ export const mutations = {
 			state.sort = payload;
 		}
 	},
-	SET_USERS: (state, payload) => {
-		state.users = payload;
+	SET_USERS: (state, { users, scroll }) => {
+		if (!scroll) state.no_more_data = false;
+		if (scroll) state.users = [...state.users, ...users];
+		else state.users = users;
+
+		const last_user = users[users.length - 1];
+		if (last_user) state.cursor = last_user[state.sort];
+		state.no_more_data = users.length < 12 ? true : false;
 	},
 	INIT_TAGS: (state, payload) => {
 		state.tags.items = payload.items;
@@ -48,10 +56,11 @@ export const mutations = {
 };
 
 export const actions = {
-	async updateResult({ commit, state, rootState }) {
+	async updateResult({ commit, state, rootState }, scroll) {
 		try {
 			let { age, distance, likes, tags, sort, sort_dir } = state;
-			if (tags.selected.length === 0 && sort === 'number_of_common_tags') return;
+			if (tags.selected.length === 0 && sort === 'tag_cursor') return;
+			if (scroll && state.no_more_data) return;
 			const params = {
 				age,
 				distance,
@@ -60,11 +69,13 @@ export const actions = {
 				sort,
 				sort_dir,
 				languages: rootState.auth.user.languages,
+				scroll: !!scroll,
+				cursor: state.cursor,
 			};
 			const { data } = await this.$axios.get('/api/search', {
 				params,
 			});
-			commit('SET_USERS', data.users);
+			commit('SET_USERS', { users: data.users, scroll });
 		} catch (error) {
 			console.error(error);
 		}

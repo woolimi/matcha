@@ -279,13 +279,16 @@ class User extends Model {
 
 	static common_select_query() {
 		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location,
-		uinfo.age, uinfo.distance, IFNULL(ulikes.likes, 0) AS likes, upictures.path AS image`;
+		uinfo.age, ROUND(uinfo.distance) AS distance, IFNULL(ulikes.nb_likes, 0) AS likes, upictures.path AS image,
+		CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
+		CONCAT(LPAD(IFNULL(ulikes.nb_likes, 0), 5, '0'), LPAD(users.id, 5, '0')) AS likes_cursor,
+		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor`;
 	}
 
 	static common_join_query(languages: string[]) {
 		return `
 			LEFT JOIN (
-				SELECT liked, COUNT(user_likes.liked) AS likes
+				SELECT liked, COUNT(user_likes.liked) AS nb_likes
 				FROM user_likes
 				GROUP BY liked
 			) AS ulikes
@@ -309,6 +312,19 @@ class User extends Model {
 			ON users.id = ulangs.user`;
 	}
 
+	static cursor_query({ scroll, cursor, sort, sort_dir }: SearchQuery) {
+		const dir = sort_dir === 'ASC' ? '>' : '<';
+		let s = '';
+		if (sort === 'distance_cursor') {
+			s = `CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0'))`;
+		} else if (sort === 'likes_cursor') {
+			s = `CONCAT(LPAD(IFNULL(ulikes.nb_likes, 0), 5, '0'), LPAD(users.id, 5, '0'))`;
+		} else if (sort === 'age_cursor') {
+			s = `CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0'))`;
+		}
+		return scroll ? `AND ${s} ${dir} ${cursor}` : ``;
+	}
+
 	static async search_without_tags(
 		user_id: number,
 		location: LocationXY,
@@ -324,8 +340,10 @@ class User extends Model {
 						AND ${preferences_query} AND distance < ?
 						AND age >= ? AND age <= ?
 						${User.invalid_user_filter_query}
-					HAVING likes >= ? AND likes <= ?
-					ORDER BY ${sort} ${sort_dir} `,
+						AND IFNULL(ulikes.nb_likes, 0) >= ? AND IFNULL(ulikes.nb_likes, 0) <= ?
+						${User.cursor_query(query)}
+					ORDER BY ${sort} ${sort_dir}
+					LIMIT 12`,
 			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
@@ -340,7 +358,8 @@ class User extends Model {
 		return await User.query(
 			`SELECT ${User.common_select_query()},
 				utags.tag_list,
-				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags
+				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags,
+				CONCAT(LPAD(LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1, 3, '0'), LPAD(users.id, 5, '0')) AS tag_cursor
 				FROM users
 				${User.common_join_query(languages)}
 				LEFT JOIN (
@@ -356,8 +375,10 @@ class User extends Model {
 					AND age >= ? AND age <= ?
 					AND tag_list IS NOT NULL
 					${User.invalid_user_filter_query}
-				HAVING likes >= ? AND likes <= ?
-				ORDER BY ${sort} ${sort_dir}`,
+					AND IFNULL(ulikes.nb_likes, 0) >= ? AND IFNULL(ulikes.nb_likes, 0) <= ?
+					${User.cursor_query(query)}
+				ORDER BY ${sort} ${sort_dir}
+				LIMIT 12`,
 			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
 		);
 	}
