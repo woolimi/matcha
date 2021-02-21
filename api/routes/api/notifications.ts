@@ -6,8 +6,8 @@ import UserNotification, { NotificationWithUserInterface } from '../../models/Us
 const notificationRouter = express.Router();
 
 notificationRouter.get('/list', authToken, async (req: any, res) => {
-	const user = req.user.id as number;
-	const notifications = await UserNotification.getAll(user);
+	const self = parseInt(req.user.id);
+	const notifications = await UserNotification.getAll(self);
 	const userIds = Array.from(new Set(notifications.map((notification) => notification.sender)));
 	const otherUsers = await User.getAllSimple(userIds);
 	res.send(
@@ -22,8 +22,8 @@ notificationRouter.get('/list', authToken, async (req: any, res) => {
 });
 
 notificationRouter.post('/read', authToken, async (req: any, res) => {
-	const id = req.body.id;
-	if (!id || typeof id != 'number' || isNaN(id) || id < 1) {
+	const id = parseInt(req.body.id);
+	if (isNaN(id) || id < 1) {
 		return res.status(400).send({ error: 'Missing or invalid notification ID' });
 	}
 
