@@ -29,7 +29,7 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id existst
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);
-	if (!(await User.exists(req.params.id))) {
+	if (isNaN(id) || id < 1 || !(await User.exists(id))) {
 		return res.status(404).json({ error: 'Profile not found' });
 	}
 
