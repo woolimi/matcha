@@ -31,15 +31,13 @@
 
 				<v-spacer></v-spacer>
 
-				<v-btn outlined color="pink" class="mr-2" @click="unlike">
-					<v-icon left>mdi-heart</v-icon> Unlike
-				</v-btn>
-				<v-btn outlined color="orange" @click="block"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
+				<v-btn dark color="pink" class="mr-2" @click="unlike"> <v-icon left>mdi-heart</v-icon> Unlike </v-btn>
+				<v-btn dark color="orange" @click="block"> <v-icon left>mdi-cancel</v-icon> Block </v-btn>
 			</v-toolbar>
 			<v-container
 				fluid
 				ref="messages"
-				class="messages grey d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill lighten-5 mb-0"
+				class="messages d-flex flex-grow-1 flex-shrink-1 flex-column flex-fill mb-0"
 				@scroll.passive="onScroll"
 			>
 				<div class="loading" v-show="!loadedChat || loadingMore">
@@ -81,7 +79,7 @@
 		</template>
 		<template v-else>
 			<div class="pa-2 d-flex justify-center align-center">
-				<v-alert border="left" elevation="2" outlined text type="info" icon="mdi-chevron-left">
+				<v-alert border="left" elevation="2" colored-border light type="info" icon="mdi-chevron-left">
 					Select an User you want to talk to on the left.
 				</v-alert>
 			</div>

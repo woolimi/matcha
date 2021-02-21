@@ -1,8 +1,8 @@
 <template>
-	<div>
+	<div class="flex">
 		<template v-if="rows.length == 0">
 			<div class="pa-2">
-				<v-alert border="left" elevation="2" outlined text type="info">
+				<v-alert border="left" elevation="2" colored-border light type="info">
 					{{ emptyMessage }}
 				</v-alert>
 			</div>

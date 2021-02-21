@@ -1,10 +1,10 @@
 <template>
 	<v-container fluid>
-		<v-alert border="left" elevation="2" outlined text type="info" v-if="profile.id == $auth.user.id">
+		<v-alert border="left" elevation="2" colored-border light type="info" v-if="profile.id == $auth.user.id">
 			This is what you profile looks like to other users.
 		</v-alert>
 		<div v-if="profile.error" class="text-center">
-			<v-alert border="left" colored-border type="error" elevation="2"> {{ profile.error }} </v-alert>
+			<v-alert border="left" colored-border light type="error" elevation="2"> {{ profile.error }} </v-alert>
 		</div>
 		<v-row v-else-if="profile.id">
 			<v-col cols="12" sm="6">
@@ -43,19 +43,19 @@
 				<v-row class="text-center">
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-human-male-female </v-icon> Gender</v-subheader>
-						<v-chip :color="genderColor">
+						<v-chip class="black--text" :color="genderColor">
 							{{ profile.gender }}
 						</v-chip>
 					</v-col>
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-head-heart </v-icon> Sexual Preferences</v-subheader>
-						<v-chip :color="preferencesColor">
+						<v-chip class="black--text" :color="preferencesColor">
 							{{ profile.preferences }}
 						</v-chip>
 					</v-col>
 				</v-row>
 				<v-subheader><v-icon left> mdi-notebook </v-icon> Biography</v-subheader>
-				<v-card elevation="4" class="pa-2 mb-2">
+				<v-card elevation="4" light class="pa-2 mb-2">
 					<v-row>
 						<v-col cols="12">
 							{{ profile.biography }}
@@ -88,7 +88,7 @@
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
 						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
-								<v-btn class="ma-2" outlined color="success" v-bind="attrs" v-on="on">
+								<v-btn class="ma-2" color="success" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-map-marker</v-icon> Location
 								</v-btn>
 							</template>
@@ -117,24 +117,24 @@
 								</gmap-map>
 							</v-card>
 						</v-bottom-sheet>
-						<v-btn class="ma-2" outlined color="pink" @click="likeEvent" v-if="!profile.blocked">
+						<v-btn dark class="ma-2" color="pink" @click="likeEvent" v-if="!profile.blocked">
 							<v-icon left>mdi-heart</v-icon> {{ like }}
 						</v-btn>
 						<v-btn
+							dark
 							class="ma-2"
-							outlined
 							color="primary"
 							@click="openChat"
 							v-if="profile.like == 2 && !profile.blocked"
 						>
 							<v-icon left>mdi-email</v-icon> Chat
 						</v-btn>
-						<v-btn class="ma-2" outlined color="orange" @click="blockEvent">
+						<v-btn dark class="ma-2" color="orange" @click="blockEvent">
 							<v-icon left>mdi-cancel</v-icon> {{ blocked }}
 						</v-btn>
 						<v-bottom-sheet inset v-if="!profile.blocked">
 							<template v-slot:activator="{ on, attrs }">
-								<v-btn class="ma-2" outlined color="blue-grey" v-bind="attrs" v-on="on">
+								<v-btn dark class="ma-2" color="blue-grey" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-clock-outline</v-icon> History
 								</v-btn>
 							</template>

@@ -2,7 +2,7 @@
 	<div>
 		<template v-if="rows.length == 0">
 			<div class="pa-2">
-				<v-alert border="left" elevation="2" outlined text type="info"> No blocked Users, yet. </v-alert>
+				<v-alert border="left" elevation="2" colored-border light type="info"> No blocked Users, yet. </v-alert>
 			</div>
 		</template>
 		<template v-else>
