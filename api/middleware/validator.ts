@@ -239,9 +239,22 @@ export default {
 			age: bef_query.age.map((s) => parseInt(s)),
 			likes: bef_query.likes.map((s) => parseInt(s)),
 			distance: parseInt(bef_query.distance),
+			scroll: bef_query.scroll === 'true' ? true : false,
 		};
 		if (!query.tags) query.tags = [];
-		if (!fieldsChecker(query, ['age', 'distance', 'likes', 'tags', 'sort', 'sort_dir', 'languages']))
+		if (
+			!fieldsChecker(query, [
+				'age',
+				'distance',
+				'likes',
+				'tags',
+				'sort',
+				'sort_dir',
+				'languages',
+				'scroll',
+				'cursor',
+			])
+		)
 			return res.sendStatus(400);
 
 		if (!query) return res.sendStatus(400);
