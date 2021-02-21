@@ -49,6 +49,8 @@ export interface BeforeParsedSearchQuery {
 	sort: string;
 	sort_dir: string;
 	languages: string[];
+	scroll: string;
+	cursor: string;
 }
 
 export interface SearchQuery {
@@ -59,4 +61,6 @@ export interface SearchQuery {
 	sort: string;
 	sort_dir: string;
 	languages: string[];
+	scroll: boolean;
+	cursor: string;
 }
