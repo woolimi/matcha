@@ -1,19 +1,25 @@
 <template>
 	<v-container>
 		<v-row class="images-scroll" v-scroll.self="scroll">
+			<v-overlay :value="overlay" color="transparent"> </v-overlay>
+
 			<template v-if="mode === 'image'">
 				<v-col v-for="user in users" :key="user.id" :cols="imageCols">
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
 						<v-card @click="navigate" role="link" elevation="10" style="border-radius: 15px">
 							<v-img :src="user.image" width="100%" height="100%" aspect-ratio="0.75">
-								<v-container class="d-flex align-start flex-column" style="height: 100%">
-									<v-spacer></v-spacer>
-									<div class="font-weight-black white--text text-shadow">
-										{{ user.username }}, {{ user.age }}
-									</div>
-									<div class="font-weight-black white--text">
-										<v-icon color="primary">mdi-heart</v-icon>
-										<span class="text-shadow">{{ user.likes }}</span>
+								<v-container class="d-flex align-end" style="height: 100%">
+									<div class="d-block" style="width: 100%">
+										<div class="font-weight-black white--text text-shadow">
+											{{ user.username }}, {{ user.age }}
+										</div>
+										<div class="white--text font-weight-black d-flex justify-space-between">
+											<div class="d-block">
+												<v-icon color="primary">mdi-heart</v-icon>
+												{{ user.likes }}
+											</div>
+											<div class="text-shadow">{{ user.distance }}km</div>
+										</div>
 									</div>
 								</v-container>
 							</v-img>
@@ -82,14 +88,24 @@
 			mode() {
 				return this.$store.state.search.mode;
 			},
+			sort() {
+				return [this.$store.state.search.sort, this.$store.state.search.sort_dir];
+			},
 		},
 		methods: {
-			scroll(e) {
-				// console.log()
-				// if (e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 50) {
-				// 	console.log('HERE');
-				// }
+			async scroll(e) {
+				if (this.overlay) return;
+				if (Math.floor(e.target.scrollHeight - e.target.scrollTop) <= e.target.clientHeight + 50) {
+					this.overlay = true;
+					await this.$store.dispatch('search/updateResult', true);
+					this.overlay = false;
+				}
 			},
+		},
+		data() {
+			return {
+				overlay: false,
+			};
 		},
 	};
 </script>

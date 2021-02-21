@@ -1,27 +1,27 @@
 <template>
 	<v-container class="d-flex justify-space-between align-center">
 		<v-btn-toggle v-if="mode === 'image'" mandatory dense>
-			<v-btn value="distance" @click="sorting">
+			<v-btn value="distance_cursor" @click="sorting">
 				<v-icon>mdi-map-marker-distance</v-icon>
-				<v-icon v-show="sort === 'distance'">
+				<v-icon v-show="sort === 'distance_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
-			<v-btn value="likes" @click="sorting">
+			<v-btn value="likes_cursor" @click="sorting">
 				<v-icon>mdi-heart</v-icon>
-				<v-icon v-show="sort === 'likes'">
+				<v-icon v-show="sort === 'likes_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
-			<v-btn value="age" @click="sorting">
+			<v-btn value="age_cursor" @click="sorting">
 				<v-icon>mdi-account-tie</v-icon>
-				<v-icon v-show="sort === 'age'">
+				<v-icon v-show="sort === 'age_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
-			<v-btn value="number_of_common_tags" @click="sorting">
+			<v-btn value="tag_cursor" @click="sorting">
 				<v-icon>mdi-tag</v-icon>
-				<v-icon v-show="sort === 'number_of_common_tags'">
+				<v-icon v-show="sort === 'tag_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
@@ -67,8 +67,7 @@
 		},
 		methods: {
 			sorting(e) {
-				const value = e.currentTarget.value;
-				this.$store.commit('search/SET_SEARCH_SORT', value);
+				this.$store.commit('search/SET_SEARCH_SORT', e.currentTarget.value);
 			},
 		},
 	};
