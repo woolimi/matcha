@@ -7,7 +7,7 @@
 		<div style="height: 6.5em" class="d-md-none"></div>
 		<v-container>
 			<v-row>
-				<v-col class="d-none d-md-block" cols="4">
+				<v-col class="search-filters d-none d-md-block" cols="4">
 					<SearchFilter />
 					<SearchTag />
 					<SearchLanguage />
@@ -30,5 +30,10 @@
 <style scoped>
 	.h-init {
 		height: initial;
+	}
+
+	.search-filters {
+		overflow-y: auto;
+		max-height: calc(100vh - 140px);
 	}
 </style>
