@@ -27,8 +27,9 @@ export const actions = {
 		});
 	},
 	toggle({ commit }, id) {
-		return this.$axios.post(`/api/block/${id}`).then((response) => {
-			if (response.status == 200) {
+		return this.$axios
+			.post(`/api/block/${id}`)
+			.then((response) => {
 				const status = response.data.status;
 				if (status) {
 					commit('add', response.data);
@@ -44,7 +45,8 @@ export const actions = {
 					{ root: true }
 				);
 				return status;
-			} else {
+			})
+			.catch(() => {
 				commit(
 					'snackbar/SHOW',
 					{
@@ -54,7 +56,6 @@ export const actions = {
 					{ root: true }
 				);
 				return false;
-			}
-		});
+			});
 	},
 };

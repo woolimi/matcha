@@ -248,8 +248,9 @@
 			likeEvent() {
 				if (!this.profile.error) {
 					const previous = this.profile.like;
-					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
-						if (response.status == 200) {
+					this.$axios
+						.post(`/api/like/${this.profile.id}`)
+						.then((response) => {
 							this.$store.commit('profile/setLike', response.data.like);
 							if (response.data.like == 0 /* NONE */ && previous == 1 /* LIKED */) {
 								this.$store.commit('profile/updateFame', -4);
@@ -260,26 +261,27 @@
 							} else if (response.data.like == 3 /* REVERSE */ && previous == 2 /* MATCHED */) {
 								this.$store.commit('profile/updateFame', -10);
 							}
-						} else {
+						})
+						.catch(() => {
 							this.$store.commit('snackbar/SHOW', {
 								message: 'Could not update Like status.',
 								color: 'error',
 							});
-						}
-					});
+						});
 				}
 			},
 			openChat() {
-				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
-					if (response.status >= 200 && response.status <= 201) {
+				this.$axios
+					.post(`/api/chat/create/${this.id}`)
+					.then((response) => {
 						this.$router.push({ path: `/app/chat/${response.data.chat}` });
-					} else {
+					})
+					.catch(() => {
 						this.$store.commit('snackbar/SHOW', {
 							message: 'Could not create a chat with User.',
 							color: 'error',
 						});
-					}
-				});
+					});
 			},
 			async blockEvent() {
 				if (!this.profile.error) {
@@ -296,34 +298,36 @@
 					this.$store.commit('profile/setBlock', status);
 				}
 			},
-			async reportEvent() {
+			reportEvent() {
 				if (!this.profile.error) {
 					const id = this.profile.id;
 					const likeStatus = this.profile.like;
-					const response = await this.$axios.post(`/api/report/${id}`);
-					if (response.status == 200) {
-						const status = response.data.status;
-						if (status) {
-							this.$store.commit('chat/removeUserChat', id);
-							this.$store.commit('notifications/removeFromUser', id);
-							// Remove fame
-							if (likeStatus == 2) {
-								this.$store.commit('profile/updateFame', -10);
-							} else if (likeStatus == 1) {
-								this.$store.commit('profile/updateFame', -4);
+					return this.$axios
+						.post(`/api/report/${id}`)
+						.then((response) => {
+							const status = response.data.status;
+							if (status) {
+								this.$store.commit('chat/removeUserChat', id);
+								this.$store.commit('notifications/removeFromUser', id);
+								// Remove fame
+								if (likeStatus == 2) {
+									this.$store.commit('profile/updateFame', -10);
+								} else if (likeStatus == 1) {
+									this.$store.commit('profile/updateFame', -4);
+								}
 							}
-						}
-						this.$store.commit('profile/setReported', status);
-						this.$store.commit('snackbar/SHOW', {
-							message: status ? 'User Reported' : 'Report Removed',
-							color: 'success',
+							this.$store.commit('profile/setReported', status);
+							this.$store.commit('snackbar/SHOW', {
+								message: status ? 'User Reported' : 'Report Removed',
+								color: 'success',
+							});
+						})
+						.catch(() => {
+							this.$store.commit('snackbar/SHOW', {
+								message: 'Could not Report User.',
+								color: 'error',
+							});
 						});
-					} else {
-						this.$store.commit('snackbar/SHOW', {
-							message: 'Could not Report User.',
-							color: 'error',
-						});
-					}
 				}
 			},
 		},

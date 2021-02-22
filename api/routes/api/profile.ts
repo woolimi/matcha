@@ -116,7 +116,9 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 
 	// Get the profile informations
 	const profile = await User.getPublicProfile(id);
-	if (!profile) return res.status(404).json({ error: 'This Profile does not exists.' });
+	if (!profile || !profile.verified || !profile.initialized) {
+		return res.status(404).json({ error: 'This Profile does not exists.' });
+	}
 
 	// Get all other informations
 	const like = await UserLike.status(self, id);
@@ -168,6 +170,8 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 		}
 	}
 
+	delete (profile as any).verified;
+	delete (profile as any).initialized;
 	return res.json({
 		...profile,
 		online: req.app.sockets[id] != undefined ? true : profile.login ?? false,

@@ -180,8 +180,8 @@ class User extends Model {
 	static async create_fake_user(user: any): Promise<any> {
 		try {
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`) \
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true)',
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`, `initialized`) \
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true, true)',
 				[
 					user.email,
 					user.username,
@@ -225,7 +225,7 @@ class User extends Model {
 
 	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
 		const result: UserInterfaceXY[] = await User.query(
-			`SELECT id, firstName, lastName, fame, gender, preferences, biography, location, birthdate, login
+			`SELECT id, verified, initialized, firstName, lastName, fame, gender, preferences, biography, location, birthdate, login
 			FROM ${User.tname}
 			WHERE id = ? LIMIT 1`,
 			[id]
@@ -237,9 +237,15 @@ class User extends Model {
 		return null;
 	}
 
-	static async exists(id: number): Promise<boolean> {
-		const result: { id: number }[] = await User.query(`SELECT id FROM ${User.tname} WHERE id = ? LIMIT 1`, [id]);
-		if (result && result.length == 1) return true;
+	static async exists(id: number): Promise<{ id: number; verified: number; initialized: number } | false> {
+		const result: {
+			id: number;
+			verified: number;
+			initialized: number;
+		}[] = await User.query(`SELECT id, verified, initialized FROM ${User.tname} WHERE id = ? LIMIT 1`, [id]);
+		if (result && result.length == 1) {
+			return result[0];
+		}
 		return false;
 	}
 

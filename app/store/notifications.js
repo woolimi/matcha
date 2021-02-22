@@ -50,14 +50,32 @@ export const actions = {
 		});
 	},
 	markAsRead({ commit }, id) {
-		this.$axios.post(`/api/notifications/read`, { id }).then(() => {
-			commit('setAsRead', id);
-		});
+		this.$axios
+			.post(`/api/notifications/read`, { id })
+			.then(() => {
+				commit('setAsRead', id);
+			})
+			.catch(() => {
+				commit(
+					'snackbar/SHOW',
+					{ type: 'error', message: 'Could not mark notification as read.' },
+					{ root: true }
+				);
+			});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.post(`/api/notifications/read/all`).then(() => {
-			commit('setAllAsRead');
-		});
+		this.$axios
+			.post(`/api/notifications/read/all`)
+			.then(() => {
+				commit('setAllAsRead');
+			})
+			.catch(() => {
+				commit(
+					'snackbar/SHOW',
+					{ type: 'error', message: 'Could not mark all notifications as read.' },
+					{ root: true }
+				);
+			});
 	},
 	setListAsRead({ commit }, payload) {
 		commit('setListAsRead', payload.list);

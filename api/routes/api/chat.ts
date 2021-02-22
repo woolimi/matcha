@@ -46,7 +46,8 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 	const self = req.user.id as number;
 
 	// Check User
-	if (isNaN(id) || id < 1) {
+	const user = await User.exists(id);
+	if (isNaN(id) || id < 1 || !user || !user.verified || !user.initialized) {
 		return res.status(404).send({ error: 'User not found' });
 	}
 	const otherUser = await User.getSimple(id);
@@ -89,11 +90,14 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 	return res.status(created ? 201 : 200).json({ chat: chat.id });
 });
 
+// Get a chat ID from an User ID
+// Used to redirect from a notification where there is no Chat ID
 chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => {
 	const id = parseInt(req.user.id);
 
 	// Check User
-	if (isNaN(id) || id < 1) {
+	const user = await User.exists(id);
+	if (isNaN(id) || id < 1 || !user || !user.verified || !user.initialized) {
 		return res.status(404).send({ error: 'User not found' });
 	}
 
@@ -106,8 +110,6 @@ chatRouter.get('/user/:id', authToken, requireNotSelf, async (req: any, res) => 
 	return res.json(chat);
 });
 
-// Get a chat ID from an User ID
-// Used to redirect from a notification where there is no Chat ID
 chatRouter.get('/:id/:from?', authToken, async (req: any, res) => {
 	const self = parseInt(req.user.id);
 	const id = parseInt(req.params.id);

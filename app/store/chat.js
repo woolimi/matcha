@@ -110,7 +110,7 @@ export const actions = {
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios
+		return this.$axios
 			.get(`/api/chat/${id}`)
 			.then((response) => {
 				commit('setMessages', response.data);
@@ -128,10 +128,15 @@ export const actions = {
 		if (state.completed) return;
 		commit('setLoadingMore', true);
 		const from = state.messages.length == 0 ? '' : state.messages[0].id;
-		this.$axios.get(`/api/chat/${state.chat.id}/${from}`).then((response) => {
-			commit('insertMessages', response.data);
-			commit('setLoadingMore', false);
-		});
+		return this.$axios
+			.get(`/api/chat/${state.chat.id}/${from}`)
+			.then((response) => {
+				commit('insertMessages', response.data);
+				commit('setLoadingMore', false);
+			})
+			.catch(() => {
+				commit('snackbar/SHOW', { message: 'Could not load messages.', color: 'error' }, { root: true });
+			});
 	},
 	unliked({ state, commit }, userId) {
 		if (state.chat && state.chat.user.id == userId) {

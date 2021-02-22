@@ -167,8 +167,9 @@
 			},
 			unlike() {
 				const id = this.chat.id;
-				this.$axios.post(`/api/like/${this.chat.user.id}`).then(async (response) => {
-					if (response.status == 200) {
+				return this.$axios
+					.post(`/api/like/${this.chat.user.id}`)
+					.then(async (response) => {
 						this.$store.commit('chat/removeChat', id);
 						this.$store.commit('chat/leaveChat');
 						this.$router.push({ path: `/app/chat` });
@@ -176,13 +177,13 @@
 							message: 'User unliked',
 							color: 'success',
 						});
-					} else {
+					})
+					.catch(() => {
 						this.$store.commit('snackbar/SHOW', {
 							message: 'Could not Unlike User.',
 							color: 'error',
 						});
-					}
-				});
+					});
 			},
 			async block() {
 				const status = await this.$store.dispatch('blocked/toggle', this.chat.user.id);

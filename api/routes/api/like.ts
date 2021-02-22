@@ -12,7 +12,8 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id existst
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);
-	if (isNaN(id) || id < 1 || !(await User.exists(req.params.id))) {
+	const user = await User.exists(id);
+	if (isNaN(id) || id < 1 || !user || !user.verified || !user.initialized) {
 		return res.status(404).json({ error: 'Profile not found' });
 	}
 
