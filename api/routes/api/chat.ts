@@ -77,7 +77,7 @@ chatRouter.post('/create/:id', authToken, requireNotSelf, async (req: any, res) 
 	if (socket) {
 		otherUser.online = req.app.sockets[id] != undefined ? true : otherUser.login ?? false;
 		console.log('💨[socket]: send chat/addToList to ', socket.id);
-		socket.emit('chat/addToList', { ...chat, otherUser });
+		socket.emit('chat/addToList', { ...chat, user: otherUser });
 	}
 	const otherSocket = req.app.sockets[id];
 	if (otherSocket) {

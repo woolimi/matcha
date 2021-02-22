@@ -3,29 +3,13 @@ import authToken from '../../middleware/authToken';
 import requireNotSelf from '../../middleware/requireNotSelf';
 import Chat from '../../models/Chat';
 import User from '../../models/User';
-import UserBlock from '../../models/UserBlock';
 import UserLike, { UserLikeStatus } from '../../models/UserLike';
 import UserNotification from '../../models/UserNotification';
+import UserReport from '../../models/UserReport';
 
-const blockRouter = express.Router();
+const reportRouter = express.Router();
 
-blockRouter.get('/list', authToken, async (req: any, res) => {
-	const user = req.user.id as number;
-	const blocked = await UserBlock.getAll(user);
-	const userIds = Array.from(new Set(blocked.map((block) => block.blocked)));
-	const otherUsers = await User.getAllSimple(userIds);
-	res.send(
-		blocked
-			.map((block) => {
-				const otherUser = otherUsers.find((user) => user.id == block.blocked);
-				if (otherUser) return { id: block.id, at: block.at, user: otherUser };
-				return undefined;
-			})
-			.filter((n) => n !== undefined)
-	);
-});
-
-blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
+reportRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	// Check if :id exists
 	const id = parseInt(req.params.id);
 	const self = parseInt(req.user.id);
@@ -33,15 +17,16 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		return res.status(404).json({ error: 'Profile not found' });
 	}
 
-	const userBlockId = await UserBlock.status(self, id);
-	// Unblock User
-	if (userBlockId) {
-		const result = await UserBlock.remove(userBlockId);
+	const userReport = await UserReport.get(self, id);
+	// Remove report
+	if (userReport) {
+		const result = await UserReport.remove(userReport.id);
 		if (!result) {
-			return res.status(500).send({ error: 'Could not change User block state.' });
+			return res.status(500).send({ error: 'Could not remove report.' });
 		}
 
 		// Send unblocked if the other is currently looking at our profile
+		// This will trigger a refresh even if the user is also blocked
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
 			const otherUserPage = req.app.currentPage[otherSocket.id];
@@ -51,11 +36,10 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			}
 		}
 
-		return res.json({ id: userBlockId, status: false });
+		return res.json({ id: userReport.id, status: false });
 	}
-	// Block User
+	// Add report
 	else {
-		// Remove likes
 		const likeStatus = await UserLike.status(self, id);
 		if (likeStatus != UserLikeStatus.NONE) {
 			await UserLike.removeAll(self, id);
@@ -69,9 +53,9 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 				await User.updateFame(self, -4);
 			}
 		}
-		const result = await UserBlock.add(self, id);
+		const result = await UserReport.add(self, id);
 		if (!result) {
-			return res.status(500).send({ error: 'Could not change User block state.' });
+			return res.status(500).send({ error: 'Could not create report.' });
 		}
 
 		// Delete Chat
@@ -82,6 +66,7 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		await UserNotification.removeAllForUser(id, self);
 
 		// Send blocked if the other is currently looking at our profile
+		// There is no reportedBy/unreportedBy messages since they don't have a different effect from blockedBy/unblockedBy
 		const otherSocket = req.app.sockets[id];
 		if (otherSocket) {
 			const otherUserPage = req.app.currentPage[otherSocket.id];
@@ -94,9 +79,8 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 			}
 		}
 
-		const user = await User.getSimple(id);
-		return res.send({ id: result.insertId, at: new Date(), status: true, user });
+		return res.send({ id: result.insertId, at: new Date(), status: true });
 	}
 });
 
-export default blockRouter;
+export default reportRouter;

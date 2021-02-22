@@ -23,6 +23,13 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	if (status == UserLikeStatus.NONE || status == UserLikeStatus.REVERSE) {
 		await UserLike.add(self, id);
 
+		// Increase fame - 4 on like and 6 on match
+		const fameIncrease = status == UserLikeStatus.NONE ? 4 : 10;
+		await User.updateFame(id, fameIncrease);
+		if (status == UserLikeStatus.REVERSE) {
+			await User.updateFame(self, 6);
+		}
+
 		// Add notification
 		const notificationType = status == UserLikeStatus.NONE ? Notification.LikeReceived : Notification.LikeMatched;
 		const notifInsert = await UserNotification.add(id, self, notificationType);
@@ -66,8 +73,15 @@ likeRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		return res.send({ like: status == UserLikeStatus.NONE ? UserLikeStatus.ONEWAY : UserLikeStatus.TWOWAY });
 	}
 	// Remove like from self to id
+	// if (status == UserLikeStatus.ONEWAY || status == UserLikeStatus.TWOWAY)
 	else {
 		await UserLike.remove(self, id);
+
+		// Decrease fame - -4 from like and -6 from match
+		if (status == UserLikeStatus.TWOWAY) {
+			await User.updateFame(id, -10); // Remove match + like
+			await User.updateFame(self, -6); // Remove match to self
+		} else await User.updateFame(id, -4); // else Remove like to other
 
 		// Add notification
 		const notifInsert = await UserNotification.add(id, self, Notification.LikeRemoved);

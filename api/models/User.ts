@@ -8,6 +8,7 @@ import { LocationLL, LocationXY } from '../init/Interfaces';
 import UserPicture from './UserPicture';
 import UserTag from './UserTag';
 import UserLanguage from './UserLanguage';
+import { ResultSetHeader } from 'mysql2';
 
 export interface UserInterfaceBase {
 	id: number;
@@ -18,6 +19,7 @@ export interface UserInterfaceBase {
 	firstName: string;
 	verified: number;
 	initialized: number;
+	fame: number;
 	gender: ('male' | 'female') | null;
 	preferences: ('heterosexual' | 'bisexual') | null;
 	biography: string | null;
@@ -35,7 +37,16 @@ export type UserSimpleInterface = Pick<UserInterfaceBase, 'id' | 'firstName' | '
 
 export type PublicProfileInterface = Pick<
 	UserInterfaceLL,
-	'id' | 'firstName' | 'lastName' | 'gender' | 'preferences' | 'biography' | 'location' | 'birthdate' | 'login'
+	| 'id'
+	| 'firstName'
+	| 'lastName'
+	| 'fame'
+	| 'gender'
+	| 'preferences'
+	| 'biography'
+	| 'location'
+	| 'birthdate'
+	| 'login'
 >;
 
 class User extends Model {
@@ -49,6 +60,7 @@ class User extends Model {
 			lastName VARCHAR(45) NOT NULL,
 			verified TINYINT DEFAULT '0',
 			initialized TINYINT DEFAULT '0',
+			fame INT UNSIGNED DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
 			preferences ENUM('heterosexual','bisexual') DEFAULT NULL,
 			biography TEXT DEFAULT NULL,
@@ -207,9 +219,13 @@ class User extends Model {
 		}
 	}
 
+	static updateFame(id: number, amount: number): Promise<ResultSetHeader> {
+		return User.query(`UPDATE ${User.tname} SET fame = fame + ? WHERE id = ?`, [amount, id]);
+	}
+
 	static async getPublicProfile(id: number): Promise<UserInterfaceLL | null> {
 		const result: UserInterfaceXY[] = await User.query(
-			`SELECT id, firstName, lastName, gender, preferences, biography, location, birthdate, login
+			`SELECT id, firstName, lastName, fame, gender, preferences, biography, location, birthdate, login
 			FROM ${User.tname}
 			WHERE id = ? LIMIT 1`,
 			[id]

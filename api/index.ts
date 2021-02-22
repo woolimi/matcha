@@ -19,6 +19,7 @@ import { bindSocket } from './services/Socket';
 import searchRouter from './routes/api/search';
 import likeRouter from './routes/api/like';
 import blockRouter from './routes/api/block';
+import reportRouter from './routes/api/report';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -56,6 +57,7 @@ app.use('/api/tags', tagRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/like', likeRouter);
 app.use('/api/block', blockRouter);
+app.use('/api/report', reportRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/chat', chatRouter);
 

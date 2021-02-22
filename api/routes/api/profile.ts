@@ -13,6 +13,7 @@ import UserTag from '../../models/UserTag';
 import UserLanguage from '../../models/UserLanguage';
 import UserBlock from '../../models/UserBlock';
 import UserLike from '../../models/UserLike';
+import UserReport from '../../models/UserReport';
 
 const profileRouter = express.Router();
 
@@ -108,9 +109,10 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 		return res.status(404).json({ error: 'Profile not found.' });
 	}
 
-	// Check if the user is not blocked
+	// Check if the user is not blocked or reported
 	const isBlocked = await UserBlock.status(id, self);
-	if (isBlocked) return res.status(401).json({ error: "You can't view this Profile right now." });
+	const isReported = await UserReport.get(id, self);
+	if (isBlocked || isReported) return res.status(401).json({ error: "You can't view this Profile right now." });
 
 	// Get the profile informations
 	const profile = await User.getPublicProfile(id);
@@ -119,6 +121,7 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 	// Get all other informations
 	const like = await UserLike.status(self, id);
 	const blocked = await UserBlock.status(self, id);
+	const reported = await UserReport.get(self, id);
 	const images = (await UserPicture.get_images(id)).filter((i) => i.path != '');
 	const tags = await UserTag.get_tags(id);
 	const languages = await UserLanguage.get_languages(id);
@@ -127,6 +130,12 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 	const otherUsers = await User.getAllSimple(userIds);
 
 	if (id != self) {
+		// TODO: debounce last visit (notification + fame)
+
+		// Increase fame
+		await User.updateFame(id, 1);
+		profile.fame += 1;
+
 		// Add notification
 		const notifInsert = await UserNotification.add(id, self, Notification.Visit);
 		if (notifInsert) {
@@ -164,6 +173,7 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 		online: req.app.sockets[id] != undefined ? true : profile.login ?? false,
 		like,
 		blocked,
+		reported: reported != null,
 		images,
 		tags,
 		languages,
