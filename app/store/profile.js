@@ -16,8 +16,15 @@ export const mutations = {
 	setLike(state, status) {
 		state.current.like = status;
 	},
+	updateFame(state, amount) {
+		state.current.fame += amount;
+	},
 	setBlock(state, status) {
 		state.current.blocked = status;
+		if (status) state.current.like = 0;
+	},
+	setReported(state, status) {
+		state.current.reported = status;
 		if (status) state.current.like = 0;
 	},
 	userLogin(state, id) {
@@ -65,7 +72,11 @@ export const actions = {
 				commit('setLike', 3);
 			} else if (payload.type == 'like:match') {
 				commit('setLike', 2);
+				commit('updateFame', 6);
 			} else if (payload.type == 'like:removed') {
+				if (state.current.like == 2) {
+					commit('updateFame', -6);
+				}
 				commit('setLike', state.current.like == 3 ? 0 : 1);
 			}
 			commit('addNotification', payload);
