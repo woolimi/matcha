@@ -8,6 +8,7 @@ import faker from 'faker';
 import UserTag from '../models/UserTag';
 import UserLanguage from '../models/UserLanguage';
 import UserLike from '../models/UserLike';
+import UserReport from '../models/UserReport';
 
 faker.locale = 'en';
 
@@ -114,7 +115,7 @@ async function create_seed_users() {
 async function create_seed_user_likes() {
 	try {
 		const ulikes = await UserLike.query('SELECT * FROM user_likes COUNT');
-		if (ulikes.length >= 300) return;
+		if (ulikes.length >= 300) return console.log('user_likes already created');
 		let prv = 1;
 
 		for (let i = 0; i < 500; i++) {
@@ -122,6 +123,24 @@ async function create_seed_user_likes() {
 			await UserLike.query('INSERT IGNORE INTO user_likes (user, liked) VALUES (?, ?)', [prv, nxt]);
 			prv = nxt;
 		}
+		console.log('user_likes created');
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function create_seed_user_reports() {
+	try {
+		const ureports = await UserReport.query('SELECT * FROM user_reports COUNT');
+		if (ureports.length >= 5) return console.log('user_repors already created');
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 500]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 500]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 500]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 499]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 499]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 498]);
+		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 498]);
+		console.log('user_reports created');
 	} catch (error) {
 		throw error;
 	}
@@ -133,7 +152,7 @@ async function create_seed() {
 		await create_seed_tags();
 		await create_seed_users();
 		await create_seed_user_likes();
-		// await create_seed_user_reports();
+		await create_seed_user_reports();
 		await Model.query('COMMIT');
 		process.exit();
 	} catch (error) {
