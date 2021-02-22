@@ -86,7 +86,7 @@
 				<v-row v-if="profile.id != $auth.user.id">
 					<v-col cols="12" class="text-center">
 						<v-subheader><v-icon left> mdi-flash </v-icon> Actions</v-subheader>
-						<v-bottom-sheet inset v-if="!profile.blocked">
+						<v-bottom-sheet inset v-if="canInteract">
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn class="ma-2" color="success" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-map-marker</v-icon> Location
@@ -117,22 +117,31 @@
 								</gmap-map>
 							</v-card>
 						</v-bottom-sheet>
-						<v-btn dark class="ma-2" color="pink" @click="likeEvent" v-if="!profile.blocked">
-							<v-icon left>mdi-heart</v-icon> {{ like }}
+						<v-btn dark class="ma-2" color="pink" @click="likeEvent" v-if="canInteract">
+							<v-icon left>mdi-heart</v-icon> {{ likeMessage }}
 						</v-btn>
 						<v-btn
 							dark
 							class="ma-2"
 							color="primary"
 							@click="openChat"
-							v-if="profile.like == 2 && !profile.blocked"
+							v-if="canInteract && profile.like == 2"
 						>
 							<v-icon left>mdi-email</v-icon> Chat
 						</v-btn>
-						<v-btn dark class="ma-2" color="orange" @click="blockEvent">
-							<v-icon left>mdi-cancel</v-icon> {{ blocked }}
+						<v-btn
+							dark
+							class="ma-2"
+							color="orange"
+							@click="blockEvent"
+							v-if="canInteract || profile.blocked"
+						>
+							<v-icon left>mdi-cancel</v-icon> {{ blockMessage }}
 						</v-btn>
-						<v-bottom-sheet inset v-if="!profile.blocked">
+						<v-btn dark class="ma-2" color="error" @click="reportEvent">
+							<v-icon left>mdi-alert</v-icon> {{ reportMessage }}
+						</v-btn>
+						<v-bottom-sheet inset v-if="canInteract">
 							<template v-slot:activator="{ on, attrs }">
 								<v-btn dark class="ma-2" color="blue-grey" v-bind="attrs" v-on="on">
 									<v-icon left>mdi-clock-outline</v-icon> History
@@ -188,7 +197,7 @@
 			preferencesColor() {
 				return this.profile?.preferences == 'heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5';
 			},
-			like() {
+			likeMessage() {
 				switch (this.profile.like) {
 					case 0:
 						return 'Like';
@@ -200,11 +209,20 @@
 				}
 				return 'Like';
 			},
-			blocked() {
+			blockMessage() {
 				if (this.profile.blocked) {
 					return 'Unblock';
 				}
 				return 'Block';
+			},
+			reportMessage() {
+				if (this.profile.reported) {
+					return 'Remove Report';
+				}
+				return 'Report';
+			},
+			canInteract() {
+				return !this.profile.blocked && !this.profile.reported;
 			},
 			noHistoryMessage() {
 				return `No History with ${this.profile?.firstName} ${this.profile?.lastName} yet.`;
@@ -212,7 +230,7 @@
 		},
 		methods: {
 			likeEvent() {
-				if (this.profile.id) {
+				if (!this.profile.error) {
 					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
 						if (response.status == 200) {
 							this.$store.commit('profile/setLike', response.data.like);
@@ -238,9 +256,32 @@
 				});
 			},
 			async blockEvent() {
-				if (this.profile.id) {
+				if (!this.profile.error) {
 					const status = await this.$store.dispatch('blocked/toggle', this.profile.id);
 					this.$store.commit('profile/setBlock', status);
+				}
+			},
+			async reportEvent() {
+				if (!this.profile.error) {
+					const id = this.profile.id;
+					const response = await this.$axios.post(`/api/report/${id}`);
+					if (response.status == 200) {
+						const status = response.data.status;
+						if (status) {
+							this.$store.commit('chat/removeUserChat', id);
+							this.$store.commit('notifications/removeFromUser', id);
+						}
+						this.$store.commit('profile/setReported', status);
+						this.$store.commit('snackbar/SHOW', {
+							message: status ? 'User Reported' : 'Report Removed',
+							color: 'success',
+						});
+					} else {
+						this.$store.commit('snackbar/SHOW', {
+							message: 'Could not Report User.',
+							color: 'error',
+						});
+					}
 				}
 			},
 		},

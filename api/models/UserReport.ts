@@ -1,6 +1,14 @@
+import { ResultSetHeader } from 'mysql2';
 import MySQL from '../init/MySQL';
 import Model from './Model';
 import User from './User';
+
+export interface UserReportInterface {
+	id: number;
+	user: number;
+	reported: number;
+	at: string;
+}
 
 class UserReport extends Model {
 	static tname = 'user_reports';
@@ -16,6 +24,25 @@ class UserReport extends Model {
 
 	static init(): Promise<any> {
 		return Model.init(UserReport.tname, UserReport);
+	}
+
+	static async get(user: number, reported: number): Promise<UserReportInterface | undefined> {
+		const result: UserReportInterface[] = await UserReport.query(
+			`SELECT * FROM ${UserReport.tname} WHERE user = ? AND reported = ? LIMIT 1`,
+			[user, reported]
+		);
+		if (result && result.length == 1) {
+			return result[0];
+		}
+		return undefined;
+	}
+
+	static add(user: number, reported: number): Promise<ResultSetHeader> {
+		return UserReport.query(`INSERT INTO ${UserReport.tname} (user, reported) VALUES (?, ?)`, [user, reported]);
+	}
+
+	static remove(id: number): Promise<ResultSetHeader> {
+		return UserReport.query(`DELETE FROM ${UserReport.tname} WHERE id = ?`, [id]);
 	}
 }
 
