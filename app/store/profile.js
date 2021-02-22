@@ -20,6 +20,10 @@ export const mutations = {
 		state.current.blocked = status;
 		if (status) state.current.like = 0;
 	},
+	setReported(state, status) {
+		state.current.reported = status;
+		if (status) state.current.like = 0;
+	},
 	userLogin(state, id) {
 		if (state.current.id === id) {
 			state.current.online = true;
