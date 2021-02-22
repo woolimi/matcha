@@ -34,10 +34,9 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	}
 
 	const userBlockId = await UserBlock.status(self, id);
-	let result;
 	// Unblock User
 	if (userBlockId) {
-		result = await UserBlock.remove(userBlockId);
+		const result = await UserBlock.remove(userBlockId);
 		if (!result) {
 			return res.status(500).send({ error: 'Could not change User block state.' });
 		}
@@ -56,11 +55,21 @@ blockRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 	}
 	// Block User
 	else {
+		// Remove likes
 		const likeStatus = await UserLike.status(self, id);
 		if (likeStatus != UserLikeStatus.NONE) {
 			await UserLike.removeAll(self, id);
+			// Decrease fame
+			if (likeStatus == UserLikeStatus.TWOWAY) {
+				await User.updateFame(self, -10);
+				await User.updateFame(id, -10);
+			} else if (likeStatus == UserLikeStatus.ONEWAY) {
+				await User.updateFame(id, -4);
+			} else if (likeStatus == UserLikeStatus.REVERSE) {
+				await User.updateFame(self, -4);
+			}
 		}
-		result = await UserBlock.add(self, id);
+		const result = await UserBlock.add(self, id);
 		if (!result) {
 			return res.status(500).send({ error: 'Could not change User block state.' });
 		}
