@@ -71,16 +71,19 @@ async function create_seed_users() {
 			'Chinese',
 		];
 		const unique_pairs: string[] = [];
+		const unique_emails: string[] = [];
 		for (let i = 0; i < 500; i++) {
-			let lastName, firstName, username;
+			let lastName, firstName, username, email;
 			const lng = faker.random.number({ min: 2.107361, max: 2.489544, precision: 0.0001 });
 			const lat = faker.random.number({ min: 48.775862, max: 48.957325, precision: 0.0001 });
 			do {
 				lastName = faker.name.lastName(genders[i]);
 				firstName = faker.name.firstName(genders[i]);
 				username = `${lastName}.${firstName}`;
-			} while (unique_pairs.indexOf(username) >= 0);
+				email = faker.internet.email();
+			} while (unique_pairs.indexOf(username) >= 0 || unique_emails.indexOf(email) >= 0);
 			unique_pairs.push(username);
+			unique_emails.push(email);
 			const gender = i < 70 ? genderArr[genders[i]] : genderArr[get_random(0, 1)];
 			const user = {
 				email: faker.internet.email(),
@@ -106,7 +109,7 @@ async function create_seed_users() {
 			// add languages
 			await UserLanguage.add(insertId, langs[Math.floor(Math.random() * langs.length)]);
 		}
-		console.log('Fake user created');
+		console.log('Fake user seed created');
 	} catch (error) {
 		throw error;
 	}
@@ -115,7 +118,7 @@ async function create_seed_users() {
 async function create_seed_user_likes() {
 	try {
 		const ulikes = await UserLike.query('SELECT * FROM user_likes COUNT');
-		if (ulikes.length >= 300) return console.log('user_likes already created');
+		if (ulikes.length >= 300) return console.log('user_likes seed already created');
 		let prv = 1;
 
 		for (let i = 0; i < 500; i++) {
@@ -123,7 +126,7 @@ async function create_seed_user_likes() {
 			await UserLike.query('INSERT IGNORE INTO user_likes (user, liked) VALUES (?, ?)', [prv, nxt]);
 			prv = nxt;
 		}
-		console.log('user_likes created');
+		console.log('user_likes seed created');
 	} catch (error) {
 		throw error;
 	}
@@ -132,15 +135,15 @@ async function create_seed_user_likes() {
 async function create_seed_user_reports() {
 	try {
 		const ureports = await UserReport.query('SELECT * FROM user_reports COUNT');
-		if (ureports.length >= 5) return console.log('user_repors already created');
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 500]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 500]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 500]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 499]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 499]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 498]);
-		await UserLike.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 498]);
-		console.log('user_reports created');
+		if (ureports.length >= 5) return console.log('user_reports seed already created');
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 50]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 50]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 50]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 49]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [2, 49]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [3, 48]);
+		await UserReport.query('INSERT INTO user_reports (user, reported) VALUES (?, ?)', [1, 48]);
+		console.log('user_reports seed created');
 	} catch (error) {
 		throw error;
 	}
