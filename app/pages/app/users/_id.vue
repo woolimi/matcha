@@ -21,6 +21,22 @@
 				</v-card>
 			</v-col>
 			<v-col cols="12" sm="6">
+				<v-row>
+					<v-col cols="12">
+						<v-tooltip bottom>
+							<template v-slot:activator="{ on, attrs }">
+								<p
+									v-bind="attrs"
+									v-on="on"
+									class="text-h3 text-center amber--text text--lighten-2 mt-2 mb-2"
+								>
+									<v-icon left color="amber"> mdi-crown </v-icon> {{ profile.fame }}
+								</p>
+							</template>
+							Fame
+						</v-tooltip>
+					</v-col>
+				</v-row>
 				<v-row class="text-center">
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-card-account-details </v-icon> Name</v-subheader>
@@ -231,9 +247,19 @@
 		methods: {
 			likeEvent() {
 				if (!this.profile.error) {
+					const previous = this.profile.like;
 					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
 						if (response.status == 200) {
 							this.$store.commit('profile/setLike', response.data.like);
+							if (response.data.like == 0 /* NONE */ && previous == 1 /* LIKED */) {
+								this.$store.commit('profile/updateFame', -4);
+							} else if (response.data.like == 1 /* LIKED */ && previous == 0 /* NONE */) {
+								this.$store.commit('profile/updateFame', 4);
+							} else if (response.data.like == 2 /* MATCHED */ && previous == 3 /* REVERSE */) {
+								this.$store.commit('profile/updateFame', 10);
+							} else if (response.data.like == 3 /* REVERSE */ && previous == 2 /* MATCHED */) {
+								this.$store.commit('profile/updateFame', -10);
+							}
 						} else {
 							this.$store.commit('snackbar/SHOW', {
 								message: 'Could not update Like status.',
@@ -257,19 +283,35 @@
 			},
 			async blockEvent() {
 				if (!this.profile.error) {
+					const likeStatus = this.profile.like;
 					const status = await this.$store.dispatch('blocked/toggle', this.profile.id);
+					// Remove fame
+					if (status) {
+						if (likeStatus == 2) {
+							this.$store.commit('profile/updateFame', -10);
+						} else if (likeStatus == 1) {
+							this.$store.commit('profile/updateFame', -4);
+						}
+					}
 					this.$store.commit('profile/setBlock', status);
 				}
 			},
 			async reportEvent() {
 				if (!this.profile.error) {
 					const id = this.profile.id;
+					const likeStatus = this.profile.like;
 					const response = await this.$axios.post(`/api/report/${id}`);
 					if (response.status == 200) {
 						const status = response.data.status;
 						if (status) {
 							this.$store.commit('chat/removeUserChat', id);
 							this.$store.commit('notifications/removeFromUser', id);
+							// Remove fame
+							if (likeStatus == 2) {
+								this.$store.commit('profile/updateFame', -10);
+							} else if (likeStatus == 1) {
+								this.$store.commit('profile/updateFame', -4);
+							}
 						}
 						this.$store.commit('profile/setReported', status);
 						this.$store.commit('snackbar/SHOW', {

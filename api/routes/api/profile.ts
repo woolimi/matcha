@@ -130,6 +130,12 @@ profileRouter.get('/:id', authToken, async (req: any, res) => {
 	const otherUsers = await User.getAllSimple(userIds);
 
 	if (id != self) {
+		// TODO: debounce last visit (notification + fame)
+
+		// Increase fame
+		await User.updateFame(id, 1);
+		profile.fame += 1;
+
 		// Add notification
 		const notifInsert = await UserNotification.add(id, self, Notification.Visit);
 		if (notifInsert) {

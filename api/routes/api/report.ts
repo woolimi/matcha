@@ -43,6 +43,15 @@ reportRouter.post('/:id', authToken, requireNotSelf, async (req: any, res) => {
 		const likeStatus = await UserLike.status(self, id);
 		if (likeStatus != UserLikeStatus.NONE) {
 			await UserLike.removeAll(self, id);
+			// Decrease fame
+			if (likeStatus == UserLikeStatus.TWOWAY) {
+				await User.updateFame(self, -10);
+				await User.updateFame(id, -10);
+			} else if (likeStatus == UserLikeStatus.ONEWAY) {
+				await User.updateFame(id, -4);
+			} else if (likeStatus == UserLikeStatus.REVERSE) {
+				await User.updateFame(self, -4);
+			}
 		}
 		const result = await UserReport.add(self, id);
 		if (!result) {
