@@ -5,6 +5,7 @@
 <script>
 	export default {
 		auth: true,
+		middleware: 'checkVerfiedUser',
 		computed: {
 			id() {
 				return this.$route.params.id;
