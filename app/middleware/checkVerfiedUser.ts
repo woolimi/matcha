@@ -6,9 +6,9 @@ function is_verified_user(user: any): boolean {
 }
 
 export default function ({ route, redirect, $auth }: any) {
-	if (!$auth.user) return;
-	if (route.path === '/app') return redirect('/app/search');
-	if (route.path !== '/app/profile' && !is_verified_user($auth.user)) {
+	if (!$auth.loggedIn) return;
+	if (!is_verified_user($auth.user)) {
 		return redirect('/app/profile');
 	}
+	if (route.path === '/app') return redirect('/app/search');
 }
