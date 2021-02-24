@@ -31,7 +31,6 @@
 				isLandingPage: true,
 			};
 		},
-		middleware: 'appRoute',
 		mounted() {
 			if (this.$auth.loggedIn) {
 				this.$auth.refreshTokens();
