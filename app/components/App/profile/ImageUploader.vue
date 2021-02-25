@@ -1,5 +1,5 @@
 <template>
-	<div style="height: 350px; width: 100%; max-width: 250px">
+	<div style="height: 350px; width: 100%; max-width: 300px">
 		<div @click="launchFilePicker()">
 			<slot name="activator"> </slot>
 		</div>
