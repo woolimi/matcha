@@ -25,8 +25,14 @@
 						</v-card-text>
 						<v-card-actions>
 							<v-row>
-								<v-col class="text-center">
+								<v-col cols="12" class="text-center">
 									<v-btn type="submit" class="primary"> Login </v-btn>
+								</v-col>
+								<v-col cols="12">
+									<v-divider></v-divider>
+								</v-col>
+								<v-col cols="12" class="text-center">
+									<v-btn @click="googleLogin" class="warning">Login with Google</v-btn>
 								</v-col>
 							</v-row>
 						</v-card-actions>
@@ -38,6 +44,7 @@
 </template>
 
 <script>
+	import randomstring from 'randomstring';
 	export default {
 		auth: false,
 		data() {
@@ -76,6 +83,12 @@
 						});
 					}
 				}
+			},
+			googleLogin() {
+				const state = randomstring.generate();
+				const uri = this.$googleAuth.token.getUri({ state });
+				localStorage.setItem('state', state);
+				window.location = uri;
 			},
 		},
 	};

@@ -15,7 +15,7 @@
 										tile
 										height="350"
 										width="100%"
-										max-width="250"
+										max-width="300"
 										class="elevation-10 grey lighten-3 pointer"
 									>
 										<p v-if="!$auth.user.images[i].url">Click here to add photo</p>

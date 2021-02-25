@@ -27,6 +27,7 @@ export default {
 		{ src: '~/plugins/vuejs-google-maps.js', mode: 'client' },
 		'~/plugins/date.ts',
 		{ src: '~/plugins/google-maps-marker.js', mode: 'client' },
+		{ src: '~/plugins/client-oauth2.js', mode: 'client' },
 	],
 
 	// Auto import components (https://go.nuxtjs.dev/config-components)
@@ -82,7 +83,6 @@ export default {
 		redirect: {
 			login: '/',
 			logout: '/',
-			callback: '/',
 			home: '/app',
 		},
 	},

@@ -7,8 +7,8 @@ import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
 import path from 'path';
 import { send_verification_email } from '../services/Mailing';
-import geoip from 'geoip-lite';
 import { deleteRefreshToken, generateToken, setRefreshToken } from '../services/Token';
+import getLocation from '../middleware/getLocation';
 
 const authRouter = express.Router();
 
@@ -76,25 +76,37 @@ authRouter.delete('/logout', (req, res) => {
 	return res.sendStatus(200);
 });
 
-authRouter.post('/register', validator.userRegister, async (req, res) => {
-	const formData = req.body;
-	// Find location by IP if browser gps diabled
-	if (_.isEmpty(formData.location)) {
-		const ip: any = req.clientIp;
-		let ll = geoip.lookup(ip)?.ll;
-		let location = { lat: 48.8566, lng: 2.3522 }; // set paris by default
-		if (ll) location = { lat: ll[0], lng: ll[1] };
-
-		formData.location = location;
-	}
-
+authRouter.post('/register', validator.userRegister, getLocation, async (req, res) => {
 	try {
+		const formData = req.body;
 		const result = await User.register(formData);
 		await send_verification_email(formData.email, result.insertId);
 		return res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
 		return res.sendStatus(403);
+	}
+});
+
+authRouter.post('/social', getLocation, async (req, res) => {
+	try {
+		const uinfo = req.body;
+		let user_id;
+
+		if (uinfo.provider === 'google') {
+			user_id = await User.register_google(uinfo);
+		} else throw 'No provider info';
+
+		const user = await User.me(user_id);
+
+		return res.status(200).json({
+			user,
+			access_token: generateToken({ id: user.id }, 'access'),
+			refresh_token: setRefreshToken(res, { id: user.id }),
+		});
+	} catch (error) {
+		console.error(error);
+		res.sendStatus(400);
 	}
 });
 
