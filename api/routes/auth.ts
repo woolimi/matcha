@@ -19,15 +19,15 @@ authRouter.post('/login', validator.userLogin, async (req, res) => {
 		// check username
 		const queryResult = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [loginForm.username]);
 		if (!queryResult.length) {
-			console.log(`email(${loginForm.username}) not matched`);
-			return res.status(200).send({ error: 'Wrong email or password' });
+			console.log(`username(${loginForm.username}) not matched`);
+			return res.status(200).send({ error: 'Wrong username or password' });
 		}
 		// check password
 		const user = queryResult[0];
 		const isValidPassword = await bcrypt.compare(loginForm.password, user.password);
 		if (!isValidPassword) {
 			console.log(`${loginForm.username}'s password not matched`);
-			return res.status(200).send({ error: 'Wrong email or password' });
+			return res.status(200).send({ error: 'Wrong username or password' });
 		}
 		// return tokens
 		const u = _.pick(user, ['id']);
