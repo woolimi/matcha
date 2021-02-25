@@ -14,6 +14,7 @@ import UserLanguage from '../../models/UserLanguage';
 import UserBlock from '../../models/UserBlock';
 import UserLike from '../../models/UserLike';
 import UserReport from '../../models/UserReport';
+import Model from '../../models/Model';
 
 const profileRouter = express.Router();
 
@@ -54,10 +55,10 @@ profileRouter.post('/images/:user_id/:image_id', authToken, validator.userPictur
 profileRouter.post('/send-email-verification', authToken, validator.userEmailVerification, async (req: any, res) => {
 	try {
 		const data = req.body;
-
+		await Model.query('START TRANSACTION');
 		await User.query('UPDATE users SET email = ?, verified = false WHERE id = ?', [data.email, req.user.id]);
 		await send_verification_email(data.email, req.user.id);
-
+		await Model.query('COMMIT');
 		res.json({
 			message: 'Email has been sent successfully.',
 			email: data.email,
@@ -65,7 +66,8 @@ profileRouter.post('/send-email-verification', authToken, validator.userEmailVer
 		});
 	} catch (error) {
 		console.error(error);
-		res.sendStatus(500);
+		await Model.query('ROLLBACK');
+		res.sendStatus(400);
 	}
 });
 
