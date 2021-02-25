@@ -9,7 +9,9 @@
 		layout: 'empty',
 		auth: false,
 		async mounted() {
-			if (this.$auth.loggedIn) window.location.replace('/');
+			if (this.$route.fullPath === '/callback') return this.$router.replace('/');
+			if (this.$auth.loggedIn) return this.$router.replace('/');
+
 			let location = localStorage.getItem('location');
 			try {
 				location = JSON.parse(location);
@@ -44,10 +46,17 @@
 				};
 				const { data } = await this.$axios.post('/auth/social', form);
 				this.$auth.setUserToken(data.access_token, data.refresh_token);
-				window.locaion.replace('/');
+				this.$notifier.showMessage({
+					message: 'Login sucess',
+					color: 'success',
+				});
+				return this.$router.replace('/');
 			} catch (error) {
-				console.log(error);
-				window.location.replace('/');
+				this.$notifier.showMessage({
+					message: 'Server error',
+					color: 'error',
+				});
+				return this.$router.replace('/');
 			}
 		},
 	};

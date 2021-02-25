@@ -72,6 +72,10 @@
 							color: 'error',
 						});
 					}
+					this.$notifier.showMessage({
+						message: 'Login sucess',
+						color: 'success',
+					});
 				} catch (e) {
 					if (e.error) {
 						this.error = e.error;
