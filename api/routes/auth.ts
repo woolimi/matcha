@@ -9,6 +9,7 @@ import path from 'path';
 import { send_verification_email } from '../services/Mailing';
 import { deleteRefreshToken, generateToken, setRefreshToken } from '../services/Token';
 import getLocation from '../middleware/getLocation';
+import Model from '../models/Model';
 
 const authRouter = express.Router();
 
@@ -79,11 +80,14 @@ authRouter.delete('/logout', (req, res) => {
 authRouter.post('/register', validator.userRegister, getLocation, async (req, res) => {
 	try {
 		const formData = req.body;
+		await Model.query('START TRANSACTION');
 		const result = await User.register(formData);
 		await send_verification_email(formData.email, result.insertId);
+		await Model.query('COMMIT');
 		return res.sendStatus(201);
 	} catch (error) {
 		console.error(error);
+		await Model.query('ROLLBACK');
 		return res.sendStatus(403);
 	}
 });
