@@ -10,7 +10,7 @@
 		auth: false,
 		async mounted() {
 			if (this.$route.fullPath === '/callback') return this.$router.replace('/');
-			if (this.$auth.loggedIn) return this.$router.replace('/');
+			if (this.$auth.loggedIn) return this.$router.replace('/app');
 
 			let location = localStorage.getItem('location');
 			try {
@@ -53,7 +53,7 @@
 				return this.$router.replace('/');
 			} catch (error) {
 				this.$notifier.showMessage({
-					message: 'Server error',
+					message: 'Error',
 					color: 'error',
 				});
 				return this.$router.replace('/');
