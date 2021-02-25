@@ -6,8 +6,12 @@ export interface RegisterForm {
 	firstName: string;
 	lastName: string;
 	password: string;
-	vpassword: string;
+	vpassword?: string;
 	location: LocationLL;
+	provider?: string;
+	provider_id?: string;
+	verified?: boolean;
+	picture?: string;
 }
 
 export interface LoginForm {

@@ -4,7 +4,7 @@
 			<HomeNav app />
 			<div class="align-center justify-center d-flex flex-column landing">
 				<h1 class="white--text">Find your Love</h1>
-				<v-dialog v-model="show" max-width="400px">
+				<v-dialog v-model="show" max-width="500px">
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn v-bind="attrs" v-on="on" color="primary">Create an Account</v-btn>
 					</template>
@@ -36,6 +36,15 @@
 				this.$auth.refreshTokens();
 			}
 			this.isLandingPage = this.$route.path == '/';
+			navigator.geolocation.getCurrentPosition(({ coords }) => {
+				localStorage.setItem(
+					'location',
+					JSON.stringify({
+						lat: coords.latitude,
+						lng: coords.longitude,
+					})
+				);
+			});
 		},
 		watch: {
 			$route(to, _from) {

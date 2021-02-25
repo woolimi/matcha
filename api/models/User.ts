@@ -67,6 +67,8 @@ class User extends Model {
 			location POINT SRID 4326 NOT NULL,
 			birthdate DATETIME DEFAULT NULL,
 			login DATETIME DEFAULT NULL,
+			provider VARCHAR(10) DEFAULT 'local',
+			provider_id VARCHAR(255) DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
@@ -148,11 +150,54 @@ class User extends Model {
 			data.password = await bcrypt.hash(formData.password, 10);
 			const xy = ll2xy(data.location);
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `verified`, `location`) \
+				'INSERT INTO `users` (`email`, `username`, `password`, `firstName`, `lastName`, `verified`, `location`) \
 				VALUES (?, ?, ?, ?, ?, false, ST_SRID(POINT(?, ?), 4326))',
 				[data.email, data.username, data.password, data.firstName, data.lastName, xy.x, xy.y]
 			);
 		} catch (error) {
+			throw error;
+		}
+	}
+
+	static async register_google(formData: RegisterForm): Promise<number> {
+		try {
+			const data = { ...formData };
+			const user = await User.query('SELECT * FROM users WHERE provider = ? AND provider_id = ? LIMIT 1', [
+				data.provider,
+				data.provider_id,
+			]);
+			if (user.length === 1) return user[0].id;
+			data.password = await bcrypt.hash(formData.password, 10);
+			const xy = ll2xy(data.location);
+			console.log(xy, data);
+			await Model.query(`START TRANSACTION`);
+			const {
+				insertId,
+			} = await User.query(
+				'INSERT INTO `users` (`email`, `username`, `password`,`firstName`, `lastName`,  `verified`, `location`, `provider`, `provider_id`) \
+					VALUES (?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), ?, ?)',
+				[
+					data.email,
+					data.username,
+					data.password,
+					data.firstName,
+					data.lastName,
+					data.verified,
+					xy.x,
+					xy.y,
+					data.provider,
+					data.provider_id,
+				]
+			);
+			await UserPicture.query('INSERT INTO `user_pictures` (`user`, `picture`, `path`) VALUES (?, ?, ?)', [
+				insertId,
+				0,
+				data.picture,
+			]);
+			await Model.query('COMMIT');
+			return insertId;
+		} catch (error) {
+			await Model.query('ROLLBACK');
 			throw error;
 		}
 	}

@@ -55,9 +55,10 @@
 								prepend-inner-icon="mdi-lock"
 							/>
 						</v-card-text>
-						<v-card-actions>
-							<v-spacer />
+						<v-card-actions class="d-flex justify-space-between">
 							<v-btn type="submit" class="primary"> submit </v-btn>
+							<div>OR</div>
+							<v-btn @click="googleLogin" class="warning">Sign up with Google</v-btn>
 						</v-card-actions>
 					</v-form>
 				</v-card>
@@ -68,6 +69,7 @@
 
 <script>
 	import _ from 'lodash';
+	import randomstring from 'randomstring';
 
 	export default {
 		auth: false,
@@ -80,7 +82,6 @@
 					lastName: '',
 					password: '',
 					vpassword: '',
-					location: {},
 				},
 				error: {
 					email: '',
@@ -92,21 +93,16 @@
 				},
 			};
 		},
-		mounted() {
-			navigator.geolocation.getCurrentPosition(({ coords }) => {
-				this.user.location = {
-					lat: coords.latitude,
-					lng: coords.longitude,
-				};
-			});
-		},
 		methods: {
 			async userRegister() {
 				try {
 					const validated = await this.$validator.userRegister(this.user);
 					if (!_.isEmpty(validated.error)) throw { error: validated.error };
 
-					const { data, status } = await this.$axios.post('/auth/register', this.user);
+					const { data, status } = await this.$axios.post('/auth/register', {
+						...this.user,
+						location: JSON.parse(localStorage.getItem('location')),
+					});
 					if (data.error) throw { error: data.error };
 					if (status === 201) {
 						this.$notifier.showMessage({
@@ -127,6 +123,12 @@
 						});
 					}
 				}
+			},
+			googleLogin() {
+				const state = randomstring.generate();
+				const uri = this.$googleAuth.token.getUri({ state });
+				localStorage.setItem('state', state);
+				window.location = uri;
 			},
 		},
 	};
