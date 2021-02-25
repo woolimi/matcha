@@ -67,12 +67,12 @@
 
 					const { data } = await this.$auth.loginWith('cookie', { data: this.user });
 					if (data.error) {
-						this.$notifier.showMessage({
+						return this.$notifier.showMessage({
 							message: data.error,
 							color: 'error',
 						});
 					}
-					this.$notifier.showMessage({
+					return this.$notifier.showMessage({
 						message: 'Login sucess',
 						color: 'success',
 					});
@@ -80,7 +80,6 @@
 					if (e.error) {
 						this.error = e.error;
 					} else {
-						console.error(e);
 						this.$notifier.showMessage({
 							message: 'Server error',
 							color: 'error',
