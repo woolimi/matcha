@@ -16,10 +16,15 @@
 
 <script>
 	export default {
-		data() {
-			return {
-				loginModal: false,
-			};
+		computed: {
+			loginModal: {
+				get() {
+					return this.$store.state.login.show;
+				},
+				set(val) {
+					this.$store.commit('login/SET', val);
+				},
+			},
 		},
 	};
 </script>

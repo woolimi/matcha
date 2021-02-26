@@ -4,38 +4,61 @@
 			<v-col class="d-flex align-center justify-center pa-0">
 				<v-card elevation="2" width="600px" class="pa-6">
 					<v-form @submit.prevent="userLogin">
-						<v-card-title> Login </v-card-title>
-						<v-card-text>
-							<v-text-field
-								label="Username"
-								v-model="user.username"
-								type="text"
-								required
-								prepend-inner-icon="mdi-account"
-								:error-messages="error.username"
-							/>
-							<v-text-field
-								label="Password"
-								v-model="user.password"
-								type="password"
-								required
-								prepend-inner-icon="mdi-lock"
-								:error-messages="error.password"
-							/>
-						</v-card-text>
-						<v-card-actions>
-							<v-row>
-								<v-col cols="12" class="text-center">
-									<v-btn type="submit" class="primary"> Login </v-btn>
-								</v-col>
-								<v-col cols="12">
-									<v-divider></v-divider>
-								</v-col>
-								<v-col cols="12" class="text-center">
-									<v-btn @click="googleLogin" class="warning">Login with Google</v-btn>
-								</v-col>
-							</v-row>
-						</v-card-actions>
+						<transition name="slide">
+							<div v-if="forgot_pw" key="forgot">
+								<v-card-title> Reset password </v-card-title>
+								<v-card-text>
+									<v-text-field
+										label="Username"
+										v-model="user.username"
+										type="text"
+										required
+										prepend-inner-icon="mdi-account"
+										:error-messages="error.username"
+									/>
+								</v-card-text>
+								<div class="pa-1 d-flex justify-space-between">
+									<a @click="forgot_pw = !forgot_pw">Back to login</a>
+									<v-btn @click="resetPassword">Reset password</v-btn>
+								</div>
+							</div>
+							<div v-else key="login">
+								<v-card-title> Login </v-card-title>
+								<v-card-text>
+									<v-text-field
+										label="Username"
+										v-model="user.username"
+										type="text"
+										required
+										prepend-inner-icon="mdi-account"
+										:error-messages="error.username"
+									/>
+									<v-text-field
+										label="Password"
+										v-model="user.password"
+										type="password"
+										required
+										prepend-inner-icon="mdi-lock"
+										:error-messages="error.password"
+									/>
+								</v-card-text>
+								<v-row>
+									<v-col cols="12" class="ma-0 pt-0 d-flex justify-center">
+										<a @click="forgot_pw = !forgot_pw">Forgot password?</a>
+									</v-col>
+								</v-row>
+								<v-card-actions>
+									<v-row>
+										<v-col cols="12">
+											<div class="d-flex justify-space-between">
+												<v-btn type="submit" class="primary"> Login </v-btn>
+												<v-btn @click="googleLogin" class="warning">Login with Google</v-btn>
+											</div>
+										</v-col>
+									</v-row>
+								</v-card-actions>
+							</div>
+						</transition>
 					</v-form>
 				</v-card>
 			</v-col>
@@ -57,6 +80,7 @@
 					username: '',
 					password: '',
 				},
+				forgot_pw: false,
 			};
 		},
 		methods: {
@@ -93,6 +117,33 @@
 				localStorage.setItem('state', state);
 				window.location = uri;
 			},
+			async resetPassword() {
+				try {
+					const { data } = await this.$axios.post('/auth/reset-password', {
+						username: this.user.username,
+					});
+					if (data.error) throw data;
+
+					this.$notifier.showMessage({
+						message: data.message,
+						color: 'success',
+					});
+					this.$store.commit('login/CLOSE');
+				} catch (e) {
+					if (e.error) {
+						this.$notifier.showMessage({
+							message: e.error,
+							color: 'error',
+						});
+					} else {
+						this.$notifier.showMessage({
+							message: 'Error',
+							color: 'error',
+						});
+						console.log(e);
+					}
+				}
+			},
 		},
 	};
 </script>
@@ -100,5 +151,20 @@
 <style scoped>
 	form {
 		overflow: hidden;
+	}
+	.slide-enter-active {
+		transition: all 0.2s ease;
+	}
+	.slide-leave-active {
+		transition: all 0.2s ease;
+	}
+	.slide-enter {
+		transform: translateX(-300px);
+	}
+	.slide-leave {
+		display: none;
+	}
+	.slide-leave-to {
+		display: none;
 	}
 </style>
