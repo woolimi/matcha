@@ -2,14 +2,15 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
-import _ from 'lodash';
+import _, { random } from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
 import path from 'path';
-import { send_verification_email } from '../services/Mailing';
+import { send_verification_email, send_reset_password_email } from '../services/Mailing';
 import { deleteRefreshToken, generateToken, setRefreshToken } from '../services/Token';
 import getLocation from '../middleware/getLocation';
 import Model from '../models/Model';
+import randomstring from 'randomstring';
 
 const authRouter = express.Router();
 
@@ -89,6 +90,32 @@ authRouter.post('/register', validator.userRegister, getLocation, async (req, re
 		console.error(error);
 		await Model.query('ROLLBACK');
 		return res.sendStatus(403);
+	}
+});
+
+authRouter.post('/reset-password', async (req, res) => {
+	const data = req.body;
+	try {
+		const result = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [data.username]);
+		console.log(data);
+		if (!result.length) throw { error: 'Invalid username' };
+
+		const email = result[0].email;
+		const new_password = randomstring.generate(10);
+		const hashed_new_password = await bcrypt.hash(new_password, 10);
+		await Model.query('START TRANSACTION');
+		await User.query('UPDATE users SET password = ? WHERE id = ? LIMIT 1', [hashed_new_password, result[0].id]);
+
+		await send_reset_password_email(email, new_password);
+		await Model.query('COMMIT');
+
+		return res.status(200).json({ message: 'Successfully sent email with new password. Please check your email' });
+	} catch (e) {
+		console.log(e);
+		await Model.query('ROLLBACK');
+		if (e.error) {
+			res.json({ error: e });
+		} else res.sendStatus(400);
 	}
 });
 
