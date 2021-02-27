@@ -86,7 +86,7 @@ async function create_seed_users() {
 			unique_emails.push(email);
 			const gender = i < 70 ? genderArr[genders[i]] : genderArr[get_random(0, 1)];
 			const user = {
-				email: faker.internet.email(),
+				email,
 				username,
 				password,
 				lastName,

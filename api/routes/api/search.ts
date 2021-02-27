@@ -1,7 +1,6 @@
 import express from 'express';
 import authToken from '../../middleware/authToken';
 import User from '../../models/User';
-import { xy2ll } from '../../services/Location';
 import validator from '../../middleware/validator';
 import { SearchQuery } from '../../init/Interfaces';
 

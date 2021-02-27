@@ -123,20 +123,84 @@ class User extends Model {
 					user_id,
 				]
 			);
-			// tag
-			for (const tag of formData.tags) {
-				await conn.query('INSERT IGNORE INTO tags (`name`) VALUES (?)', [tag]);
+
+			/*
+			 ** TAG
+			 */
+			let [current_user_tags]: [
+				any[],
+				any
+			] = await conn.query(
+				`SELECT user_tags.tag, tags.name FROM user_tags INNER JOIN tags ON user_tags.tag = tags.id WHERE user_tags.user = ?`,
+				[user_id]
+			);
+			let [all_tags]: [any[], any] = await conn.query(`SELECT name FROM tags`);
+
+			const goal_user_tags_names = formData.tags;
+			const all_tags_names = all_tags.map((t) => t.name);
+			const current_user_tags_names = current_user_tags.map((ut) => ut.name);
+
+			const insert_tags_names = _.difference(goal_user_tags_names, all_tags_names);
+			const insert_user_tags_names = _.difference(goal_user_tags_names, current_user_tags_names);
+			const delete_user_tags_names = _.difference(current_user_tags_names, goal_user_tags_names);
+
+			// 1. delete unused user_tags
+			if (delete_user_tags_names.length) {
+				const len = delete_user_tags_names.length;
+				await conn.query(
+					`DELETE user_tags
+						FROM user_tags
+						INNER JOIN tags
+						ON user_tags.tag = tags.id
+						WHERE tags.name IN (${new Array(len).fill('?').join(',')})`,
+					delete_user_tags_names
+				);
 			}
-			await conn.query('DELETE FROM user_tags WHERE user = ?', user_id);
-			for (const tag of formData.tags) {
-				const [rows, fields]: [any, any] = await conn.query('SELECT * FROM tags WHERE name = ? LIMIT 1', [tag]);
-				await conn.query('INSERT INTO user_tags (`user`, `tag`) VALUES (?, ?)', [user_id, rows[0].id]);
+
+			// 2. insert new tag
+			if (insert_tags_names.length) {
+				const len = insert_tags_names.length;
+				await conn.query(
+					`INSERT INTO tags (\`name\`) VALUES ${new Array(len).fill('(?)').join(',')}`,
+					insert_tags_names
+				);
 			}
-			// language
-			await conn.query('DELETE FROM user_languages WHERE user = ?', user_id);
-			for (const lang of formData.languages) {
-				await conn.query('INSERT INTO user_languages (`user`, `language`) VALUES (?, ?)', [user_id, lang]);
+
+			// 3. insert user tags
+			for (const tname of insert_user_tags_names) {
+				const [row]: [any[], any] = await conn.query(`SELECT id FROM tags WHERE name = ? LIMIT 1`, [tname]);
+				await conn.query(`INSERT INTO user_tags (\`user\`, \`tag\`) VALUES (?, ?)`, [user_id, row[0].id]);
 			}
+
+			/*
+			 ** LANGUAGE
+			 */
+			let [current_user_langs]: [
+				any[],
+				any
+			] = await conn.query(`SELECT language FROM user_languages WHERE user = ?`, [user_id]);
+			const current_user_lang_names = current_user_langs.map((ul) => ul.language);
+			const goal_user_lang_names = formData.languages;
+			const insert_user_lang_names = _.difference(goal_user_lang_names, current_user_lang_names);
+			const delete_user_lang_names = _.difference(current_user_lang_names, goal_user_lang_names);
+
+			if (delete_user_lang_names.length) {
+				const len = delete_user_lang_names.length;
+				await conn.query(
+					`DELETE FROM user_languages WHERE language IN (${new Array(len).fill('?').join(',')})`,
+					delete_user_lang_names
+				);
+			}
+
+			if (insert_user_lang_names.length) {
+				const len = insert_user_lang_names.length;
+				await conn.query(
+					'INSERT INTO user_languages (`user`, `language`) VALUES ' +
+						new Array(len).fill('(?, ?)').join(', '),
+					insert_user_lang_names.map((n) => [user_id, n]).reduce((a, b) => [...a, ...b])
+				);
+			}
+
 			await conn.query('COMMIT');
 			await conn.release();
 		} catch (error) {
