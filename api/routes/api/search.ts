@@ -12,7 +12,7 @@ searchRouter.get('/', authToken, validator.searchQuery, async (req: any, res) =>
 	try {
 		const query: SearchQuery = req.query;
 		const users = await User.search(req.user.id, query);
-		return res.json({ users: users.map((u: any) => ({ ...u, location: xy2ll(u.location) })) });
+		return res.json({ users });
 	} catch (error) {
 		console.error(error);
 		res.sendStatus(400);
