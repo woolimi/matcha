@@ -67,23 +67,23 @@ export function bindSocket(app: Express, io: Server) {
 			console.log('💨[socket]: disconnected', socket.id);
 
 			const userId = app.users[socket.id];
-			const lastLogin = new Date();
-			await User.updateLastLogin(userId);
-			sendStatusChange(Status.Logout, app, userId);
-			for (const socketId of Object.keys(app.currentPage)) {
-				if (
-					app.currentPage[socketId].name == 'app-users-id' &&
-					parseInt(app.currentPage[socketId].params?.id ?? '') == userId
-				) {
-					const otherUser = app.users[socketId];
-					if (!otherUser) continue;
-					const otherSocket = app.sockets[otherUser];
-					if (!otherSocket) continue;
-					otherSocket.emit('userLogout', { user: userId });
+			if (userId) {
+				await User.updateLastLogin(userId);
+				sendStatusChange(Status.Logout, app, userId);
+				for (const socketId of Object.keys(app.currentPage)) {
+					if (
+						app.currentPage[socketId].name == 'app-users-id' &&
+						parseInt(app.currentPage[socketId].params?.id ?? '') == userId
+					) {
+						const otherUser = app.users[socketId];
+						if (!otherUser) continue;
+						const otherSocket = app.sockets[otherUser];
+						if (!otherSocket) continue;
+						otherSocket.emit('userLogout', { user: userId });
+					}
 				}
+				delete app.sockets[userId];
 			}
-
-			delete app.sockets[userId];
 			delete app.users[socket.id];
 			delete app.currentPage[socket.id];
 		});
