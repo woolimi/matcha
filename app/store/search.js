@@ -1,13 +1,13 @@
 export const state = () => ({
 	age: [18, 30],
 	distance: 50,
-	likes: [0, 5],
+	fame: [0, 30],
 	tags: {
 		selected: [],
 		items: [],
 	},
 	mode: 'image' /* image or map mode*/,
-	sort: 'distance_cursor' /* distance_cursor, age_cursor, likes_cursor, tag_cursor */,
+	sort: 'distance_cursor' /* distance_cursor, age_cursor, fame_cursor, tag_cursor */,
 	sort_dir: 'ASC' /* ASC, DESC */,
 	cursor: '',
 	no_more_data: false,
@@ -21,8 +21,8 @@ export const mutations = {
 	SET_DISTANCE: (state, payload) => {
 		state.distance = payload;
 	},
-	SET_LIKES: (state, payload) => {
-		state.likes = payload;
+	SET_FAME: (state, payload) => {
+		state.fame = payload;
 	},
 	SET_TAGS_SELECTED: (state, payload) => {
 		state.tags.selected = payload;
@@ -58,19 +58,20 @@ export const mutations = {
 export const actions = {
 	async updateResult({ commit, state, rootState }, scroll) {
 		try {
-			let { age, distance, likes, tags, sort, sort_dir } = state;
+			let { age, distance, fame, tags, sort, sort_dir, mode } = state;
 			if (tags.selected.length === 0 && sort === 'tag_cursor') return;
 			if (scroll && state.no_more_data) return;
 			const params = {
 				age,
 				distance,
-				likes,
+				fame,
 				tags: tags.selected,
 				sort,
 				sort_dir,
 				languages: rootState.auth.user.languages,
 				scroll: !!scroll,
 				cursor: state.cursor,
+				mode,
 			};
 			const { data } = await this.$axios.get('/api/search', {
 				params,

@@ -237,10 +237,11 @@ export default {
 	},
 	searchQuery(req: any, res: any, next: NextFunction) {
 		const bef_query: BeforeParsedSearchQuery = req.query;
+		console.log(bef_query);
 		const query: SearchQuery = {
 			...bef_query,
 			age: bef_query.age.map((s) => parseInt(s)),
-			likes: bef_query.likes.map((s) => parseInt(s)),
+			fame: bef_query.fame.map((s) => parseInt(s)),
 			distance: parseInt(bef_query.distance),
 			scroll: bef_query.scroll === 'true' ? true : false,
 		};
@@ -249,13 +250,14 @@ export default {
 			!fieldsChecker(query, [
 				'age',
 				'distance',
-				'likes',
+				'fame',
 				'tags',
 				'sort',
 				'sort_dir',
 				'languages',
 				'scroll',
 				'cursor',
+				'mode',
 			])
 		)
 			return res.sendStatus(400);
@@ -263,14 +265,15 @@ export default {
 		if (!query) return res.sendStatus(400);
 		if (query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
 		if (query.distance < 0) return res.sendStatus(400);
-		if (query.likes.length !== 2 || query.likes[0] < 0) return res.sendStatus(400);
+		if (query.fame.length !== 2 || query.fame[0] < 0) return res.sendStatus(400);
 		if (query.tags.length > 10) return res.sendStatus(400);
 		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
 		if (query.languages.length === 0) return res.sendStatus(400);
+		if (query.mode !== 'map' && query.mode !== 'image') return res.sendStatus(400);
 
 		if (query.age[1] >= 50) query.age[1] = Number.MAX_SAFE_INTEGER;
 		if (query.distance >= 100) query.distance = Number.MAX_SAFE_INTEGER;
-		if (query.likes[1] >= 10) query.likes[1] = Number.MAX_SAFE_INTEGER;
+		if (query.fame[1] >= 50) query.fame[1] = Number.MAX_SAFE_INTEGER;
 
 		req.query = query;
 		next();

@@ -3,8 +3,8 @@
 		<v-card-title
 			>{{ this.$auth.user.username }}
 			<span class="ml-1">
-				<v-icon color="red">mdi-heart</v-icon>
-				<span class="text-caption move-left">{{ 0 }}</span>
+				<v-icon color="amber">mdi-crown</v-icon>
+				<span class="text-caption move-left">{{ this.$auth.user.fame }}</span>
 			</span>
 		</v-card-title>
 		<v-card-text>
