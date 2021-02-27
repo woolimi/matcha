@@ -15,8 +15,8 @@
 										</div>
 										<div class="white--text font-weight-black d-flex justify-space-between">
 											<div class="d-block">
-												<v-icon color="primary">mdi-heart</v-icon>
-												{{ user.likes }}
+												<v-icon color="amber">mdi-crown</v-icon>
+												{{ user.fame }}
 											</div>
 											<div class="text-shadow">{{ user.distance }}km</div>
 										</div>

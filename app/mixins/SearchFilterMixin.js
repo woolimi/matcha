@@ -16,12 +16,12 @@ export default {
 				this.$store.commit('search/SET_DISTANCE', val);
 			},
 		},
-		likes: {
+		fame: {
 			get() {
-				return this.$store.state.search.likes;
+				return this.$store.state.search.fame;
 			},
 			set(val) {
-				this.$store.commit('search/SET_LIKES', val);
+				this.$store.commit('search/SET_FAME', val);
 			},
 		},
 	},

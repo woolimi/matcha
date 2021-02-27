@@ -18,9 +18,9 @@
 					</span>
 				</v-col>
 				<v-col cols="3" class="text--secondary d-flex align-center">
-					<v-icon small>mdi-heart</v-icon>
-					<span v-if="likes[1] < 10" class="d-flex align-center">{{ likes[0] }} ~ {{ likes[1] }}</span>
-					<span v-else class="d-flex align-center">{{ likes[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
+					<v-icon small>mdi-crown</v-icon>
+					<span v-if="fame[1] <= 50" class="d-flex align-center">{{ fame[0] }} ~ {{ fame[1] }}</span>
+					<span v-else class="d-flex align-center">{{ fame[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-col>
 			</v-row>
 		</v-expansion-panel-header>
@@ -35,9 +35,9 @@
 					<div style="width: 60px">Distance</div>
 				</template>
 			</v-slider>
-			<v-range-slider dense v-model="likes" min="0" max="10" track-color="grey">
+			<v-range-slider dense v-model="fame" step="5" min="0" max="50" track-color="grey">
 				<template v-slot:label>
-					<div style="width: 60px">Likes</div>
+					<div style="width: 60px">Fame</div>
 				</template>
 			</v-range-slider>
 		</v-expansion-panel-content>
@@ -59,7 +59,7 @@
 				if (!this.$vuetify.breakpoint.smAndDown) return;
 				this.$store.dispatch('search/updateResult');
 			},
-			likes(newData, oldData) {
+			fame(newData, oldData) {
 				if (_.isEqual(newData, oldData)) return;
 				if (!this.$vuetify.breakpoint.smAndDown) return;
 				this.$store.dispatch('search/updateResult');

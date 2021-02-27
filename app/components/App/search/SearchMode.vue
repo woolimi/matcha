@@ -7,9 +7,9 @@
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
-			<v-btn value="likes_cursor" @click="sorting">
-				<v-icon>mdi-heart</v-icon>
-				<v-icon v-show="sort === 'likes_cursor'">
+			<v-btn value="fame_cursor" @click="sorting">
+				<v-icon>mdi-crown</v-icon>
+				<v-icon v-show="sort === 'fame_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
