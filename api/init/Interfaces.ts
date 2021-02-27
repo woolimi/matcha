@@ -49,23 +49,25 @@ export interface LocationXY {
 export interface BeforeParsedSearchQuery {
 	age: string[];
 	distance: string;
-	likes: string[];
+	fame: string[];
 	tags: string[];
 	sort: string;
 	sort_dir: string;
 	languages: string[];
 	scroll: string;
 	cursor: string;
+	mode: string;
 }
 
 export interface SearchQuery {
 	age: number[];
 	distance: number;
-	likes: number[];
+	fame: number[];
 	tags: string[];
 	sort: string;
 	sort_dir: string;
 	languages: string[];
 	scroll: boolean;
 	cursor: string;
+	mode: string;
 }

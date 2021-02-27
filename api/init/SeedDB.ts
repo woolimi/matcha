@@ -97,6 +97,7 @@ async function create_seed_users() {
 				birthdate: faker.date.between(new Date(String(current_year - 50)), new Date(String(current_year - 18))),
 				lng,
 				lat,
+				fame: get_random(0, 100),
 			};
 			const { insertId } = await User.create_fake_user(user);
 			const randomTagId = Math.floor(Math.random() * tags.length);
@@ -154,8 +155,8 @@ async function create_seed() {
 		await Model.query('START TRANSACTION');
 		await create_seed_tags();
 		await create_seed_users();
-		await create_seed_user_likes();
-		await create_seed_user_reports();
+		// await create_seed_user_likes();
+		// await create_seed_user_reports();
 		await Model.query('COMMIT');
 		process.exit();
 	} catch (error) {

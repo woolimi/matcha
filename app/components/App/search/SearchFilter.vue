@@ -21,12 +21,12 @@
 				<v-slider dense v-model.lazy="distance" ticks step="5" min="0" max="100" track-color="grey"></v-slider>
 
 				<v-subheader class="pa-0 h-init">
-					<span class="font-weight-bold"> Likes </span>
+					<span class="font-weight-bold"> Fame </span>
 					<v-spacer></v-spacer>
-					<span v-if="likes[1] < 10">{{ likes[0] }} ~ {{ likes[1] }}</span>
-					<span v-else>{{ likes[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
+					<span v-if="fame[1] <= 50">{{ fame[0] }} ~ {{ fame[1] }}</span>
+					<span v-else>{{ fame[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-subheader>
-				<v-range-slider dense v-model.lazy="likes" min="0" max="10" track-color="grey"></v-range-slider>
+				<v-range-slider dense v-model.lazy="fame" step="5" min="0" max="50" track-color="grey"></v-range-slider>
 			</v-card-text>
 		</v-card>
 	</v-container>
@@ -49,7 +49,7 @@
 				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');
 			},
-			likes(newData, oldData) {
+			fame(newData, oldData) {
 				if (_.isEqual(newData, oldData)) return;
 				if (!this.$vuetify.breakpoint.mdAndUp) return;
 				this.$store.dispatch('search/updateResult');

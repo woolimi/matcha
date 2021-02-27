@@ -99,6 +99,7 @@ class User extends Model {
 				'biography',
 				'languages',
 				'birthdate',
+				'fame',
 			]);
 		} catch (error) {
 			throw error;
@@ -226,8 +227,8 @@ class User extends Model {
 	static async create_fake_user(user: any): Promise<any> {
 		try {
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`) \
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true)',
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`, `fame`) \
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true, ?)',
 				[
 					user.email,
 					user.username,
@@ -240,6 +241,7 @@ class User extends Model {
 					user.birthdate,
 					user.lng,
 					user.lat,
+					user.fame,
 				]
 			);
 		} catch (error) {
@@ -341,20 +343,14 @@ class User extends Model {
 
 	static common_select_query() {
 		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location,
-		uinfo.age, ROUND(uinfo.distance) AS distance, IFNULL(ulikes.nb_likes, 0) AS likes, upictures.path AS image,
+		uinfo.age, ROUND(uinfo.distance) AS distance, fame, upictures.path AS image,
 		CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
-		CONCAT(LPAD(IFNULL(ulikes.nb_likes, 0), 5, '0'), LPAD(users.id, 5, '0')) AS likes_cursor,
+		CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
 		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor`;
 	}
 
 	static common_join_query(languages: string[]) {
 		return `
-			LEFT JOIN (
-				SELECT liked, COUNT(user_likes.liked) AS nb_likes
-				FROM user_likes
-				GROUP BY liked
-			) AS ulikes
-			ON users.id = ulikes.liked
 			INNER JOIN (
 				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age
 				FROM users
@@ -379,8 +375,8 @@ class User extends Model {
 		let s = '';
 		if (sort === 'distance_cursor') {
 			s = `CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0'))`;
-		} else if (sort === 'likes_cursor') {
-			s = `CONCAT(LPAD(IFNULL(ulikes.nb_likes, 0), 5, '0'), LPAD(users.id, 5, '0'))`;
+		} else if (sort === 'fame_cursor') {
+			s = `CONCAT(LPAD(fame, 5, '0'), LPAD(users.id, 5, '0'))`;
 		} else if (sort === 'age_cursor') {
 			s = `CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0'))`;
 		}
@@ -393,7 +389,7 @@ class User extends Model {
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, likes, sort, sort_dir, languages } = query;
+		const { distance, age, fame, sort, sort_dir, languages, mode } = query;
 		return await User.query(
 			`SELECT ${User.common_select_query()}
 					FROM users
@@ -402,11 +398,11 @@ class User extends Model {
 						AND ${preferences_query} AND distance < ?
 						AND age >= ? AND age <= ?
 						${User.invalid_user_filter_query}
-						AND IFNULL(ulikes.nb_likes, 0) >= ? AND IFNULL(ulikes.nb_likes, 0) <= ?
+						AND fame >= ? AND fame <= ?
 						${User.cursor_query(query)}
 					ORDER BY ${sort} ${sort_dir}
-					LIMIT 12`,
-			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], likes[0], likes[1]]
+					LIMIT ${mode === 'image' ? 12 : 30}`,
+			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], fame[0], fame[1]]
 		);
 	}
 
@@ -416,7 +412,7 @@ class User extends Model {
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, likes, sort, sort_dir, tags, languages } = query;
+		const { distance, age, fame, sort, sort_dir, tags, languages, mode } = query;
 		return await User.query(
 			`SELECT ${User.common_select_query()},
 				utags.tag_list,
@@ -437,11 +433,11 @@ class User extends Model {
 					AND age >= ? AND age <= ?
 					AND tag_list IS NOT NULL
 					${User.invalid_user_filter_query}
-					AND IFNULL(ulikes.nb_likes, 0) >= ? AND IFNULL(ulikes.nb_likes, 0) <= ?
+					AND fame >= ? AND fame <= ?
 					${User.cursor_query(query)}
 				ORDER BY ${sort} ${sort_dir}
-				LIMIT 12`,
-			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], likes[0], likes[1]]
+				LIMIT ${mode === 'image' ? 12 : 30}`,
+			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], fame[0], fame[1]]
 		);
 	}
 }
