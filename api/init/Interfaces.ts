@@ -6,7 +6,7 @@ export interface RegisterForm {
 	firstName: string;
 	lastName: string;
 	password: string;
-	vpassword?: string;
+	vpassword: string;
 	location: LocationLL;
 	provider?: string;
 	provider_id?: string;
@@ -20,6 +20,7 @@ export interface LoginForm {
 }
 
 export interface PublicInfoForm {
+	username: string;
 	firstName: string;
 	lastName: string;
 	languages: Array<string>;

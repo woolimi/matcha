@@ -42,7 +42,15 @@
 				>
 					Send verification
 				</v-btn>
-				<v-btn v-if="user.verified" small text outlined :ripple="false" class="no-cursor" color="success">
+				<v-btn
+					v-if="user.verified && $auth.user.email === user.email"
+					small
+					text
+					outlined
+					:ripple="false"
+					class="no-cursor"
+					color="success"
+				>
 					Verified
 				</v-btn>
 			</div>

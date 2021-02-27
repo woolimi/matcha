@@ -110,8 +110,9 @@ class User extends Model {
 		try {
 			await conn.query('START TRANSACTION');
 			await conn.query(
-				'UPDATE users SET firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ?, birthdate = ? WHERE id = ?',
+				'UPDATE users SET username = ?, firstName = ?, lastName = ?, gender = ?, preferences = ?, biography = ?, birthdate = ? WHERE id = ?',
 				[
+					formData.username,
 					formData.firstName,
 					formData.lastName,
 					formData.gender,

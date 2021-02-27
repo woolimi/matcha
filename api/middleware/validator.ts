@@ -187,6 +187,7 @@ export default {
 		const user: PublicInfoForm = req.body;
 		if (
 			!fieldsChecker(user, [
+				'username',
 				'firstName',
 				'lastName',
 				'languages',
@@ -200,6 +201,8 @@ export default {
 			return res.sendStatus(400);
 		const error: any = {};
 		let e_msg = '';
+		e_msg = validate_username(user.username);
+		e_msg = error.username;
 		e_msg = validate_firstName(user.firstName);
 		if (e_msg) error.firstName = e_msg;
 		e_msg = validate_lastName(user.lastName);
