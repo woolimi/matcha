@@ -23,6 +23,7 @@ interface EmailVerification {
 }
 
 interface PublicInfoForm {
+	username: string;
 	firstName: string;
 	lastName: string;
 	languages: Array<string>;
@@ -49,12 +50,19 @@ function validate_email(email: string) {
 	}
 }
 
-async function validate_username(username: string, $axios: NuxtAxiosInstance): Promise<string> {
+async function validate_username(
+	username: string,
+	$axios: NuxtAxiosInstance,
+	prev_username: string = ''
+): Promise<string> {
 	try {
+		console.log('validate_username');
 		if (username.length === 0) return 'username is required';
 		else if (username.length < 4 || username.length > 30) return 'username must be between 4 to 30 letters.';
-		const { data } = await $axios.post('/check/username', { username });
-		if (data.error) return data.error;
+		if (username !== prev_username) {
+			const { data } = await $axios.post('/check/username', { username });
+			if (data.error) return data.error;
+		}
 		return '';
 	} catch (error) {
 		console.error(error);
@@ -121,7 +129,7 @@ function validate_birthdate(birthdate: string) {
 	return '';
 }
 
-export default ({ $axios }: Context, inject: Inject) => {
+export default ({ $axios, $auth }: Context, inject: Inject) => {
 	inject('validator', {
 		async userRegister(user: RegisterForm) {
 			const error: any = {};
@@ -153,9 +161,12 @@ export default ({ $axios }: Context, inject: Inject) => {
 			if (e_msg) error.email = e_msg;
 			return { error };
 		},
-		userPublic(user: PublicInfoForm) {
+		async userPublic(user: PublicInfoForm, prev_username: string) {
 			const error: any = {};
+
 			let e_msg = '';
+			e_msg = await validate_username(user.username, $axios, prev_username);
+			if (e_msg) error.username = e_msg;
 			e_msg = validate_firstName(user.firstName);
 			if (e_msg) error.firstName = e_msg;
 			e_msg = validate_lastName(user.lastName);

@@ -6,6 +6,14 @@
 				<v-row>
 					<v-col col="12" sm="6">
 						<v-text-field
+							label="Username"
+							type="text"
+							v-model="user.username"
+							required
+							prepend-icon="mdi-account"
+							:error-messages="error.username"
+						/>
+						<v-text-field
 							label="First name"
 							type="text"
 							v-model="user.firstName"
@@ -148,13 +156,14 @@
 		data() {
 			return {
 				user: {
+					username: this.$auth.user.username,
 					firstName: this.$auth.user.firstName,
 					lastName: this.$auth.user.lastName,
 					languages: [...this.$auth.user.languages],
 					gender: this.$auth.user.gender,
 					preferences: this.$auth.user.preferences,
 					tags: [...this.$auth.user.tags],
-					biography: this.$auth.user.biography,
+					biography: this.$auth.user.biography || '',
 					birthdate: this.$auth.user.birthdate
 						? new Date(this.$auth.user.birthdate).toISOString().substr(0, 10)
 						: '',
@@ -187,7 +196,7 @@
 		methods: {
 			async setPublicInfo() {
 				try {
-					const validated = await this.$validator.userPublic(this.user);
+					const validated = await this.$validator.userPublic(this.user, this.$auth.user.username);
 					if (!_.isEmpty(validated.error)) throw { error: validated.error };
 
 					const { data } = await this.$axios.post('/api/profile/public-info', this.user);
@@ -210,6 +219,8 @@
 							color: 'error',
 						});
 					} else {
+						console.error(e);
+						this.error = {};
 						this.$notifier.showMessage({
 							message: 'Server error',
 							color: 'error',
