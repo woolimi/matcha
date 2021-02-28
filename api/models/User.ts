@@ -227,8 +227,8 @@ class User extends Model {
 	static async create_fake_user(user: any): Promise<any> {
 		try {
 			return await User.query(
-				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`, `fame`) \
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true, ?)',
+				'INSERT INTO `users` (`email`, `username`, `password`, `lastName`, `firstName`, `gender`, `preferences`, `biography`, `birthdate`, `location`, `verified`, `fame`, `login`) \
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_SRID(POINT(?, ?), 4326), true, ?, ?)',
 				[
 					user.email,
 					user.username,
@@ -242,6 +242,7 @@ class User extends Model {
 					user.lng,
 					user.lat,
 					user.fame,
+					user.login,
 				]
 			);
 		} catch (error) {

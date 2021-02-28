@@ -98,6 +98,7 @@ async function create_seed_users() {
 				lng,
 				lat,
 				fame: get_random(0, 100),
+				login: new Date(Date.now() - 3600 * 24 * 1000 * Math.floor(Math.random() * 10)),
 			};
 			const { insertId } = await User.create_fake_user(user);
 			const randomTagId = Math.floor(Math.random() * tags.length);
