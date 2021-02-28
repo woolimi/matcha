@@ -4,7 +4,7 @@ function setRefreshToken(res: any, user: any) {
 	const rtoken = generateToken(user, 'refresh');
 	res.cookie(process.env.REFRESH_COOKIE_NAME, rtoken, {
 		expires: new Date(Date.now() + 1000 * parseInt(process.env.REFRESH_TOKEN_EXP)),
-		secure: false,
+		secure: process.env.ENVIRONMENT === 'prod' ? true : false,
 		httpOnly: true,
 		sameSite: true,
 		path: '/',
