@@ -30,9 +30,13 @@ declare global {
 }
 
 dotenv.config();
-const serverLog = fs.createWriteStream(path.join(__dirname, '/log/server.log'), { flags: 'a' });
+const log_path =
+	process.env.ENVIRONMENT === 'prod'
+		? path.join(__dirname, '..', '/log/server.log')
+		: path.join(__dirname, '/log/server.log');
+const serverLog = fs.createWriteStream(log_path, { flags: 'a' });
 const corsConfig = {
-	origin: ['http://localhost:3000', 'http://176.169.89.89'],
+	origin: ['http://localhost:3000', 'http://176.169.89.89', 'https://https://ft-matcha.herokuapp.com/'],
 	credentials: true,
 };
 
@@ -42,7 +46,9 @@ app.sockets = {};
 app.currentPage = {};
 
 Database.init();
-app.use('/uploads', express.static(__dirname + '/uploads'));
+const upload_path =
+	process.env.ENVIRONMENT === 'prod' ? path.resolve(__dirname, '..', 'uploads') : path.resolve(__dirname, 'uploads');
+app.use('/uploads', express.static(upload_path));
 app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
 app.use(cors(corsConfig));
