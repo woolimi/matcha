@@ -1,1 +1,7 @@
-{}
+{
+	"scripts": {
+		"install": "npm i --prefix api && npm i --prefix app",
+		"postinstall": "npm run build --prefix api && npm run build --prefix app",
+		"start": "docker-compose up -d && npm run start --prefix api && npm run start --prefix app"
+	}
+}
