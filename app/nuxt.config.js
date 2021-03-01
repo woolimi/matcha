@@ -37,7 +37,7 @@ export default {
 		'@nuxt/typescript-build',
 		// https://go.nuxtjs.dev/vuetify
 		'@nuxtjs/vuetify',
-		'@nuxtjs/dotenv',
+		['@nuxtjs/dotenv', { filename: process.env.ENVIRONMENT === 'prod' ? '.env.prod' : '.env' }],
 	],
 
 	// Modules (https://go.nuxtjs.dev/config-modules)
