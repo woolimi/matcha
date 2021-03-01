@@ -1,9 +1,8 @@
 {
 	"scripts": {
 		"install": "npm i --prefix api",
-		"postinstall": "npm run init_seed",
+		"postinstall": "npm run init --prefix api",
 		"build": "npm run build --prefix api",
-		"init_seed": "npm run init_seed --prefix api",
 		"start": "npm run start --prefix api"
 	}
 }
