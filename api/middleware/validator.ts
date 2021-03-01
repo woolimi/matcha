@@ -237,7 +237,6 @@ export default {
 	},
 	searchQuery(req: any, res: any, next: NextFunction) {
 		const bef_query: BeforeParsedSearchQuery = req.query;
-		console.log(bef_query);
 		const query: SearchQuery = {
 			...bef_query,
 			age: bef_query.age.map((s) => parseInt(s)),
