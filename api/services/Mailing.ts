@@ -30,7 +30,7 @@ export async function send_verification_email(to: string, userId: number) {
 		const token = generateToken({ id: userId }, 'access');
 		const content: any = {};
 		content.subject = 'Email verification';
-		content.email_verification_url = `http://localhost:5000/auth/email-verification/${token}`;
+		content.email_verification_url = `${process.env.API}/auth/email-verification/${token}`;
 		const mail = await send_email(to, 'verification', content);
 		console.log('Email : ', mail);
 		console.log('Email verification token : ', token);

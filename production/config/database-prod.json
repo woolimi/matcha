@@ -1,0 +1,11 @@
+{
+    "MYSQL_CONFIG": {
+        "host": "d3y0lbg7abxmbuoi.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
+        "user": "fwbu98w3ddg6w243",
+        "password": "gauwk0n1w9q69iyh",
+        "database": "etla6rosfi06vu6t",
+        "charset": "utf8mb4_unicode_ci",
+        "connectionLimit": 30,
+        "timezone": "Z"
+    }
+}
