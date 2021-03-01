@@ -2,6 +2,13 @@
 	"scripts": {
 		"install": "npm i --prefix api && npm i --prefix app",
 		"build": "npm run build --prefix api && npm run build --prefix app",
-		"start": "docker-compose up -d && npm run start --prefix api && npm run start --prefix app"
+		"init_seed": "npm run init_seed --prefix api",
+		"db": "docker-compose up -d",
+		"start": "npm-run-all --parallel start-api start-app",
+		"start-api": "npm run start --prefix api",
+		"start-app": "npm run start --prefix app"
+	},
+	"devDependencies": {
+		"npm-run-all": "^4.1.5"
 	}
 }

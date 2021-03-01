@@ -97,7 +97,6 @@ authRouter.post('/reset-password', async (req, res) => {
 	const data = req.body;
 	try {
 		const result = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [data.username]);
-		console.log(data);
 		if (!result.length) throw { error: 'Invalid username' };
 
 		const email = result[0].email;

@@ -5,8 +5,6 @@ import authRouter from './routes/auth';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import checkRouter from './routes/api/check';
-import morgan from 'morgan';
-import fs from 'fs';
 import path from 'path';
 import Database from './init/Database';
 import { createServer } from 'http';
@@ -30,13 +28,8 @@ declare global {
 }
 
 dotenv.config();
-const log_path =
-	process.env.ENVIRONMENT === 'prod'
-		? path.join(__dirname, '..', '/log/server.log')
-		: path.join(__dirname, '/log/server.log');
-const serverLog = fs.createWriteStream(log_path, { flags: 'a' });
 const corsConfig = {
-	origin: ['http://localhost:3000', 'http://176.169.89.89', 'https://https://ft-matcha.herokuapp.com/'],
+	origin: ['http://localhost:3000', 'http://176.169.89.89'],
 	credentials: true,
 };
 
@@ -47,9 +40,10 @@ app.currentPage = {};
 
 Database.init();
 const upload_path =
-	process.env.ENVIRONMENT === 'prod' ? path.resolve(__dirname, '..', 'uploads') : path.resolve(__dirname, 'uploads');
+	process.env.ENVIRONMENT === 'build' || process.env.ENVIRONMENT === 'prod'
+		? path.resolve(__dirname, '..', 'uploads')
+		: path.resolve(__dirname, 'uploads');
 app.use('/uploads', express.static(upload_path));
-app.use(morgan('dev', { stream: serverLog }));
 app.use(express.json());
 app.use(cors(corsConfig));
 app.use(cookieParser());
