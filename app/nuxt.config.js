@@ -88,8 +88,7 @@ export default {
 
 	// Axios module configuration (https://go.nuxtjs.dev/config-axios)
 	axios: {
-		// baseURL: 'http://176.169.89.89:5000',
-		baseURL: 'http://localhost:5000',
+		baseURL: process.env.ENVIRONMENT === 'prod' ? 'http://176.169.89.89:5000' : 'http://localhost:5000',
 		credentials: true,
 		debug: process.env.ENVIRONMENT === 'dev' ? false : true,
 	},
@@ -123,7 +122,7 @@ export default {
 	io: {
 		sockets: [
 			{
-				url: 'http://localhost:5000',
+				url: process.env.ENVIRONMENT === 'prod' ? 'http://176.169.89.89:5000' : 'http://localhost:5000',
 				default: true,
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
