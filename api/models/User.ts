@@ -171,7 +171,6 @@ class User extends Model {
 			if (user.length === 1) return user[0].id;
 			data.password = await bcrypt.hash(formData.password, 10);
 			const xy = ll2xy(data.location);
-			console.log(xy, data);
 			await Model.query(`START TRANSACTION`);
 			const {
 				insertId,

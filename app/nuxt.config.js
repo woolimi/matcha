@@ -1,5 +1,3 @@
-import colors from 'vuetify/es5/util/colors';
-
 export default {
 	server: {
 		host: '0',
@@ -91,9 +89,9 @@ export default {
 	// Axios module configuration (https://go.nuxtjs.dev/config-axios)
 	axios: {
 		// baseURL: 'http://176.169.89.89:5000',
-		baseURL: process.env.ENVIRONMENT === 'prod' ? 'https://ft-matcha.herokuapp.com:5000' : 'http://localhost:5000',
+		baseURL: 'http://localhost:5000',
 		credentials: true,
-		debug: process.env.ENVIRONMENT === 'prod' ? false : true,
+		debug: process.env.ENVIRONMENT === 'dev' ? false : true,
 	},
 
 	// Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)
