@@ -18,7 +18,6 @@ import searchRouter from './routes/api/search';
 import likeRouter from './routes/api/like';
 import blockRouter from './routes/api/block';
 import reportRouter from './routes/api/report';
-import https from 'https';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -30,7 +29,7 @@ declare global {
 
 dotenv.config();
 const corsConfig = {
-	origin: ['http://localhost:3000', 'http://176.169.89.89'],
+	origin: [process.env.APP || 'http://localhost:3000'],
 	credentials: true,
 };
 
@@ -49,6 +48,7 @@ app.use(express.json());
 app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(requestIp.mw());
+app.set('view engine', 'ejs');
 
 // API
 app.use('/check', checkRouter);
@@ -61,12 +61,15 @@ app.use('/api/block', blockRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/chat', chatRouter);
+app.get('/', (req, res) => {
+	return res.send('Api Server is running');
+});
 
 // Start !
-const server = https.createServer(app);
+const server = createServer(app);
 const io = new WSServer(server, {
 	cors: {
-		origin: ['http://localhost:3000', 'http://176.169.89.89'],
+		origin: [process.env.APP || 'http://localhost:3000'],
 		methods: ['GET', 'POST'],
 		credentials: true,
 	},

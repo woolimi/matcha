@@ -2,10 +2,9 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
-import _, { random } from 'lodash';
+import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
-import path from 'path';
 import { send_verification_email, send_reset_password_email } from '../services/Mailing';
 import { deleteRefreshToken, generateToken, setRefreshToken } from '../services/Token';
 import getLocation from '../middleware/getLocation';
@@ -141,6 +140,7 @@ authRouter.post('/social', getLocation, async (req, res) => {
 });
 
 authRouter.get('/email-verification/:jwt', async (req, res) => {
+	console.log('HERE');
 	try {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const result = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
@@ -158,9 +158,13 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 
 authRouter.get('/email-verification', (req, res) => {
 	if (req.query.result === 'success') {
-		res.status(200).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
+		res.status(200).render('email-verification', {
+			app: process.env.APP,
+		});
 	} else {
-		res.status(401).sendFile(path.join(__dirname, '../views', 'email-verification.html'));
+		res.status(401).render('email-verification', {
+			app: process.env.APP,
+		});
 	}
 });
 

@@ -8,7 +8,6 @@
 	<body>
 		<script>
 			const urlParams = new URLSearchParams(window.location.search);
-			debugger;
 			const result = urlParams.get('result');
 			if (result === 'success') {
 				alert('Email verification success');
@@ -16,7 +15,7 @@
 				const reason = urlParams.get('reason');
 				alert(reason);
 			}
-			window.location.replace('http://localhost:3000');
+			window.location.replace('<%= app %>');
 		</script>
 	</body>
 </html>

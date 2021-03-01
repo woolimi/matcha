@@ -1,0 +1,11 @@
+{
+    "MYSQL_CONFIG": {
+        "host": "localhost",
+        "user": "root",
+        "password": "root",
+        "database": "matcha",
+        "charset": "utf8mb4_unicode_ci",
+        "connectionLimit": 30,
+        "timezone": "Z"
+    }
+}
