@@ -18,6 +18,7 @@ import searchRouter from './routes/api/search';
 import likeRouter from './routes/api/like';
 import blockRouter from './routes/api/block';
 import reportRouter from './routes/api/report';
+import https from 'https';
 
 declare global {
 	interface Express extends CoreExpress {
@@ -62,10 +63,10 @@ app.use('/api/notifications', notificationsRouter);
 app.use('/api/chat', chatRouter);
 
 // Start !
-const server = createServer(app);
+const server = https.createServer(app);
 const io = new WSServer(server, {
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: ['http://localhost:3000', 'http://176.169.89.89'],
 		methods: ['GET', 'POST'],
 		credentials: true,
 	},
