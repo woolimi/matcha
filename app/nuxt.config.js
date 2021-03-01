@@ -1,7 +1,7 @@
 export default {
 	server: {
 		host: '0',
-		port: 3000,
+		port: process.env.PORT || 3000,
 	},
 	// Global page headers (https://go.nuxtjs.dev/config-head)
 	head: {
@@ -37,6 +37,7 @@ export default {
 		'@nuxt/typescript-build',
 		// https://go.nuxtjs.dev/vuetify
 		'@nuxtjs/vuetify',
+		'@nuxtjs/dotenv',
 	],
 
 	// Modules (https://go.nuxtjs.dev/config-modules)
@@ -88,9 +89,9 @@ export default {
 
 	// Axios module configuration (https://go.nuxtjs.dev/config-axios)
 	axios: {
-		baseURL: process.env.ENVIRONMENT === 'prod' ? 'http://176.169.89.89:5000' : 'http://localhost:5000',
+		baseURL: process.env.API || 'http://localhost:5000',
 		credentials: true,
-		debug: process.env.ENVIRONMENT === 'dev' ? false : true,
+		debug: process.env.ENVIRONMENT === 'prod' ? false : true,
 	},
 
 	// Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)
@@ -122,7 +123,7 @@ export default {
 	io: {
 		sockets: [
 			{
-				url: process.env.ENVIRONMENT === 'prod' ? 'http://176.169.89.89:5000' : 'http://localhost:5000',
+				url: process.env.API || 'http://localhost:5000',
 				default: true,
 				// https://nuxt-socket-io.netlify.app/configuration/#vuex-options-per-socket
 				vuex: {
