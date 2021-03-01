@@ -1,0 +1,7 @@
+{
+	"scripts": {
+		"install": "npm i --prefix app",
+		"build": "npm run build --prefix app",
+		"start": "npm run start --prefix app"
+	}
+}
