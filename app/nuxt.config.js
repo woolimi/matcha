@@ -78,6 +78,7 @@ export default {
 				},
 				secure: process.env.ENVIRONMENT === 'prod' ? true : false,
 				sameSite: process.env.ENVIRONMENT === 'prod' ? 'none' : true,
+				domain: process.env.ENVIRONMENT === 'prod' ? 'matcha42-api.herokuapp.com' : 'localhost',
 			},
 		},
 		localStorage: false,

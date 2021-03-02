@@ -8,6 +8,7 @@ function setRefreshToken(res: any, user: any) {
 		httpOnly: true,
 		sameSite: process.env.ENVIRONMENT === 'prod' ? 'none' : 'lax',
 		path: '/',
+		domain: process.env.ENVIRONMENT === 'prod' ? 'matcha42-api.herokuapp.com' : 'localhost',
 	});
 	return rtoken;
 }
