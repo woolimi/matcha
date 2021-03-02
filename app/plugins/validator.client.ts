@@ -56,7 +56,6 @@ async function validate_username(
 	prev_username: string = ''
 ): Promise<string> {
 	try {
-		console.log('validate_username');
 		if (username.length === 0) return 'username is required';
 		else if (username.length < 4 || username.length > 30) return 'username must be between 4 to 30 letters.';
 		if (username !== prev_username) {

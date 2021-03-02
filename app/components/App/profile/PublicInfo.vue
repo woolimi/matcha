@@ -8,7 +8,7 @@
 						<v-text-field
 							label="Username"
 							type="text"
-							v-model="user.username"
+							v-model.trim="user.username"
 							required
 							prepend-icon="mdi-account"
 							:error-messages="error.username"
@@ -16,7 +16,7 @@
 						<v-text-field
 							label="First name"
 							type="text"
-							v-model="user.firstName"
+							v-model.trim="user.firstName"
 							required
 							prepend-icon="mdi-card-account-details"
 							:error-messages="error.firstName"
@@ -24,7 +24,7 @@
 						<v-text-field
 							label="Last name"
 							type="text"
-							v-model="user.lastName"
+							v-model.trim="user.lastName"
 							required
 							prepend-icon="mdi-card-account-details"
 							:error-messages="error.lastName"
@@ -132,7 +132,7 @@
 							label="Biography"
 							counter="150"
 							auto-grow
-							v-model="user.biography"
+							v-model.trim="user.biography"
 							outlined
 							prepend-icon="mdi-notebook"
 							:error-messages="error.biography"

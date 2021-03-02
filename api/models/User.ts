@@ -348,11 +348,17 @@ class User extends Model {
 		uinfo.age, ROUND(uinfo.distance) AS distance, fame, upictures.path AS image,
 		CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
 		CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
-		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor`;
+		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor, block_list.blocked`;
 	}
 
-	static common_join_query(languages: string[]) {
+	static common_join_query(languages: string[], user_id: number) {
 		return `
+			LEFT JOIN (
+				SELECT user_blocks.user, user_blocks.blocked
+				FROM user_blocks
+				WHERE user_blocks.user = ${user_id}
+			) AS block_list
+			ON users.id = block_list.blocked
 			INNER JOIN (
 				SELECT id AS user, ST_Distance_Sphere(location, ST_GeomFromText('POINT(? ?)', 4326))/1000 AS distance, timestampdiff(YEAR, birthdate, CURDATE()) AS age
 				FROM users
@@ -395,13 +401,14 @@ class User extends Model {
 		return await User.query(
 			`SELECT ${User.common_select_query()}
 					FROM users
-					${User.common_join_query(languages)}
+					${User.common_join_query(languages, user_id)}
 					WHERE users.id != ?
 						AND ${preferences_query} AND distance < ?
 						AND age >= ? AND age <= ?
 						${User.invalid_user_filter_query}
 						AND fame >= ? AND fame <= ?
 						${User.cursor_query(query)}
+						AND block_list.blocked IS NULL
 					ORDER BY ${sort} ${sort_dir}
 					LIMIT ${mode === 'image' ? 12 : 30}`,
 			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], fame[0], fame[1]]
@@ -421,7 +428,7 @@ class User extends Model {
 				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags,
 				CONCAT(LPAD(LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1, 3, '0'), LPAD(users.id, 5, '0')) AS tag_cursor
 				FROM users
-				${User.common_join_query(languages)}
+				${User.common_join_query(languages, user_id)}
 				LEFT JOIN (
 					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length).fill('?').join(',')}), tags.name, NULL)) as tag_list
 					FROM user_tags
@@ -437,6 +444,7 @@ class User extends Model {
 					${User.invalid_user_filter_query}
 					AND fame >= ? AND fame <= ?
 					${User.cursor_query(query)}
+					AND block_list.blocked IS NULL
 				ORDER BY ${sort} ${sort_dir}
 				LIMIT ${mode === 'image' ? 12 : 30}`,
 			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], fame[0], fame[1]]
