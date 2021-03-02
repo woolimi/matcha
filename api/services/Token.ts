@@ -6,7 +6,7 @@ function setRefreshToken(res: any, user: any) {
 		expires: new Date(Date.now() + 1000 * parseInt(process.env.REFRESH_TOKEN_EXP)),
 		secure: process.env.ENVIRONMENT === 'prod',
 		httpOnly: true,
-		sameSite: process.env.ENVIRONMENT !== 'prod',
+		sameSite: process.env.ENVIRONMENT === 'prod' ? 'none' : 'lax',
 		path: '/',
 	});
 	return rtoken;
@@ -15,9 +15,8 @@ function setRefreshToken(res: any, user: any) {
 function deleteRefreshToken(res: any) {
 	return res.cookie(process.env.REFRESH_COOKIE_NAME, 'false', {
 		expires: new Date(Date.now()),
-		secure: false,
+		secure: process.env.ENVIRONMENT === 'prod',
 		httpOnly: false,
-		sameSite: false,
 		path: '/',
 	});
 }
