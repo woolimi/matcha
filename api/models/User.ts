@@ -327,9 +327,11 @@ class User extends Model {
 					preferences_query = `(gender = 'female' OR (gender = 'male' AND preferences = 'bisexual'))`;
 				else preferences_query = `(gender = 'male' OR (gender = 'female' AND preferences = 'bisexual'))`;
 			}
+			let users = [];
+			if (query.tags.length) users = await User.search_with_tags(user_id, location, preferences_query, query);
+			else users = await User.search_without_tags(user_id, location, preferences_query, query);
 
-			if (query.tags.length) return await User.search_with_tags(user_id, location, preferences_query, query);
-			else return await User.search_without_tags(user_id, location, preferences_query, query);
+			return users.map((u: any) => ({ ...u, location: xy2ll(u.location), image: User.mainPictureUrl(u.image) }));
 		} catch (error) {
 			throw error;
 		}
