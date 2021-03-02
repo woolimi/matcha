@@ -43,6 +43,7 @@ const upload_path =
 	process.env.ENVIRONMENT === 'build' || process.env.ENVIRONMENT === 'prod'
 		? path.resolve(__dirname, '..', 'uploads')
 		: path.resolve(__dirname, 'uploads');
+app.enable('trust proxy');
 app.use('/uploads', express.static(upload_path));
 app.use(express.json());
 app.use(cors(corsConfig));
