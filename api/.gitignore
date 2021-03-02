@@ -1,3 +1,4 @@
 log
 production
-uploads
+uploads/*
+!uploads/.gitkeep
