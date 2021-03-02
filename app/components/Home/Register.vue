@@ -9,7 +9,7 @@
 							<v-text-field
 								label="E-mail"
 								type="email"
-								v-model="user.email"
+								v-model.trim="user.email"
 								:error-messages="error.email"
 								required
 								prepend-inner-icon="mdi-email"
@@ -17,7 +17,7 @@
 							<v-text-field
 								label="Username"
 								type="text"
-								v-model="user.username"
+								v-model.trim="user.username"
 								:error-messages="error.username"
 								required
 								prepend-inner-icon="mdi-account"
@@ -25,7 +25,7 @@
 							<v-text-field
 								label="First name"
 								type="text"
-								v-model="user.firstName"
+								v-model.trim="user.firstName"
 								:error-messages="error.firstName"
 								required
 								prepend-inner-icon="mdi-card-account-details"
@@ -33,7 +33,7 @@
 							<v-text-field
 								label="Last name"
 								type="text"
-								v-model="user.lastName"
+								v-model.trim="user.lastName"
 								:error-messages="error.lastName"
 								required
 								prepend-inner-icon="mdi-card-account-details"
