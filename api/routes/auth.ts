@@ -140,7 +140,6 @@ authRouter.post('/social', getLocation, async (req, res) => {
 });
 
 authRouter.get('/email-verification/:jwt', async (req, res) => {
-	console.log('HERE');
 	try {
 		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
 		const result = await User.query('UPDATE users SET verified = ? WHERE id = ?', [true, user.id]);
