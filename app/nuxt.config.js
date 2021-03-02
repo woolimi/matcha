@@ -77,7 +77,7 @@ export default {
 					refresh: { url: '/auth/refresh', method: 'post' },
 				},
 				secure: process.env.ENVIRONMENT === 'prod' ? true : false,
-				sameSite: process.env.ENVIRONMENT === 'prod' ? false : true,
+				sameSite: process.env.ENVIRONMENT === 'prod' ? 'none' : true,
 			},
 		},
 		localStorage: false,
