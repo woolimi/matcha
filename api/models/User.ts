@@ -348,11 +348,17 @@ class User extends Model {
 		uinfo.age, ROUND(uinfo.distance) AS distance, fame, upictures.path AS image,
 		CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
 		CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
-		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor, block_list.blocked`;
+		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor, block_list.blocked, report_list.reported_count`;
 	}
 
 	static common_join_query(languages: string[], user_id: number) {
 		return `
+			LEFT JOIN (
+				SELECT user_reports.reported, COUNT(user_reports.reported) AS reported_count
+				FROM user_reports
+				GROUP BY user_reports.reported
+			) AS report_list
+			ON users.id = report_list.reported
 			LEFT JOIN (
 				SELECT user_blocks.user, user_blocks.blocked
 				FROM user_blocks
@@ -409,6 +415,7 @@ class User extends Model {
 						AND fame >= ? AND fame <= ?
 						${User.cursor_query(query)}
 						AND block_list.blocked IS NULL
+						AND (reported_count < 3 OR reported_count IS NULL)
 					ORDER BY ${sort} ${sort_dir}
 					LIMIT ${mode === 'image' ? 12 : 30}`,
 			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], fame[0], fame[1]]
@@ -445,6 +452,7 @@ class User extends Model {
 					AND fame >= ? AND fame <= ?
 					${User.cursor_query(query)}
 					AND block_list.blocked IS NULL
+					AND (reported_count < 3 OR reported_count IS NULL)
 				ORDER BY ${sort} ${sort_dir}
 				LIMIT ${mode === 'image' ? 12 : 30}`,
 			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], fame[0], fame[1]]
