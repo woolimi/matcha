@@ -218,7 +218,7 @@ class User extends Model {
 			[id]
 		);
 		if (result && result.length == 1) {
-			return result[0];
+			return { ...result[0], picture: User.mainPictureUrl(result[0].picture) };
 		}
 		return null;
 	}
