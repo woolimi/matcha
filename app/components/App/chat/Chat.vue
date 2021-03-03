@@ -228,8 +228,7 @@
 								top:
 									this.$refs.messages.scrollHeight -
 									this.lastHeight -
-									this.$refs.messages.offsetHeight / 2,
-								behavior: 'smooth',
+									this.$refs.messages.offsetHeight / 3,
 							});
 						}
 					});

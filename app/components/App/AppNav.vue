@@ -11,7 +11,7 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title>
+								<v-list-item-title :disabled="isDisabled(list.title)">
 									{{ list.title }}
 								</v-list-item-title>
 								<v-list-item-action v-if="unreadNotifications.length > 0">
@@ -24,7 +24,9 @@
 								<v-list-item-icon>
 									<v-icon>{{ list.icon }}</v-icon>
 								</v-list-item-icon>
-								<v-list-item-title>{{ list.title }}</v-list-item-title>
+								<v-list-item-title :disabled="isDisabled(list.title)">
+									{{ list.title }}
+								</v-list-item-title>
 							</NuxtLink>
 						</template>
 					</v-list-item>
@@ -161,5 +163,8 @@
 	}
 	.theme--dark .v-list .v-list-item--active a {
 		color: #ffcdd2;
+	}
+	.v-list-item--disabled {
+		opacity: 0.6;
 	}
 </style>
