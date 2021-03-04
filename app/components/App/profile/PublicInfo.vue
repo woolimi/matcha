@@ -151,6 +151,7 @@
 
 <script>
 	import languages from '~/init/languages.js';
+	import _ from 'lodash';
 
 	export default {
 		data() {
@@ -229,7 +230,7 @@
 				}
 			},
 			resetSearch() {
-				this.user.tags = this.user.tags.map((s) => s.toLowerCase());
+				this.user.tags = _.union(this.user.tags.map((s) => s.toLowerCase()));
 				this.interest.search = '';
 			},
 			setDate(date) {

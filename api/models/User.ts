@@ -124,7 +124,7 @@ class User extends Model {
 				]
 			);
 			// tag
-			formData.tags = formData.tags.map((t) => t.toLowerCase());
+			formData.tags = _.union(formData.tags.map((t) => t.toLowerCase()));
 			for (const tag of formData.tags) {
 				await conn.query('INSERT IGNORE INTO tags (`name`) VALUES (?)', [tag]);
 			}
