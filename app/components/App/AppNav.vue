@@ -110,25 +110,29 @@
 			await this.$store.dispatch('chat/loadList');
 		},
 		mounted() {
-			this.socket = this.$nuxtSocket({ persist: 'socket' });
-			this.socket.on('socket/loggedOut', () => {
-				this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
+			this.$root.socket = this.$nuxtSocket({ teardown: true });
+			this.$root.socket.on('socket/loggedOut', () => {
+				this.$root.socket.emit('socket/login', { token: this.$auth.strategy.token.get() });
 			});
-			this.socket.emit('socket/login', { token: this.$auth.strategy.token.get() }, (response) => {
+			this.$root.socket.emit('socket/login', { token: this.$auth.strategy.token.get() }, (response) => {
 				if (!response.success) {
-					this.$store.commit('snack/SHOW', {
-						message: 'Could not link user to WebSocket.',
+					this.$notifier.showMessage({
+						message: 'Could not link user to WebSocket, Refresh the page.',
 						color: 'error',
 					});
 				} else {
-					this.socket.emit('user/changePage', { name: this.$route.name, params: this.$route.params });
+					this.$root.socket.emit('user/changePage', { name: this.$route.name, params: this.$route.params });
 				}
 			});
 		},
 		methods: {
 			userLogout() {
 				this.$auth.logout();
-				this.socket.disconnect();
+				this.$root.socket.disconnect();
+				this.$store.commit('chat/logout');
+				this.$store.commit('notifications/unload');
+				this.$store.commit('profile/leaveCurrent');
+				this.$store.commit('blocked/unload');
 			},
 			isDisabled(title) {
 				const { verified, languages, tags, preferences, gender, images } = this.$auth.user;
@@ -145,11 +149,8 @@
 		},
 		watch: {
 			$route(to, _from) {
-				this.socket.emit('user/changePage', { name: to.name, params: to.params });
+				this.$root.socket.emit('user/changePage', { name: to.name, params: to.params });
 			},
-		},
-		unmounted() {
-			this.socket.disconnect();
 		},
 	};
 </script>

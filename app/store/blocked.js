@@ -18,6 +18,9 @@ export const mutations = {
 		const index = state.list.findIndex((c) => c.id == id);
 		if (index >= 0) state.list.splice(index, 1);
 	},
+	unload(state) {
+		state.list.length = 0;
+	},
 };
 
 export const actions = {

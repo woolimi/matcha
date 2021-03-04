@@ -41,6 +41,9 @@ export const mutations = {
 	removeFromUser(state, id) {
 		state.list = state.list.filter((n) => n.user.id != id);
 	},
+	unload(state) {
+		state.list.length = 0;
+	},
 };
 
 export const actions = {
