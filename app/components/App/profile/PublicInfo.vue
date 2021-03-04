@@ -229,6 +229,7 @@
 				}
 			},
 			resetSearch() {
+				this.user.tags = this.user.tags.map((s) => s.toLowerCase());
 				this.interest.search = '';
 			},
 			setDate(date) {
