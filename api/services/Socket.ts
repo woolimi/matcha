@@ -23,6 +23,7 @@ export function bindSocket(app: Express, io: Server) {
 	io.on('connection', (socket: Socket) => {
 		console.log('💨[socket]: connected', socket.id);
 		socket.on('socket/login', (payload: { token: string }, callback) => {
+			if (!callback) return;
 			if (!payload || !payload.token) {
 				return callback({ error: true });
 			}
