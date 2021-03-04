@@ -100,6 +100,16 @@ export const mutations = {
 	setLoadingMore(state, value) {
 		state.loadingMore = value;
 	},
+	logout(state) {
+		state.list.length = 0;
+		state.loadedList = false;
+		state.chat = undefined;
+		state.messages.length = 0;
+		state.loadedChat = false;
+		state.loadingMore = false;
+		state.completed = false;
+		state.lastEvent = 'none';
+	},
 };
 
 export const actions = {

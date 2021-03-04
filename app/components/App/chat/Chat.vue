@@ -150,13 +150,9 @@
 			async sendMessage() {
 				if (this.message.length > 0 && this.message.length <= 500) {
 					this.disabled = true;
-					this.$store.dispatch('$nuxtSocket/emit', {
-						label: 'socket',
-						evt: 'chat/sendMessage',
-						msg: {
-							chat: this.$store.getters['chat/chat'].id,
-							message: this.message,
-						},
+					this.$root.socket.emit('chat/sendMessage', {
+						chat: this.$store.getters['chat/chat'].id,
+						message: this.message,
 					});
 					this.message = '';
 					this.disabled = false;
@@ -250,7 +246,7 @@
 		},
 		unmounted() {
 			this.newRows.length = 0;
-			this.$store.dispatch('chat/leaveChat');
+			this.$store.commit('chat/leaveChat');
 		},
 	};
 </script>
