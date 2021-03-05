@@ -54,22 +54,7 @@ async function create_seed_users() {
 		const password = await bcrypt.hash('asdfasdf', 10);
 		const current_year = new Date().getFullYear();
 		const tags = await Tag.get_tag_ids();
-		const langs = [
-			'English',
-			'English',
-			'English',
-			'French',
-			'French',
-			'French',
-			'Italian',
-			'Italian',
-			'Italian',
-			'Spanish',
-			'Spanish',
-			'Spanish',
-			'Korean',
-			'Chinese',
-		];
+		const langs = ['English', 'English', 'English', 'French', 'French', 'French', 'Korean'];
 		const unique_pairs: string[] = [];
 		const unique_emails: string[] = [];
 		for (let i = 0; i < 500; i++) {
