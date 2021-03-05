@@ -147,7 +147,7 @@ export default [
 	'Somali',
 	'Sotho, Southern',
 	'South Ndebele',
-	'Spanish, Castilian',
+	'Spanish',
 	'Sundanese',
 	'Swahili',
 	'Swati',

@@ -11,7 +11,7 @@ const mg = mailgun({ apiKey: API_KEY, domain: DOMAIN });
 async function send_email(to: string, template: string, content: any) {
 	console.log('URL', content.email_verification_url);
 	const data = {
-		from: 'no-reply <postmaster@sandboxd05e92bd5d9e40f99e93d11755f649a2.mailgun.org>',
+		from: 'Mailgun Sandbox <postmaster@sandboxd05e92bd5d9e40f99e93d11755f649a2.mailgun.org>',
 		to,
 		subject: content.subject,
 		template,
