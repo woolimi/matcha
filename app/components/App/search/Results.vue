@@ -8,7 +8,16 @@
 					<NuxtLink :to="{ path: `/app/users/${user.id}` }" custom v-slot="{ navigate }">
 						<v-card @click="navigate" role="link" elevation="10" style="border-radius: 15px">
 							<v-img :src="user.image" width="100%" height="100%" aspect-ratio="0.75">
-								<v-container class="d-flex align-end" style="height: 100%">
+								<v-container class="d-flex flex-column justify-space-between" style="height: 100%">
+									<div>
+										<v-avatar
+											:color="user.gender === 'male' ? 'blue' : 'red'"
+											class="lighten-2"
+											size="36"
+										>
+											<v-icon>{{ `mdi-gender-${user.gender}` }}</v-icon>
+										</v-avatar>
+									</div>
 									<div class="d-block" style="width: 100%">
 										<div class="font-weight-black white--text text-shadow">
 											{{ user.username }}, {{ user.age }}
