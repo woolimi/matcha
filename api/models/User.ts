@@ -292,20 +292,24 @@ class User extends Model {
 		return false;
 	}
 
-	static async updateLocation(ll: LocationLL) {
+	static async updateLocation(user_id: number, ll: LocationLL) {
 		try {
 			const xy = ll2xy(ll);
-			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326)', [xy.x, xy.y]);
+			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326) WHERE id = ?', [
+				xy.x,
+				xy.y,
+				user_id,
+			]);
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	static async changePassword(pwForm: ChangePasswordForm) {
+	static async changePassword(user_id: number, pwForm: ChangePasswordForm) {
 		try {
 			const data = { ...pwForm };
 			data.password = await bcrypt.hash(pwForm.password, 10);
-			return await User.query('UPDATE users SET password = ?', [data.password]);
+			return await User.query('UPDATE users SET password = ? WHERE id = ?', [data.password, user_id]);
 		} catch (error) {
 			throw error;
 		}

@@ -71,10 +71,10 @@ profileRouter.post('/send-email-verification', authToken, validator.userEmailVer
 	}
 });
 
-profileRouter.post('/location', authToken, validator.userLocation, async (req, res) => {
+profileRouter.post('/location', authToken, validator.userLocation, async (req: any, res) => {
 	try {
 		const location = req.body;
-		await User.updateLocation(location);
+		await User.updateLocation(req.user.id, location);
 		res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
@@ -94,7 +94,7 @@ profileRouter.post('/public-info', authToken, validator.userPublic, async (req: 
 
 profileRouter.post('/change-password', authToken, validator.userChangePassword, async (req: any, res) => {
 	try {
-		await User.changePassword(req.body);
+		await User.changePassword(req.user.id, req.body);
 		res.sendStatus(200);
 	} catch (error) {
 		console.error(error);
