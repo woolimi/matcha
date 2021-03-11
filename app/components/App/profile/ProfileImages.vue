@@ -9,7 +9,7 @@
 								<v-progress-circular indeterminate color="primary"> </v-progress-circular>
 							</v-overlay>
 
-							<ImageUploader v-model="imageLoading" :imageId="i">
+							<ImageUploader v-model="imageLoading" :imageId="i" ref="images">
 								<div slot="activator">
 									<v-avatar
 										tile
@@ -58,6 +58,7 @@
 		data: () => ({
 			window: 0,
 			saving: false,
+			refs: new Array(5).fill(null),
 		}),
 		computed: {
 			imageLoading: {
@@ -71,6 +72,9 @@
 		},
 		methods: {
 			async deleteImage() {
+				const input_ref = this.$refs.images[this.window].$refs.file;
+				input_ref.value = null;
+
 				try {
 					this.saving = true;
 					await this.$axios.post(`/api/profile/images/${this.$auth.user.id}/${this.window}`, {
