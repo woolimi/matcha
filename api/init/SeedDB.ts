@@ -77,7 +77,7 @@ async function create_seed_users() {
 				lastName,
 				firstName,
 				gender,
-				preferences: Math.floor(Math.random() * 6) === 1 ? 'bisexual' : 'heterosexual',
+				preferences: Math.random() < 0.5 ? (Math.random() < 0.5 ? 'homosexual' : 'bisexual') : 'heterosexual',
 				biography: faker.hacker.phrase(),
 				birthdate: faker.date.between(new Date(String(current_year - 50)), new Date(String(current_year - 18))),
 				lng,

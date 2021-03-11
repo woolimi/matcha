@@ -39,10 +39,14 @@ interface ChangePasswordForm {
 	vpassword: string;
 }
 
-function validate_email(email: string) {
+async function validate_email(email: string, $axios: NuxtAxiosInstance, prev_email: string = '') {
 	try {
 		const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		if (!re.test(String(email).toLowerCase())) return 'Invalid email format';
+		if (email !== prev_email) {
+			const { data } = await $axios.post('/check/email', { email });
+			if (data.error) return data.error;
+		}
 		return '';
 	} catch (error) {
 		console.error(error);
@@ -106,7 +110,9 @@ function validate_gender(gender: string) {
 }
 function validate_preferences(preferences: string) {
 	if (!preferences) return 'preference is required';
-	if (preferences !== 'heterosexual' && preferences !== 'bisexual') return 'Invalid preference';
+	if (preferences !== 'heterosexual' && preferences !== 'homosexual' && preferences !== 'bisexual') {
+		return 'Invalid preference';
+	}
 	return '';
 }
 
@@ -133,7 +139,7 @@ export default ({ $axios, $auth }: Context, inject: Inject) => {
 		async userRegister(user: RegisterForm) {
 			const error: any = {};
 			let e_msg = '';
-			e_msg = await validate_email(user.email);
+			e_msg = await validate_email(user.email, $axios);
 			if (e_msg) error.email = e_msg;
 			e_msg = await validate_username(user.username, $axios);
 			if (e_msg) error.username = e_msg;
@@ -156,7 +162,7 @@ export default ({ $axios, $auth }: Context, inject: Inject) => {
 		async emailVerification(user: EmailVerification) {
 			const error: any = {};
 			let e_msg = '';
-			e_msg = await validate_email(user.email);
+			e_msg = await validate_email(user.email, $axios);
 			if (e_msg) error.email = e_msg;
 			return { error };
 		},

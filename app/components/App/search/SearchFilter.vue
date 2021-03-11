@@ -23,7 +23,7 @@
 				<v-subheader class="pa-0 h-init">
 					<span class="font-weight-bold"> Fame </span>
 					<v-spacer></v-spacer>
-					<span v-if="fame[1] <= 50">{{ fame[0] }} ~ {{ fame[1] }}</span>
+					<span v-if="fame[1] < 50">{{ fame[0] }} ~ {{ fame[1] }}</span>
 					<span v-else>{{ fame[0] }} ~ &nbsp;<v-icon>mdi-infinity</v-icon></span>
 				</v-subheader>
 				<v-range-slider dense v-model.lazy="fame" step="5" min="0" max="50" track-color="grey"></v-range-slider>

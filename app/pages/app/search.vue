@@ -24,7 +24,7 @@
 <script>
 	export default {
 		auth: true,
-		middleware: 'checkVerfiedUser',
+		middleware: 'checkVerifiedUser',
 	};
 </script>
 

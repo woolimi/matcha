@@ -69,7 +69,9 @@ function validate_gender(gender: string) {
 }
 function validate_preferences(preferences: string) {
 	if (!preferences) return 'preference is required';
-	if (preferences !== 'heterosexual' && preferences !== 'bisexual') return 'Invalid preference';
+	if (preferences !== 'heterosexual' && preferences !== 'homosexual' && preferences !== 'bisexual') {
+		return 'Invalid preference';
+	}
 	return '';
 }
 
@@ -236,7 +238,7 @@ export default {
 		next();
 	},
 	searchQuery(req: any, res: any, next: NextFunction) {
-		const bef_query: BeforeParsedSearchQuery = req.query;
+		const bef_query: BeforeParsedSearchQuery = req.body;
 		const query: SearchQuery = {
 			...bef_query,
 			age: bef_query.age.map((s) => parseInt(s)),
@@ -258,14 +260,39 @@ export default {
 				'cursor',
 				'mode',
 			])
-		)
+		) {
 			return res.sendStatus(400);
+		}
 
 		if (!query) return res.sendStatus(400);
-		if (query.age.length !== 2 || query.age[0] < 0) return res.sendStatus(400);
-		if (query.distance < 0) return res.sendStatus(400);
-		if (query.fame.length !== 2 || query.fame[0] < 0) return res.sendStatus(400);
+		if (
+			query.age.length !== 2 ||
+			isNaN(query.age[0]) ||
+			query.age[0] < 0 ||
+			isNaN(query.age[1]) ||
+			query.age[1] < 0 ||
+			query.age[1] < query.age[0]
+		)
+			return res.sendStatus(400);
+		if (isNaN(query.distance) || query.distance < 0) return res.sendStatus(400);
+		if (
+			query.fame.length !== 2 ||
+			isNaN(query.fame[0]) ||
+			query.fame[0] < 0 ||
+			isNaN(query.fame[1]) ||
+			query.fame[1] < 0 ||
+			query.fame[1] < query.fame[0]
+		)
+			return res.sendStatus(400);
 		if (query.tags.length > 10) return res.sendStatus(400);
+		if (
+			query.sort !== 'tag_cursor' &&
+			query.sort !== 'age_cursor' &&
+			query.sort !== 'fame_cursor' &&
+			query.sort !== 'distance_cursor'
+		) {
+			return res.sendStatus(400);
+		}
 		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
 		if (query.languages.length === 0) return res.sendStatus(400);
 		if (query.mode !== 'map' && query.mode !== 'image') return res.sendStatus(400);
