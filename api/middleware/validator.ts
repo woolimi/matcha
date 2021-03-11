@@ -1,4 +1,4 @@
-import { NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
 import {
 	RegisterForm,
@@ -53,7 +53,7 @@ function validate_vpassword(password: string, vpassword: string): string {
 	return '';
 }
 
-function validate_languages(languages: Array<string>) {
+function validate_languages(languages: string[]) {
 	if (!languages.length) return 'languages are required';
 	if (languages.length > 3) return 'languages are at most 3';
 	for (const lang of languages) {
@@ -75,7 +75,7 @@ function validate_preferences(preferences: string) {
 	return '';
 }
 
-function validate_tags(tags: Array<string>) {
+function validate_tags(tags: string[]) {
 	if (!tags.length) return 'interest tags are required';
 	if (tags.length > 5) return 'interest tags are at most 5';
 	return '';
@@ -95,7 +95,7 @@ function validate_birthdate(birthdate: string) {
 
 function fieldsChecker(
 	formData: RegisterForm | LoginForm | PublicInfoForm | SearchQuery,
-	expectedFields: Array<string>
+	expectedFields: string[]
 ): boolean {
 	const foundFields = [];
 
@@ -113,79 +113,68 @@ function fieldsChecker(
 }
 
 export default {
-	async userRegister(req: any, res: any, next: NextFunction): Promise<any> {
-		try {
-			const user: RegisterForm = req.body;
-			if (
-				!fieldsChecker(user, [
-					'email',
-					'username',
-					'firstName',
-					'lastName',
-					'password',
-					'vpassword',
-					'location',
-				])
-			)
-				return res.sendStatus(400);
-
-			const error: any = {};
-			let e_msg = '';
-			e_msg = await validate_email(user.email);
-			if (e_msg) error.email = e_msg;
-			e_msg = validate_username(user.username);
-			if (e_msg) error.username = e_msg;
-			e_msg = validate_firstName(user.firstName);
-			if (e_msg) error.firstName = e_msg;
-			e_msg = validate_lastName(user.lastName);
-			if (e_msg) error.lastName = e_msg;
-			e_msg = validate_password(user.password);
-			if (e_msg) error.password = e_msg;
-			e_msg = validate_vpassword(user.password, user.vpassword);
-			if (e_msg) error.vpassword = e_msg;
-
-			if (!_.isEmpty(error)) {
-				return res.json({ error });
-			}
-			next();
-		} catch (error) {
-			console.error(error);
-			return res.sendStatus(500);
+	async userRegister(req: Request, res: Response, next: NextFunction) {
+		const user: RegisterForm = req.body;
+		if (!fieldsChecker(user, ['email', 'username', 'firstName', 'lastName', 'password', 'vpassword', 'location'])) {
+			return res.status(400).json({ error: 'Missing parameter' });
 		}
-	},
-	userLogin(req: any, res: any, next: NextFunction): any {
-		const user: LoginForm = req.body;
-		if (!fieldsChecker(user, ['username', 'password'])) return res.sendStatus(400);
+
+		const error: any = {};
+		let e_msg = '';
+		e_msg = await validate_email(user.email);
+		if (e_msg) error.email = e_msg;
+		e_msg = validate_username(user.username);
+		if (e_msg) error.username = e_msg;
+		e_msg = validate_firstName(user.firstName);
+		if (e_msg) error.firstName = e_msg;
+		e_msg = validate_lastName(user.lastName);
+		if (e_msg) error.lastName = e_msg;
+		e_msg = validate_password(user.password);
+		if (e_msg) error.password = e_msg;
+		e_msg = validate_vpassword(user.password, user.vpassword);
+		if (e_msg) error.vpassword = e_msg;
+
+		if (!_.isEmpty(error)) {
+			return res.json({ error });
+		}
 		next();
 	},
-	async userEmailVerification(req: any, res: any, next: NextFunction): Promise<any> {
-		try {
-			const data = req.body;
-			if (!fieldsChecker(data, ['email', 'prev_email'])) return res.sendStatus(400);
-
-			const error: any = {};
-			let e_msg = '';
-			e_msg = await validate_email(data.email, { prev_email: data.prev_email });
-			if (e_msg) error.email = e_msg;
-			if (!_.isEmpty(error)) return res.json({ error });
-			next();
-		} catch (error) {
-			console.error(error);
-			res.sendStatus(500);
+	userLogin(req: Request, res: Response, next: NextFunction) {
+		const user: LoginForm = req.body;
+		if (!fieldsChecker(user, ['username', 'password'])) {
+			return res.status(400).json({ error: 'Missing parameter' });
 		}
+		next();
 	},
-	userLocation(req: any, res: any, next: NextFunction) {
+	async userEmailVerification(req: Request, res: Response, next: NextFunction) {
+		const data = req.body;
+		if (!fieldsChecker(data, ['email', 'prev_email'])) {
+			return res.status(400).json({ error: 'Missing parameter' });
+		}
+
+		const error: any = {};
+		let e_msg = '';
+		e_msg = await validate_email(data.email, { prev_email: data.prev_email });
+		if (e_msg) error.email = e_msg;
+		if (!_.isEmpty(error)) return res.json({ error });
+		next();
+	},
+	userLocation(req: Request, res: Response, next: NextFunction) {
 		const location = req.body;
 		if (_.isObject(location) && location.hasOwnProperty('lat') && location.hasOwnProperty('lng')) next();
-		else return res.sendStatus(400);
+		else return res.status(400).json({ error: 'Missing parameter' });
 	},
-	userPictures(req: any, res: any, next: NextFunction) {
+	userPictures(req: Request, res: Response, next: NextFunction) {
 		const { user_id, image_id } = req.params;
-		if (req.user.id !== Number(user_id)) return res.sendStatus(403);
-		if (Number(image_id) < 0 || Number(image_id) > 4) return res.sendStatus(403);
+		if ((req as any).user.id !== Number(user_id)) {
+			return res.status(403).json({ error: 'Invalid User' });
+		}
+		if (Number(image_id) < 0 || Number(image_id) > 4) {
+			return res.status(403).json({ error: 'Invalid Picture ID' });
+		}
 		next();
 	},
-	userPublic(req: any, res: any, next: NextFunction) {
+	userPublic(req: Request, res: Response, next: NextFunction) {
 		const user: PublicInfoForm = req.body;
 		if (
 			!fieldsChecker(user, [
@@ -199,9 +188,10 @@ export default {
 				'biography',
 				'birthdate',
 			])
-		)
-			return res.sendStatus(400);
-		const error: any = {};
+		) {
+			return res.status(400).json({ error: 'Missing parameter' });
+		}
+		const error: { [key: string]: string } = {};
 		let e_msg = '';
 		e_msg = validate_username(user.username);
 		e_msg = error.username;
@@ -225,7 +215,7 @@ export default {
 		if (!_.isEmpty(error)) return res.json({ error });
 		next();
 	},
-	userChangePassword(req: any, res: any, next: NextFunction) {
+	userChangePassword(req: Request, res: Response, next: NextFunction) {
 		const pwForm: ChangePasswordForm = req.body;
 		const error: any = {};
 		let e_msg = '';
@@ -237,7 +227,7 @@ export default {
 		if (!_.isEmpty(error)) return res.json({ error });
 		next();
 	},
-	searchQuery(req: any, res: any, next: NextFunction) {
+	searchQuery(req: Request, res: Response, next: NextFunction) {
 		const bef_query: BeforeParsedSearchQuery = req.body;
 		const query: SearchQuery = {
 			...bef_query,
@@ -261,10 +251,9 @@ export default {
 				'mode',
 			])
 		) {
-			return res.sendStatus(400);
+			return res.status(400).json({ error: 'Missing parameter' });
 		}
 
-		if (!query) return res.sendStatus(400);
 		if (
 			query.age.length !== 2 ||
 			isNaN(query.age[0]) ||
@@ -273,8 +262,10 @@ export default {
 			query.age[1] < 0 ||
 			query.age[1] < query.age[0]
 		)
-			return res.sendStatus(400);
-		if (isNaN(query.distance) || query.distance < 0) return res.sendStatus(400);
+			return res.status(400).json({ error: 'Invalid age range' });
+		if (isNaN(query.distance) || query.distance < 0) {
+			return res.status(400).json({ error: 'Invalid distance' });
+		}
 		if (
 			query.fame.length !== 2 ||
 			isNaN(query.fame[0]) ||
@@ -283,25 +274,33 @@ export default {
 			query.fame[1] < 0 ||
 			query.fame[1] < query.fame[0]
 		)
-			return res.sendStatus(400);
-		if (query.tags.length > 10) return res.sendStatus(400);
+			return res.status(400).json({ error: 'Invalid fame range' });
+		if (query.tags.length > 10) {
+			return res.status(400).json({ error: 'Too many tags' });
+		}
 		if (
 			query.sort !== 'tag_cursor' &&
 			query.sort !== 'age_cursor' &&
 			query.sort !== 'fame_cursor' &&
 			query.sort !== 'distance_cursor'
 		) {
-			return res.sendStatus(400);
+			return res.status(400).json({ error: 'Invalid cursor' });
 		}
-		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') return res.sendStatus(400);
-		if (query.languages.length === 0) return res.sendStatus(400);
-		if (query.mode !== 'map' && query.mode !== 'image') return res.sendStatus(400);
+		if (query.sort_dir !== 'ASC' && query.sort_dir !== 'DESC') {
+			return res.status(400).json({ error: 'Invalid sort direction' });
+		}
+		if (query.languages.length === 0) {
+			return res.status(400).json({ error: 'Missing language' });
+		}
+		if (query.mode !== 'map' && query.mode !== 'image') {
+			return res.status(400).json({ error: 'Invalid display mode' });
+		}
 
 		if (query.age[1] >= 50) query.age[1] = Number.MAX_SAFE_INTEGER;
 		if (query.distance >= 100) query.distance = Number.MAX_SAFE_INTEGER;
 		if (query.fame[1] >= 50) query.fame[1] = Number.MAX_SAFE_INTEGER;
 
-		req.query = query;
+		(req as any).query = query;
 		next();
 	},
 };
