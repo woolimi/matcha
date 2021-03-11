@@ -42,7 +42,7 @@
 <script>
 	export default {
 		auth: true,
-		middleware: 'checkVerfiedUser',
+		middleware: 'checkVerifiedUser',
 		async fetch() {
 			await this.$store.dispatch('blocked/loadList');
 		},
