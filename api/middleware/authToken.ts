@@ -1,7 +1,7 @@
-import { NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-const authToken = (req: any, res: any, next: NextFunction): any => {
+const authToken = (req: Request, res: Response, next: NextFunction): any => {
 	const authHeader = req.headers['authorization'];
 	if (!authHeader) {
 		return res.status(401).json({ error: 'Missing Authorization header' });
@@ -17,7 +17,7 @@ const authToken = (req: any, res: any, next: NextFunction): any => {
 		if (err) {
 			return res.status(403).json({ error: 'Token expired' });
 		}
-		req.user = user;
+		(req as any).user = user;
 		next();
 	});
 };
