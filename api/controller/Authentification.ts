@@ -76,6 +76,7 @@ export default class AuthentificationController {
 		// Check username and password
 		try {
 			const loginForm = req.body;
+
 			// check username
 			const queryResult = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [
 				loginForm.username,
@@ -84,6 +85,7 @@ export default class AuthentificationController {
 				console.log(`username(${loginForm.username}) not matched`);
 				return res.status(403).json({ error: 'Wrong username or password' });
 			}
+
 			// check password
 			const user = queryResult[0];
 			const isValidPassword = await bcrypt.compare(loginForm.password, user.password);
@@ -91,6 +93,12 @@ export default class AuthentificationController {
 				console.log(`${loginForm.username}'s password not matched`);
 				return res.status(403).json({ error: 'Wrong username or password' });
 			}
+
+			// Update location if set_location is not enabled
+			if (loginForm.location && loginForm.location.lat && loginForm.location.lng) {
+				await User.updateLocation(req.user.id, loginForm.location);
+			}
+
 			// return tokens
 			const u = { id: user.id };
 			const refresh_token = setRefreshToken(res, u);

@@ -18,7 +18,6 @@ export interface UserInterfaceBase {
 	lastName: string;
 	firstName: string;
 	verified: number;
-	initialized: number;
 	fame: number;
 	gender: ('male' | 'female') | null;
 	preferences: ('heterosexual' | 'homosexual' | 'bisexual') | null;
@@ -59,7 +58,6 @@ class User extends Model {
 			firstName VARCHAR(45) NOT NULL,
 			lastName VARCHAR(45) NOT NULL,
 			verified TINYINT DEFAULT '0',
-			initialized TINYINT DEFAULT '0',
 			fame INT UNSIGNED DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
 			preferences ENUM('heterosexual','homosexual','bisexual') DEFAULT 'bisexual',
@@ -292,14 +290,10 @@ class User extends Model {
 		return false;
 	}
 
-	static async updateLocation(user_id: number, ll: LocationLL) {
+	static async updateLocation(id: number, ll: LocationLL) {
 		try {
 			const xy = ll2xy(ll);
-			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326) WHERE id = ?', [
-				xy.x,
-				xy.y,
-				user_id,
-			]);
+			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326) WHERE id = ?', [xy.x, xy.y, id]);
 		} catch (error) {
 			throw error;
 		}
