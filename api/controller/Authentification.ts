@@ -83,7 +83,7 @@ export default class AuthentificationController {
 			]);
 			if (!queryResult.length) {
 				console.log(`username(${loginForm.username}) not matched`);
-				return res.status(403).json({ error: 'Wrong username or password' });
+				return res.status(403).json({ error: 'Wrong username or password.' });
 			}
 
 			// check password
@@ -91,12 +91,12 @@ export default class AuthentificationController {
 			const isValidPassword = await bcrypt.compare(loginForm.password, user.password);
 			if (!isValidPassword) {
 				console.log(`${loginForm.username}'s password not matched`);
-				return res.status(403).json({ error: 'Wrong username or password' });
+				return res.status(403).json({ error: 'Wrong username or password.' });
 			}
 
 			// Update location if set_location is not enabled
 			if (loginForm.location && loginForm.location.lat && loginForm.location.lng) {
-				await User.updateLocation(req.user.id, loginForm.location);
+				await User.updateLocation(user.id, loginForm.location);
 			}
 
 			// return tokens
@@ -108,7 +108,7 @@ export default class AuthentificationController {
 			});
 		} catch (error) {
 			console.log(error);
-			res.sendStatus(403);
+			return res.status(403).json({ error: 'Invalid request.' });
 		}
 	}
 
