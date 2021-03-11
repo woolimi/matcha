@@ -357,7 +357,9 @@ class User extends Model {
 			CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
 			CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor,
 			block_list.blocked,
-			report_list.reported_count`;
+			report_list.reported_count,
+			IFNULL(is_liked.liked, false) as is_liked,
+			IFNULL(is_liking.user, false) as is_liking`;
 	}
 
 	static arrayPlaceholder(array: any[]): string {

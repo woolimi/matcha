@@ -15,15 +15,29 @@
 											class="lighten-2"
 											size="36"
 										>
-											<v-icon>{{ `mdi-gender-${user.gender}` }}</v-icon>
+											<v-icon> mdi-gender-{{ user.gender }} </v-icon>
 										</v-avatar>
+										<v-tooltip bottom v-if="user.is_liked || user.is_liking">
+											<template v-slot:activator="{ on, attrs }">
+												<v-avatar
+													color="pink"
+													class="lighten-2"
+													size="36"
+													v-bind="attrs"
+													v-on="on"
+												>
+													<v-icon> mdi-heart </v-icon>
+												</v-avatar>
+											</template>
+											{{ likeStatus(user) }}
+										</v-tooltip>
 									</div>
 									<div class="d-block" style="width: 100%">
 										<div class="font-weight-black white--text text-shadow">
 											{{ user.username }}, {{ user.age }}
 										</div>
 										<div class="white--text font-weight-black d-flex justify-space-between">
-											<div class="d-block">
+											<div class="d-block text-shadow">
 												<v-icon color="amber">mdi-crown</v-icon>
 												{{ user.fame }}
 											</div>
@@ -109,6 +123,12 @@
 					await this.$store.dispatch('search/updateResult', true);
 					this.overlay = false;
 				}
+			},
+			likeStatus(user) {
+				if (user.is_liked) {
+					return `${user.username} is liking you`;
+				}
+				return `You already like ${user.username}`;
 			},
 		},
 		data() {
