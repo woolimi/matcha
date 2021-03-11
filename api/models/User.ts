@@ -18,7 +18,6 @@ export interface UserInterfaceBase {
 	lastName: string;
 	firstName: string;
 	verified: number;
-	initialized: number;
 	fame: number;
 	gender: ('male' | 'female') | null;
 	preferences: ('heterosexual' | 'homosexual' | 'bisexual') | null;
@@ -59,7 +58,6 @@ class User extends Model {
 			firstName VARCHAR(45) NOT NULL,
 			lastName VARCHAR(45) NOT NULL,
 			verified TINYINT DEFAULT '0',
-			initialized TINYINT DEFAULT '0',
 			fame INT UNSIGNED DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
 			preferences ENUM('heterosexual','homosexual','bisexual') DEFAULT 'bisexual',
@@ -69,6 +67,7 @@ class User extends Model {
 			login DATETIME DEFAULT NULL,
 			provider VARCHAR(10) DEFAULT 'local',
 			provider_id VARCHAR(255) DEFAULT NULL,
+			reset_password_token VARCHAR(255) DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;

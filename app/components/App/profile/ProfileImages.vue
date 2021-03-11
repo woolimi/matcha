@@ -9,7 +9,7 @@
 								<v-progress-circular indeterminate color="primary"> </v-progress-circular>
 							</v-overlay>
 
-							<ImageUploader v-model="imageLoading" :imageId="i">
+							<ImageUploader v-model="imageLoading" :imageId="i" ref="images">
 								<div slot="activator">
 									<v-avatar
 										tile
@@ -18,7 +18,9 @@
 										max-width="300"
 										class="elevation-10 grey lighten-3 pointer"
 									>
-										<p v-if="!$auth.user.images[i].url">Click here to add photo</p>
+										<p v-if="!$auth.user.images[i].url" class="black--text">
+											Click here to add photo
+										</p>
 										<img v-else :src="$auth.user.images[i].url" alt="profile photo" />
 
 										<v-btn
@@ -58,6 +60,7 @@
 		data: () => ({
 			window: 0,
 			saving: false,
+			refs: new Array(5).fill(null),
 		}),
 		computed: {
 			imageLoading: {
@@ -71,6 +74,9 @@
 		},
 		methods: {
 			async deleteImage() {
+				const input_ref = this.$refs.images[this.window].$refs.file;
+				input_ref.value = null;
+
 				try {
 					this.saving = true;
 					await this.$axios.post(`/api/profile/images/${this.$auth.user.id}/${this.window}`, {
