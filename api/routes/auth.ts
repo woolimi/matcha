@@ -5,7 +5,7 @@ import getLocation from '../middleware/getLocation';
 import AuthentificationController from '../controller/Authentification';
 
 const authRouter = express.Router();
-authRouter.post('/login', validator.userLogin, AuthentificationController.login);
+authRouter.post('/login', validator.userLogin, getLocation, AuthentificationController.login);
 authRouter.post('/refresh', AuthentificationController.refresh);
 authRouter.delete('/logout', AuthentificationController.logout);
 authRouter.post('/register', validator.userRegister, getLocation, AuthentificationController.register);
