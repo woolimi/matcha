@@ -60,7 +60,7 @@
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-human-male-female </v-icon> Gender</v-subheader>
 						<v-chip class="black--text" :color="genderColor">
-							{{ gender }}
+							<v-icon> mdi-gender-{{ profile.gender }} </v-icon> {{ gender }}
 						</v-chip>
 					</v-col>
 					<v-col cols="6">
