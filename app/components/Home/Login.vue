@@ -101,14 +101,23 @@
 						color: 'success',
 					});
 				} catch (e) {
+					let message = '';
 					if (e.error) {
+						// client validation error
 						this.error = e.error;
+						message = 'Invalid form';
+					} else if (e.response && e.response.data) {
+						// server validation error
+						this.error = {};
+						message = e.response.data.error;
 					} else {
-						this.$notifier.showMessage({
-							message: 'Server error',
-							color: 'error',
-						});
+						this.error = {};
+						message = e;
 					}
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 				}
 			},
 			googleLogin() {
