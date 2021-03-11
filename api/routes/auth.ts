@@ -2,7 +2,6 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import authToken from '../middleware/authToken';
 import User from '../models/User';
-import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import validator from '../middleware/validator';
 import { send_verification_email, send_reset_password_email } from '../services/Mailing';
@@ -21,17 +20,17 @@ authRouter.post('/login', validator.userLogin, async (req, res) => {
 		const queryResult = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [loginForm.username]);
 		if (!queryResult.length) {
 			console.log(`username(${loginForm.username}) not matched`);
-			return res.status(200).send({ error: 'Wrong username or password' });
+			return res.status(403).json({ error: 'Wrong username or password' });
 		}
 		// check password
 		const user = queryResult[0];
 		const isValidPassword = await bcrypt.compare(loginForm.password, user.password);
 		if (!isValidPassword) {
 			console.log(`${loginForm.username}'s password not matched`);
-			return res.status(200).send({ error: 'Wrong username or password' });
+			return res.status(403).json({ error: 'Wrong username or password' });
 		}
 		// return tokens
-		const u = _.pick(user, ['id']);
+		const u = { id: user.id };
 		const refresh_token = setRefreshToken(res, u);
 		return res.json({
 			access_token: generateToken(u, 'access'),

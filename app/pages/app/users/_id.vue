@@ -60,13 +60,13 @@
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-human-male-female </v-icon> Gender</v-subheader>
 						<v-chip class="black--text" :color="genderColor">
-							{{ profile.gender }}
+							<v-icon> mdi-gender-{{ profile.gender }} </v-icon> {{ gender }}
 						</v-chip>
 					</v-col>
 					<v-col cols="6">
 						<v-subheader><v-icon left> mdi-head-heart </v-icon> Sexual Preferences</v-subheader>
 						<v-chip class="black--text" :color="preferencesColor">
-							{{ profile.preferences }}
+							{{ genderPreference }}
 						</v-chip>
 					</v-col>
 				</v-row>
@@ -207,11 +207,23 @@
 					? this.$date.simpleDate(this.profile.online)
 					: 'Offline';
 			},
+			/**
+			 * Capitalized gender
+			 */
+			gender() {
+				return `${this.profile.gender[0].toUpperCase()}${this.profile.gender.slice(1)}`;
+			},
 			genderColor() {
-				return this.profile?.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
+				return this.profile.gender == 'male' ? 'blue lighten-2' : 'pink lighten-2';
+			},
+			/**
+			 * Capitalized gender preference
+			 */
+			genderPreference() {
+				return `${this.profile.preferences[0].toUpperCase()}${this.profile.preferences.slice(1)}`;
 			},
 			preferencesColor() {
-				return this.profile?.preferences == 'heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5';
+				return this.profile.preferences == 'heterosexual' ? 'blue-grey lighten-5' : 'pink lighten-5';
 			},
 			likeMessage() {
 				switch (this.profile.like) {
