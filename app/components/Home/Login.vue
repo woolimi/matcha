@@ -97,7 +97,7 @@
 						});
 					}
 					return this.$notifier.showMessage({
-						message: 'Login sucess',
+						message: 'Logged in !',
 						color: 'success',
 					});
 				} catch (e) {
@@ -105,7 +105,7 @@
 						this.error = e.error;
 					} else {
 						this.$notifier.showMessage({
-							message: 'Server error',
+							message: e.response.data.error,
 							color: 'error',
 						});
 					}
