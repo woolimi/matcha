@@ -352,10 +352,12 @@ class User extends Model {
 
 	static common_select_query() {
 		return `users.id, username, lastName, firstName, gender, preferences, birthdate, biography, location,
-		uinfo.age, ROUND(uinfo.distance) AS distance, fame, upictures.path AS image,
-		CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
-		CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
-		CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor, block_list.blocked, report_list.reported_count`;
+			uinfo.age, ROUND(uinfo.distance) AS distance, fame, upictures.path AS image,
+			CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0')) AS distance_cursor,
+			CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
+			CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor,
+			block_list.blocked,
+			report_list.reported_count`;
 	}
 
 	static common_join_query(languages: string[], user_id: number) {
@@ -366,6 +368,20 @@ class User extends Model {
 				GROUP BY user_reports.reported
 			) AS report_list
 			ON users.id = report_list.reported
+			LEFT JOIN (
+				SELECT user_likes.liked
+				FROM user_likes
+				WHERE user_likes.user = ${user_id}
+				GROUP BY user_likes.liked
+			) AS is_liked
+			ON users.id = is_liked.liked
+			LEFT JOIN (
+				SELECT user_likes.user
+				FROM user_likes
+				WHERE user_likes.liked = ${user_id}
+				GROUP BY user_likes.user
+			) AS is_liking
+			ON users.id = is_liking.user
 			LEFT JOIN (
 				SELECT user_blocks.user, user_blocks.blocked
 				FROM user_blocks
@@ -422,6 +438,7 @@ class User extends Model {
 						AND fame >= ? AND fame <= ?
 						${User.cursor_query(query)}
 						AND block_list.blocked IS NULL
+						AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
 						AND (reported_count < 3 OR reported_count IS NULL)
 					ORDER BY ${sort} ${sort_dir}
 					LIMIT ${mode === 'image' ? 12 : 30}`,
@@ -459,6 +476,7 @@ class User extends Model {
 					AND fame >= ? AND fame <= ?
 					${User.cursor_query(query)}
 					AND block_list.blocked IS NULL
+					AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
 					AND (reported_count < 3 OR reported_count IS NULL)
 				ORDER BY ${sort} ${sort_dir}
 				LIMIT ${mode === 'image' ? 12 : 30}`,
