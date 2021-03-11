@@ -131,26 +131,23 @@
 					const { data } = await this.$axios.post('/auth/reset-password', {
 						username: this.user.username,
 					});
-					if (data.error) throw data;
-
 					this.$notifier.showMessage({
 						message: data.message,
 						color: 'success',
 					});
 					this.$store.commit('login/CLOSE');
 				} catch (e) {
-					if (e.error) {
-						this.$notifier.showMessage({
-							message: e.error,
-							color: 'error',
-						});
+					let message = '';
+					if (e.response && e.response.data) {
+						// server validation error
+						message = e.response.data.error;
 					} else {
-						this.$notifier.showMessage({
-							message: 'Error',
-							color: 'error',
-						});
-						console.log(e);
+						message = e;
 					}
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 				}
 			},
 		},

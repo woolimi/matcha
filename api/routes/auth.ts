@@ -96,23 +96,59 @@ authRouter.post('/reset-password', async (req, res) => {
 	try {
 		const result = await User.query('SELECT * FROM users WHERE username = ? LIMIT 1', [data.username]);
 		if (!result.length) throw { error: 'Invalid username' };
+		if (!result[0].verified) throw { error: 'Cannot send to unverified email address' };
 
 		const email = result[0].email;
-		const new_password = randomstring.generate(10);
-		const hashed_new_password = await bcrypt.hash(new_password, 10);
-		await Model.query('START TRANSACTION');
-		await User.query('UPDATE users SET password = ? WHERE id = ? LIMIT 1', [hashed_new_password, result[0].id]);
+		const token = generateToken({ id: result[0].id }, 'access');
+		if (!token) throw { error: 'Fail to generate token ' };
 
-		await send_reset_password_email(email, new_password);
+		await Model.query('START TRANSACTION');
+		await User.query('UPDATE users SET reset_password_token = ? WHERE id = ? LIMIT 1', [token, result[0].id]);
+
+		await send_reset_password_email(email, token);
 		await Model.query('COMMIT');
 
-		return res.status(200).json({ message: 'Successfully sent email with new password. Please check your email' });
+		return res.status(200).json({ message: 'Please check your email to reset password' });
 	} catch (e) {
 		console.log(e);
 		await Model.query('ROLLBACK');
 		if (e.error) {
-			res.json({ error: e });
-		} else res.sendStatus(400);
+			res.status(403).json({ error: e.error });
+		} else res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
+authRouter.get('/reset-password/:jwt', async (req, res) => {
+	try {
+		const token = req.params.jwt;
+		const result = await User.query('SELECT * FROM users WHERE reset_password_token = ? LIMIT 1', [token]);
+		console.log(result);
+		if (!result.length) throw { error: 'Invalid token' };
+		const user: any = await jwt.verify(req.params.jwt, process.env.ACCESS_TOKEN_SECRET);
+		const new_password = randomstring.generate(10);
+		const encrypt_password = await bcrypt.hash(new_password, 10);
+
+		await User.query('UPDATE users SET password = ?, reset_password_token = "" WHERE id = ?', [
+			encrypt_password,
+			user.id,
+		]);
+
+		res.status(200).render('reset-password', {
+			result: `Your new temperary password is ${new_password}`,
+		});
+	} catch (e) {
+		console.log(e);
+		let result = '';
+		if (e instanceof jwt.TokenExpiredError) {
+			result = 'Expired token';
+		} else if (e instanceof jwt.JsonWebTokenError) {
+			result = 'Invalid token';
+		} else if (e.error) {
+			result = e.error;
+		} else result = e;
+		return res.status(401).render('reset-password', {
+			result,
+		});
 	}
 });
 
@@ -147,7 +183,7 @@ authRouter.get('/email-verification/:jwt', async (req, res) => {
 	} catch (error) {
 		console.log('EMAIL VERIFICATION ERROR : ', error);
 		if (error instanceof jwt.TokenExpiredError) {
-			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Your token is expired'));
+			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Expired token'));
 		} else {
 			res.redirect('/auth/email-verification?result=fail&reason=' + encodeURIComponent('Invalid token'));
 		}
