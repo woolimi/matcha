@@ -21,7 +21,7 @@ export interface UserInterfaceBase {
 	initialized: number;
 	fame: number;
 	gender: ('male' | 'female') | null;
-	preferences: ('heterosexual' | 'bisexual') | null;
+	preferences: ('heterosexual' | 'homosexual' | 'bisexual') | null;
 	biography: string | null;
 	birthdate: string | null;
 	login: string | null;
@@ -62,7 +62,7 @@ class User extends Model {
 			initialized TINYINT DEFAULT '0',
 			fame INT UNSIGNED DEFAULT '0',
 			gender ENUM('male','female') DEFAULT NULL,
-			preferences ENUM('heterosexual','bisexual') DEFAULT NULL,
+			preferences ENUM('heterosexual','homosexual','bisexual') DEFAULT 'bisexual',
 			biography TEXT DEFAULT NULL,
 			location POINT SRID 4326 NOT NULL,
 			birthdate DATETIME DEFAULT NULL,
@@ -327,6 +327,8 @@ class User extends Model {
 			let preferences_query = '';
 			if (preferences === 'heterosexual') {
 				preferences_query = `gender = '${gender === 'male' ? 'female' : 'male'}'`;
+			} else if (preferences === 'homosexual') {
+				preferences_query = `gender = '${gender === 'male' ? 'male' : 'female'}'`;
 			} else if (preferences === 'bisexual') {
 				if (gender === 'male')
 					preferences_query = `(gender = 'female' OR (gender = 'male' AND preferences = 'bisexual'))`;

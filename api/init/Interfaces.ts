@@ -1,5 +1,3 @@
-import { internet } from 'faker';
-
 export interface RegisterForm {
 	email: string;
 	username: string;

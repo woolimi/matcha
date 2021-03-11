@@ -65,8 +65,9 @@
 									prepend-icon="mdi-head-heart"
 									:error-messages="error.preferences"
 								>
-									<v-radio label="heterosexual" value="heterosexual"></v-radio>
-									<v-radio label="bisexual" value="bisexual"></v-radio>
+									<v-radio label="Heterosexual" value="heterosexual"></v-radio>
+									<v-radio label="Homosexual" value="homosexual"></v-radio>
+									<v-radio label="Bisexual" value="bisexual"></v-radio>
 								</v-radio-group>
 							</v-col>
 						</v-row>
@@ -208,7 +209,7 @@
 						...this.user,
 					});
 					this.$notifier.showMessage({
-						message: 'updated',
+						message: 'Profile Updated !',
 						color: 'success',
 					});
 					this.error = {};

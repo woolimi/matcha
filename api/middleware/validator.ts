@@ -69,7 +69,9 @@ function validate_gender(gender: string) {
 }
 function validate_preferences(preferences: string) {
 	if (!preferences) return 'preference is required';
-	if (preferences !== 'heterosexual' && preferences !== 'bisexual') return 'Invalid preference';
+	if (preferences !== 'heterosexual' && preferences !== 'homosexual' && preferences !== 'bisexual') {
+		return 'Invalid preference';
+	}
 	return '';
 }
 
