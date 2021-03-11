@@ -108,7 +108,7 @@
 						message = 'Invalid form';
 					} else if (e.response && e.response.data) {
 						// server validation error
-						this.error = {};
+						this.error = e.response.data.error;
 						message = e.response.data.error;
 					} else {
 						this.error = {};

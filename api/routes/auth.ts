@@ -87,7 +87,7 @@ authRouter.post('/register', validator.userRegister, getLocation, async (req, re
 	} catch (error) {
 		console.error(error);
 		await Model.query('ROLLBACK');
-		return res.sendStatus(403);
+		return res.status(500).json({ error: 'Internal Server Error' });
 	}
 });
 
