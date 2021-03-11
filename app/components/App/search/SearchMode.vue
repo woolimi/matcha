@@ -1,26 +1,26 @@
 <template>
 	<v-container class="d-flex justify-space-between align-center">
-		<v-btn-toggle v-if="mode === 'image'" mandatory dense>
+		<v-btn-toggle v-if="mode === 'image'" :value="sort" mandatory dense>
 			<v-btn value="distance_cursor" @click="sorting">
-				<v-icon>mdi-map-marker-distance</v-icon>
+				<v-icon> mdi-map-marker-distance </v-icon>
 				<v-icon v-show="sort === 'distance_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
 			<v-btn value="fame_cursor" @click="sorting">
-				<v-icon>mdi-crown</v-icon>
+				<v-icon> mdi-crown </v-icon>
 				<v-icon v-show="sort === 'fame_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
 			<v-btn value="age_cursor" @click="sorting">
-				<v-icon>mdi-account-tie</v-icon>
+				<v-icon> mdi-account-tie </v-icon>
 				<v-icon v-show="sort === 'age_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>
 			</v-btn>
 			<v-btn value="tag_cursor" @click="sorting">
-				<v-icon>mdi-tag</v-icon>
+				<v-icon> mdi-tag </v-icon>
 				<v-icon v-show="sort === 'tag_cursor'">
 					{{ this.sort_dir === 'ASC' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
 				</v-icon>

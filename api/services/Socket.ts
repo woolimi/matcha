@@ -61,7 +61,7 @@ export function bindSocket(app: Express, io: Server) {
 			sendMessage(app, socket, payload);
 		});
 		socket.on('user/changePage', (payload: { name: string; params: { id?: string } }) => {
-			console.log('💨[socket]: receive user/changePage from', socket.id);
+			// console.log('💨[socket]: receive user/changePage from', socket.id);
 			app.currentPage[socket.id] = payload;
 		});
 		socket.on('disconnect', async () => {
