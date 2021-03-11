@@ -96,6 +96,7 @@
 							color: 'error',
 						});
 					}
+					this.$store.dispatch('search/initTags', this.$auth.user.tags);
 					return this.$notifier.showMessage({
 						message: 'Login sucess',
 						color: 'success',

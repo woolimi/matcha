@@ -46,6 +46,7 @@
 				};
 				const { data } = await this.$axios.post('/auth/social', form);
 				this.$auth.setUserToken(data.access_token, data.refresh_token);
+				this.$store.dispatch('search/initTags', this.$auth.user.tags);
 				this.$notifier.showMessage({
 					message: 'Login sucess',
 					color: 'success',

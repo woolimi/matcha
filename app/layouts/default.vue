@@ -34,6 +34,7 @@
 		mounted() {
 			if (this.$auth.loggedIn) {
 				this.$auth.refreshTokens();
+				this.$store.dispatch('search/initTags', this.$auth.user.tags);
 			}
 			this.isLandingPage = this.$route.path == '/';
 			navigator.geolocation.getCurrentPosition(({ coords }) => {
