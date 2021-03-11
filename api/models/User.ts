@@ -257,7 +257,7 @@ class User extends Model {
 				`SELECT u.id, u.firstName, u.lastName, u.login, p.path as picture
 				FROM ${User.tname} as u
 				LEFT JOIN user_pictures as p ON p.user = u.id
-				WHERE u.id IN (${new Array(ids.length).fill('?').join(',')})`,
+				WHERE u.id IN (${this.arrayPlaceholder(ids)})`,
 				[...ids]
 			);
 			return users.map((user) => {
@@ -360,7 +360,18 @@ class User extends Model {
 			report_list.reported_count`;
 	}
 
-	static common_join_query(languages: string[], user_id: number) {
+	static arrayPlaceholder(array: any[]): string {
+		return new Array(array.length).fill('?').join(',');
+	}
+
+	static common_join_placeholders(userId: number): number[] {
+		return [userId, userId, userId];
+	}
+
+	/**
+	 * Added placeholders: [User.id, User.id, User.id, languages]
+	 */
+	static common_join_query(languages: string[]) {
 		return `
 			LEFT JOIN (
 				SELECT user_reports.reported, COUNT(user_reports.reported) AS reported_count
@@ -371,21 +382,21 @@ class User extends Model {
 			LEFT JOIN (
 				SELECT user_likes.liked
 				FROM user_likes
-				WHERE user_likes.user = ${user_id}
+				WHERE user_likes.user = ?
 				GROUP BY user_likes.liked
 			) AS is_liked
 			ON users.id = is_liked.liked
 			LEFT JOIN (
 				SELECT user_likes.user
 				FROM user_likes
-				WHERE user_likes.liked = ${user_id}
+				WHERE user_likes.liked = ?
 				GROUP BY user_likes.user
 			) AS is_liking
 			ON users.id = is_liking.user
 			LEFT JOIN (
 				SELECT user_blocks.user, user_blocks.blocked
 				FROM user_blocks
-				WHERE user_blocks.user = ${user_id}
+				WHERE user_blocks.user = ?
 			) AS block_list
 			ON users.id = block_list.blocked
 			INNER JOIN (
@@ -402,22 +413,42 @@ class User extends Model {
 			INNER JOIN (
 				SELECT user_languages.user, user_languages.language
 				FROM user_languages
-				WHERE user_languages.language IN (${new Array(languages.length).fill('?').join(',')})
+				WHERE user_languages.language IN (${this.arrayPlaceholder(languages)})
 			) AS ulangs
 			ON users.id = ulangs.user`;
 	}
 
-	static cursor_query({ scroll, cursor, sort, sort_dir }: SearchQuery) {
-		const dir = sort_dir === 'ASC' ? '>' : '<';
-		let s = '';
-		if (sort === 'distance_cursor') {
-			s = `CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0'))`;
-		} else if (sort === 'fame_cursor') {
-			s = `CONCAT(LPAD(fame, 5, '0'), LPAD(users.id, 5, '0'))`;
-		} else if (sort === 'age_cursor') {
-			s = `CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0'))`;
+	static sortField(sort: string): string {
+		switch (sort) {
+			case 'tag_cursor':
+				return 'tag_cursor';
+			case 'age_cursor':
+				return 'age_cursor';
+			case 'fame_cursor':
+				return 'fame_cursor';
+			case 'distance_cursor':
+			default:
+				return 'distance_cursor';
 		}
-		return scroll ? `AND ${s} ${dir} ${cursor}` : ``;
+	}
+
+	/**
+	 * Added placeholders: [cursor_id]
+	 */
+	static cursor_query({ scroll, sort, sort_dir }: SearchQuery) {
+		if (scroll) {
+			const dir = sort_dir === 'ASC' ? '>' : '<';
+			let s = '';
+			if (sort === 'distance_cursor') {
+				s = `CONCAT(LPAD(ROUND(uinfo.distance), 5, '0'), LPAD(users.id, 5, '0'))`;
+			} else if (sort === 'fame_cursor') {
+				s = `CONCAT(LPAD(fame, 5, '0'), LPAD(users.id, 5, '0'))`;
+			} else if (sort === 'age_cursor') {
+				s = `CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0'))`;
+			}
+			return `AND ${s} ${dir} ?`;
+		}
+		return '';
 	}
 
 	static async search_without_tags(
@@ -426,23 +457,34 @@ class User extends Model {
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, fame, sort, sort_dir, languages, mode } = query;
+		const { distance, age, fame, sort, sort_dir, languages, mode, scroll } = query;
+		const placeholders = [
+			...this.common_join_placeholders(user_id),
+			location.y,
+			location.x,
+			...languages,
+			user_id,
+			distance,
+			...age,
+			...fame,
+		];
+		if (scroll) placeholders.push(query.cursor);
 		return await User.query(
 			`SELECT ${User.common_select_query()}
-					FROM users
-					${User.common_join_query(languages, user_id)}
-					WHERE users.id != ?
-						AND ${preferences_query} AND distance < ?
-						AND age >= ? AND age <= ?
-						${User.invalid_user_filter_query}
-						AND fame >= ? AND fame <= ?
-						${User.cursor_query(query)}
-						AND block_list.blocked IS NULL
-						AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
-						AND (reported_count < 3 OR reported_count IS NULL)
-					ORDER BY ${sort} ${sort_dir}
-					LIMIT ${mode === 'image' ? 12 : 30}`,
-			[location.y, location.x, ...languages, user_id, distance, age[0], age[1], fame[0], fame[1]]
+			FROM users
+			${User.common_join_query(languages)}
+			WHERE users.id != ?
+				AND ${preferences_query} AND distance < ?
+				AND age >= ? AND age <= ?
+				${User.invalid_user_filter_query}
+				AND fame >= ? AND fame <= ?
+				${User.cursor_query(query)}
+				AND block_list.blocked IS NULL
+				AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
+				AND (reported_count < 3 OR reported_count IS NULL)
+			ORDER BY ${this.sortField(sort)} ${sort_dir == 'ASC' ? 'ASC' : 'DESC'}
+			LIMIT ${mode === 'image' ? 12 : 30}`,
+			placeholders
 		);
 	}
 
@@ -452,35 +494,47 @@ class User extends Model {
 		preferences_query: string,
 		query: SearchQuery
 	) {
-		const { distance, age, fame, sort, sort_dir, tags, languages, mode } = query;
+		const { distance, age, fame, sort, sort_dir, tags, languages, mode, scroll } = query;
+		const placeholders = [
+			...this.common_join_placeholders(user_id),
+			location.y,
+			location.x,
+			...languages,
+			...tags,
+			user_id,
+			distance,
+			...age,
+			...fame,
+		];
+		if (scroll) placeholders.push(query.cursor);
 		return await User.query(
 			`SELECT ${User.common_select_query()},
 				utags.tag_list,
 				LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1 AS number_of_common_tags,
 				CONCAT(LPAD(LENGTH(utags.tag_list) - LENGTH(REPLACE(utags.tag_list, ',', '')) + 1, 3, '0'), LPAD(users.id, 5, '0')) AS tag_cursor
-				FROM users
-				${User.common_join_query(languages, user_id)}
-				LEFT JOIN (
-					SELECT user, group_concat(IF(tags.name IN (${new Array(tags.length).fill('?').join(',')}), tags.name, NULL)) as tag_list
-					FROM user_tags
-					LEFT JOIN tags
-					ON user_tags.tag = tags.id
-					GROUP BY user
-				) AS utags
-				ON users.id = utags.user
-				WHERE users.id != ?
-					AND ${preferences_query} AND distance < ?
-					AND age >= ? AND age <= ?
-					AND tag_list IS NOT NULL
-					${User.invalid_user_filter_query}
-					AND fame >= ? AND fame <= ?
-					${User.cursor_query(query)}
-					AND block_list.blocked IS NULL
-					AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
-					AND (reported_count < 3 OR reported_count IS NULL)
-				ORDER BY ${sort} ${sort_dir}
-				LIMIT ${mode === 'image' ? 12 : 30}`,
-			[location.y, location.x, ...languages, ...tags, user_id, distance, age[0], age[1], fame[0], fame[1]]
+			FROM users
+			${User.common_join_query(languages)}
+			LEFT JOIN (
+				SELECT user, group_concat(IF(tags.name IN (${this.arrayPlaceholder(tags)}), tags.name, NULL)) as tag_list
+				FROM user_tags
+				LEFT JOIN tags
+				ON user_tags.tag = tags.id
+				GROUP BY user
+			) AS utags
+			ON users.id = utags.user
+			WHERE users.id != ?
+				AND ${preferences_query} AND distance < ?
+				AND age >= ? AND age <= ?
+				AND tag_list IS NOT NULL
+				${User.invalid_user_filter_query}
+				AND fame >= ? AND fame <= ?
+				${User.cursor_query(query)}
+				AND block_list.blocked IS NULL
+				AND (is_liked.liked IS NULL OR is_liking.user IS NULL)
+				AND (reported_count < 3 OR reported_count IS NULL)
+			ORDER BY ${this.sortField(sort)} ${sort_dir == 'ASC' ? 'ASC' : 'DESC'}
+			LIMIT ${mode === 'image' ? 12 : 30}`,
+			placeholders
 		);
 	}
 }

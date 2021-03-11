@@ -73,9 +73,7 @@ export const actions = {
 				cursor: state.cursor,
 				mode,
 			};
-			const { data } = await this.$axios.get('/api/search', {
-				params,
-			});
+			const { data } = await this.$axios.post('/api/search', { ...params });
 			commit('SET_USERS', { users: data.users, scroll });
 		} catch (error) {
 			console.error(error);
