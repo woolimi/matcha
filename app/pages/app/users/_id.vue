@@ -188,9 +188,9 @@
 		validate({ params }) {
 			return /^\d+$/.test(params.id);
 		},
-		mounted() {
+		async fetch() {
 			if (this.id) {
-				this.$store.dispatch('profile/load', this.id);
+				await this.$store.dispatch('profile/load', this.id);
 			}
 		},
 		computed: {

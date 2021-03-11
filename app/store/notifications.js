@@ -53,12 +53,12 @@ export const actions = {
 		});
 	},
 	markAsRead({ commit }, id) {
-		this.$axios.post(`/api/notifications/read`, { id }).then(() => {
+		return this.$axios.post(`/api/notifications/read`, { id }).then(() => {
 			commit('setAsRead', id);
 		});
 	},
 	markAllAsRead({ commit }) {
-		this.$axios.post(`/api/notifications/read/all`).then(() => {
+		return this.$axios.post(`/api/notifications/read/all`).then(() => {
 			commit('setAllAsRead');
 		});
 	},

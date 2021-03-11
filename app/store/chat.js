@@ -120,7 +120,7 @@ export const actions = {
 	},
 	loadChat({ commit }, id) {
 		commit('selectChat', id);
-		this.$axios
+		return this.$axios
 			.get(`/api/chat/${id}`)
 			.then((response) => {
 				commit('setMessages', response.data);
@@ -138,7 +138,7 @@ export const actions = {
 		if (state.completed) return;
 		commit('setLoadingMore', true);
 		const from = state.messages.length == 0 ? '' : state.messages[0].id;
-		this.$axios.get(`/api/chat/${state.chat.id}/${from}`).then((response) => {
+		return this.$axios.get(`/api/chat/${state.chat.id}/${from}`).then((response) => {
 			commit('insertMessages', response.data);
 			commit('setLoadingMore', false);
 		});

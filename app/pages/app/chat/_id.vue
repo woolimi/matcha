@@ -14,9 +14,9 @@
 				return this.$store.getters['chat/loadedList'];
 			},
 		},
-		mounted() {
+		async fetch() {
 			if (this.id) {
-				this.$store.dispatch('chat/loadChat', this.id);
+				await this.$store.dispatch('chat/loadChat', this.id);
 			}
 		},
 		watch: {
