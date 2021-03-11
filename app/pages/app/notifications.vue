@@ -5,7 +5,7 @@
 <script>
 	export default {
 		auth: true,
-		middleware: 'checkVerfiedUser',
+		middleware: 'checkVerifiedUser',
 		computed: {
 			emptyMessage() {
 				return 'No notifications yet ! Start matching to interact with other peoples.';
