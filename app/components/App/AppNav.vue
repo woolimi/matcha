@@ -108,6 +108,8 @@
 		async fetch() {
 			await this.$store.dispatch('notifications/loadList');
 			await this.$store.dispatch('chat/loadList');
+			this.$auth.refreshTokens();
+			this.$store.dispatch('search/initTags', this.$auth.user.tags);
 		},
 		mounted() {
 			this.$root.socket = this.$nuxtSocket({ teardown: true });

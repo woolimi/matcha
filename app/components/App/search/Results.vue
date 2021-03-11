@@ -76,9 +76,6 @@
 
 <script>
 	export default {
-		beforeCreate() {
-			this.$store.dispatch('search/initTags', this.$auth.user.tags);
-		},
 		mounted() {
 			this.$store.dispatch('search/updateResult');
 		},
