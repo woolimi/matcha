@@ -18,7 +18,9 @@
 										max-width="300"
 										class="elevation-10 grey lighten-3 pointer"
 									>
-										<p v-if="!$auth.user.images[i].url">Click here to add photo</p>
+										<p v-if="!$auth.user.images[i].url" class="black--text">
+											Click here to add photo
+										</p>
 										<img v-else :src="$auth.user.images[i].url" alt="profile photo" />
 
 										<v-btn
