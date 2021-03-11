@@ -57,34 +57,26 @@ export const mutations = {
 
 export const actions = {
 	async updateResult({ commit, state, rootState }, scroll) {
-		try {
-			let { age, distance, fame, tags, sort, sort_dir, mode } = state;
-			if (tags.selected.length === 0 && sort === 'tag_cursor') return;
-			if (scroll && state.no_more_data) return;
-			const params = {
-				age,
-				distance,
-				fame,
-				tags: tags.selected,
-				sort,
-				sort_dir,
-				languages: rootState.auth.user.languages,
-				scroll: !!scroll,
-				cursor: state.cursor,
-				mode,
-			};
-			const { data } = await this.$axios.post('/api/search', { ...params });
-			commit('SET_USERS', { users: data.users, scroll });
-		} catch (error) {
-			console.error(error);
-		}
+		const { age, distance, fame, tags, sort, sort_dir, mode } = state;
+		if (tags.selected.length === 0 && sort === 'tag_cursor') return;
+		if (scroll && state.no_more_data) return;
+		const params = {
+			age,
+			distance,
+			fame,
+			tags: tags.selected,
+			sort,
+			sort_dir,
+			languages: rootState.auth.user.languages,
+			scroll: !!scroll,
+			cursor: state.cursor,
+			mode,
+		};
+		const { data } = await this.$axios.post('/api/search', params);
+		commit('SET_USERS', { users: data.users, scroll });
 	},
 	async initTags({ commit }, payload) {
-		try {
-			const { data } = await this.$axios.get('/api/tags');
-			commit('INIT_TAGS', { items: data.tags, selected: payload });
-		} catch (error) {
-			console.error(error);
-		}
+		const { data } = await this.$axios.get('/api/tags');
+		commit('INIT_TAGS', { items: data.tags, selected: payload });
 	},
 };
