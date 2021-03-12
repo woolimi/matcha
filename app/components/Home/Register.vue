@@ -112,16 +112,23 @@
 					}
 					this.$store.commit('register/CLOSE');
 				} catch (e) {
-					if (_.isEmpty(e.error)) {
-						console.error(e);
-						this.$notifier.showMessage({ message: 'Error', color: 'error' });
-					} else {
+					let message = '';
+					if (e.error) {
+						// client validation error
 						this.error = e.error;
-						this.$notifier.showMessage({
-							message: 'Invalid form',
-							color: 'error',
-						});
+						message = 'Invalid form';
+					} else if (e.response && e.response.data) {
+						// server validation error
+						this.error = e.response.data.error;
+						message = e.response.data.error;
+					} else {
+						this.error = {};
+						message = e;
 					}
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 				}
 			},
 			googleLogin() {

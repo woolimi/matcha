@@ -96,19 +96,29 @@
 							color: 'error',
 						});
 					}
+					this.$store.dispatch('search/initTags', this.$auth.user.tags);
 					return this.$notifier.showMessage({
 						message: 'Logged in !',
 						color: 'success',
 					});
 				} catch (e) {
+					let message = '';
 					if (e.error) {
+						// client validation error
 						this.error = e.error;
+						message = 'Invalid form';
+					} else if (e.response && e.response.data) {
+						// server validation error
+						this.error = e.response.data.error;
+						message = e.response.data.error;
 					} else {
-						this.$notifier.showMessage({
-							message: e.response.data.error,
-							color: 'error',
-						});
+						this.error = {};
+						message = e;
 					}
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 				}
 			},
 			googleLogin() {
@@ -122,26 +132,23 @@
 					const { data } = await this.$axios.post('/auth/reset-password', {
 						username: this.user.username,
 					});
-					if (data.error) throw data;
-
 					this.$notifier.showMessage({
 						message: data.message,
 						color: 'success',
 					});
 					this.$store.commit('login/CLOSE');
 				} catch (e) {
-					if (e.error) {
-						this.$notifier.showMessage({
-							message: e.error,
-							color: 'error',
-						});
+					let message = '';
+					if (e.response && e.response.data) {
+						// server validation error
+						message = e.response.data.error;
 					} else {
-						this.$notifier.showMessage({
-							message: 'Error',
-							color: 'error',
-						});
-						console.log(e);
+						message = e;
 					}
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 				}
 			},
 		},

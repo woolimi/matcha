@@ -90,9 +90,8 @@
 
 <script>
 	export default {
-		async fetch() {
-			await this.$store.dispatch('search/initTags', this.$auth.user.tags);
-			await this.$store.dispatch('search/updateResult');
+		mounted() {
+			this.$store.dispatch('search/updateResult');
 		},
 		computed: {
 			imageCols() {
