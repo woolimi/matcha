@@ -92,7 +92,7 @@ export default class BlockController {
 		// Block User
 		else {
 			const result = await UserBlock.add(self, id);
-			this.triggerBlockEffects(req.app, self, id);
+			BlockController.triggerBlockEffects(req.app, self, id);
 			const user = await User.getSimple(id);
 			return res.json({ id: result.insertId, at: new Date(), status: true, user });
 		}
