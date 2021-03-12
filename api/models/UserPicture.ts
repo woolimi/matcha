@@ -29,10 +29,6 @@ class UserPicture extends Model {
 	static async create_or_update(user_id: number, image_id: number, image_path: string): Promise<any> {
 		try {
 			let p = null;
-			p = await UserPicture.query('SELECT * FROM user_pictures WHERE path = ? LIMIT 1', [image_path]);
-			if (p.length > 0) {
-				return UserPicture.query('UPDATE user_pictures SET added = NOW() WHERE path = ?', [image_path]);
-			}
 
 			p = await UserPicture.query('SELECT * FROM user_pictures WHERE user = ? AND picture = ? LIMIT 1', [
 				user_id,
@@ -48,7 +44,7 @@ class UserPicture extends Model {
 				if (!p[0].path.match(/^https:\/\//)) {
 					let resolve_path = '../';
 					if (process.env.ENVIRONMENT === 'build') resolve_path += '../';
-					fs.unlink(path.resolve(__dirname, resolve_path, image_path), (err) => {
+					fs.unlink(path.resolve(__dirname, resolve_path, p[0].path), (err) => {
 						if (err) console.log(err);
 					});
 				}
