@@ -32,9 +32,6 @@
 			};
 		},
 		mounted() {
-			if (this.$auth.loggedIn) {
-				this.$auth.refreshTokens();
-			}
 			this.isLandingPage = this.$route.path == '/';
 			navigator.geolocation.getCurrentPosition(({ coords }) => {
 				localStorage.setItem(

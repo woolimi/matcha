@@ -39,14 +39,15 @@ export async function send_verification_email(to: string, userId: number) {
 	}
 }
 
-export async function send_reset_password_email(to: string, new_password: string) {
+export async function send_reset_password_email(to: string, token: string) {
 	try {
 		const content: any = {};
-		content.new_password = new_password;
+		content.url = `${process.env.API}/auth/reset-password/${token}`;
 		content.subject = 'Reset Password';
+		console.log('Reset password url: ', content.url);
 
 		const mail = await send_email(to, 'reset_password', content);
-		console.log('Email : ', mail);
+		console.log('Email: ', mail);
 	} catch (error) {
 		throw error;
 	}

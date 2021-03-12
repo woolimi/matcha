@@ -67,6 +67,7 @@ class User extends Model {
 			login DATETIME DEFAULT NULL,
 			provider VARCHAR(10) DEFAULT 'local',
 			provider_id VARCHAR(255) DEFAULT NULL,
+			reset_password_token VARCHAR(255) DEFAULT NULL,
 			UNIQUE KEY email_UNIQUE (email),
 			UNIQUE KEY username_UNIQUE (username)
 		) ENGINE=InnoDB DEFAULT CHARSET=${MySQL.CHARSET} COLLATE=${MySQL.COLLATION}`;
