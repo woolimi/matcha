@@ -98,7 +98,7 @@
 					}
 					this.$store.dispatch('search/initTags', this.$auth.user.tags);
 					return this.$notifier.showMessage({
-						message: 'Login sucess',
+						message: 'Logged in !',
 						color: 'success',
 					});
 				} catch (e) {

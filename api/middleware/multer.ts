@@ -1,3 +1,5 @@
+import { Request } from 'express';
+import { FileFilterCallback } from 'multer';
 import multer from 'multer';
 import mime from 'mime-types';
 
@@ -12,9 +14,9 @@ const storage = multer.diskStorage({
 	},
 });
 
-function fileFilter(req: any, file: any, cb: any) {
+function fileFilter(req: Request, file: Express.Multer.File, cb: FileFilterCallback) {
 	if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG)$/)) {
-		return cb(new Error('Only image files are allowed!'), false);
+		return cb(new Error('Only image files are allowed!'));
 	}
 	cb(null, true);
 }

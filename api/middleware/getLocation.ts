@@ -1,8 +1,8 @@
-import { NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
 import geoip from 'geoip-lite';
 
-const getLocation = (req: any, res: any, next: NextFunction): any => {
+const getLocation = (req: Request, res: Response, next: NextFunction) => {
 	const uinfo = req.body;
 	const clientIp = req.clientIp;
 	const default_location = { lat: 48.8566, lng: 2.3522 };

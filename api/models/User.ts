@@ -291,14 +291,10 @@ class User extends Model {
 		return false;
 	}
 
-	static async updateLocation(user_id: number, ll: LocationLL) {
+	static async updateLocation(id: number, ll: LocationLL) {
 		try {
 			const xy = ll2xy(ll);
-			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326) WHERE id = ?', [
-				xy.x,
-				xy.y,
-				user_id,
-			]);
+			await User.query('UPDATE users SET location = ST_SRID(POINT(?, ?), 4326) WHERE id = ?', [xy.x, xy.y, id]);
 		} catch (error) {
 			throw error;
 		}
@@ -356,7 +352,9 @@ class User extends Model {
 			CONCAT(LPAD(IFNULL(fame, 0), 5, '0'), LPAD(users.id, 5, '0')) AS fame_cursor,
 			CONCAT(LPAD(uinfo.age, 3, '0'), LPAD(users.id, 5, '0')) AS age_cursor,
 			block_list.blocked,
-			report_list.reported_count`;
+			report_list.reported_count,
+			IFNULL(is_liked.liked, false) as is_liked,
+			IFNULL(is_liking.user, false) as is_liking`;
 	}
 
 	static arrayPlaceholder(array: any[]): string {

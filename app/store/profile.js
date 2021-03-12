@@ -47,7 +47,7 @@ export const mutations = {
 export const actions = {
 	load({ commit }, id) {
 		commit('setCurrent', {});
-		this.$axios
+		return this.$axios
 			.get(`/api/profile/${id}`)
 			.then((response) => {
 				commit('setCurrent', response.data);

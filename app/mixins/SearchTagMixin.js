@@ -7,7 +7,7 @@ export default {
 			set(val) {
 				if (val.length > 10) {
 					this.$store.commit('snackbar/SHOW', {
-						message: 'Maximun 10 tags allowed',
+						message: 'Maximum 10 tags allowed',
 						color: 'error',
 					});
 					val.pop();

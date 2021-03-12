@@ -188,9 +188,9 @@
 		validate({ params }) {
 			return /^\d+$/.test(params.id);
 		},
-		mounted() {
+		async fetch() {
 			if (this.id) {
-				this.$store.dispatch('profile/load', this.id);
+				await this.$store.dispatch('profile/load', this.id);
 			}
 		},
 		computed: {
@@ -263,6 +263,14 @@
 					this.$axios.post(`/api/like/${this.profile.id}`).then((response) => {
 						if (response.status == 200) {
 							this.$store.commit('profile/setLike', response.data.like);
+							// Remove chat if removing like
+							if (
+								response.data.like == 0 /* NONE */ ||
+								(response.data.like == 3 /* REVERSE */ && previous == 2) /* MATCHED */
+							) {
+								this.$store.commit('chat/removeUserChat', this.profile.id);
+							}
+							// Update displayed fame
 							if (response.data.like == 0 /* NONE */ && previous == 1 /* LIKED */) {
 								this.$store.commit('profile/updateFame', -4);
 							} else if (response.data.like == 1 /* LIKED */ && previous == 0 /* NONE */) {
@@ -282,7 +290,7 @@
 				}
 			},
 			openChat() {
-				this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
+				return this.$axios.post(`/api/chat/create/${this.id}`).then((response) => {
 					if (response.status >= 200 && response.status <= 201) {
 						this.$router.push({ path: `/app/chat/${response.data.chat}` });
 					} else {

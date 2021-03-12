@@ -12,6 +12,13 @@ declare global {
 			API: string;
 		}
 	}
+
+	type CoreExpress = import('express').Express;
+	interface Express extends CoreExpress {
+		users: { [key: string]: number };
+		sockets: { [key: number]: import('socket.io').Socket };
+		currentPage: { [key: string]: { name: string; params: { id?: string } } };
+	}
 }
 
 export {};

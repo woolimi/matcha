@@ -1,4 +1,4 @@
-import express, { Express as CoreExpress } from 'express';
+import express from 'express';
 import cors from 'cors';
 import profileRouter from './routes/api/profile';
 import authRouter from './routes/auth';
@@ -8,7 +8,7 @@ import checkRouter from './routes/api/check';
 import path from 'path';
 import Database from './init/Database';
 import { createServer } from 'http';
-import { Server as WSServer, Socket } from 'socket.io';
+import { Server as WSServer } from 'socket.io';
 import notificationsRouter from './routes/api/notifications';
 import chatRouter from './routes/api/chat';
 import requestIp from 'request-ip';
@@ -18,14 +18,6 @@ import searchRouter from './routes/api/search';
 import likeRouter from './routes/api/like';
 import blockRouter from './routes/api/block';
 import reportRouter from './routes/api/report';
-
-declare global {
-	interface Express extends CoreExpress {
-		users: { [key: string]: number };
-		sockets: { [key: number]: Socket };
-		currentPage: { [key: string]: { name: string; params: { id?: string } } };
-	}
-}
 
 dotenv.config();
 const corsConfig = {
@@ -62,7 +54,7 @@ app.use('/api/report', reportRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/chat', chatRouter);
 app.get('/', (req, res) => {
-	return res.send('Api Server is running');
+	return res.json({ status: 'API Server is running' });
 });
 
 // Start !
