@@ -13,9 +13,9 @@
 | :------------------: | :--------------------------: |
 | ![](./demo/chat.png) | ![](./demo/notification.png) |
 
-|         mobile         |
-| :--------------------: |
-| ![](./demo/mobile.jpg) |
+|         mobile         |         map         |
+| :--------------------: | :-----------------: |
+| ![](./demo/mobile.jpg) | ![](./demo/map.png) |
 
 ## Feature
 
