@@ -53,7 +53,10 @@ export default class ProfileController {
 		try {
 			const fileType = await FileType.fromFile(req.file.path);
 			if (!fileType || fileType.mime !== req.file.mimetype) {
-				fs.unlink(path.resolve(__dirname, '../../', req.file.path), (err) => {
+				let resolve_path = '../';
+				if (process.env.ENVIRONMENT === 'build') resolve_path += '../';
+
+				fs.unlink(path.resolve(__dirname, resolve_path, req.file.path), (err) => {
 					if (err) console.log(err);
 				});
 				return res.status(400).json({ error: 'Invalid image' });

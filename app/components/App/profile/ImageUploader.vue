@@ -69,12 +69,16 @@
 					});
 					this.$emit('input', false);
 				} catch (e) {
-					if (e.error) {
-						this.$notifier.showMessage({
-							message: e.error,
-							color: 'error',
-						});
+					let message = '';
+					if (e.response && e.response.data.error) {
+						message = e.response.data.error;
+					} else if (e.error) {
+						message = e.error;
 					} else console.error(e);
+					this.$notifier.showMessage({
+						message,
+						color: 'error',
+					});
 					this.$emit('input', false);
 				}
 			},

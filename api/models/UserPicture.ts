@@ -46,7 +46,9 @@ class UserPicture extends Model {
 				]);
 			} else {
 				if (!p[0].path.match(/^https:\/\//)) {
-					fs.unlink(path.resolve(__dirname, '../', p[0].path), (err) => {
+					let resolve_path = '../';
+					if (process.env.ENVIRONMENT === 'build') resolve_path += '../';
+					fs.unlink(path.resolve(__dirname, resolve_path, image_path), (err) => {
 						if (err) console.log(err);
 					});
 				}
@@ -87,7 +89,9 @@ class UserPicture extends Model {
 		try {
 			await UserPicture.query('DELETE FROM user_pictures WHERE user = ? AND picture = ?', [user_id, image_id]);
 			if (!image_path.match(/^https:\/\//)) {
-				fs.unlink(path.resolve(__dirname, '../', image_path), (err) => {
+				let resolve_path = '../';
+				if (process.env.ENVIRONMENT === 'build') resolve_path += '../';
+				fs.unlink(path.resolve(__dirname, resolve_path, image_path), (err) => {
 					if (err) console.log(err);
 				});
 			}
