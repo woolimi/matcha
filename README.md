@@ -2,6 +2,8 @@
 
 ## Overview
 
+<img src="./demo/home.png" width="100%">
+
 `matcha` is one of web-project in école 42. The purpose of this project is to create a dating website like tinder. Usage of `ORM`, `validators`, `User Accounts Manager`, `NoSQL Database` is **strictly forbidden** in this project.
 
 |       light mode        |          dark mode           |
@@ -16,6 +18,10 @@
 |         mobile         |         map         |
 | :--------------------: | :-----------------: |
 | ![](./demo/mobile.jpg) | ![](./demo/map.png) |
+
+|     scroll pagination     |
+| :-----------------------: |
+| ![](./demo/scrolling.gif) |
 
 ## Feature
 
